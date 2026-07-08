@@ -131,6 +131,7 @@
   .tag.brand { background: rgba(51,84,156,.13); color: var(--brand-text); }
   .chip-sm { display: inline-flex; align-self: flex-start; padding: 4px 9px; border-radius: 999px; background: var(--paper); font-size: 10.5px; color: var(--ink-soft); }
   .chip-row { display: flex; flex-wrap: wrap; gap: 4px; }
+  .chip-row[hidden] { display: none; }
   .gauge { display: flex; flex-direction: column; gap: 4px; }
   .gauge-track { height: 6px; border-radius: 999px; background: var(--paper); overflow: hidden; }
   .gauge-fill { height: 100%; border-radius: 999px; background: var(--brand); }
@@ -378,15 +379,14 @@
     .app-header-text .subtitle { font-size: 10.5px; color: var(--muted); }
     .app-header-icons { display: flex; gap: 10px; color: var(--muted); font-size: 15px; flex: none; }
 
-    /* persona banner — automatic guest-viewpoint cutscene, replaces manual persona tabs */
-    @keyframes personaSlide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-    .persona-banner {
-      flex: none; background: rgba(51,84,156,.12); border-bottom: 1px solid rgba(51,84,156,.2);
-      color: var(--brand-text); font-size: 11.5px; font-weight: 700; text-align: center;
-      padding: 8px 14px; animation: personaSlide 0.3s ease;
+    /* 방 생성 진입 프롬프트 — 봇 방 전환 직후 예시 칩 + 슬롯피커 버튼 (채팅 카드 형태, 별도 폼/시트 없음) */
+    .entry-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+    .entry-chip {
+      border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft);
+      border-radius: 999px; padding: 5px 10px; font-size: 10.5px; cursor: pointer; font-family: inherit;
+      transition: border-color 0.12s ease;
     }
-    .persona-banner[hidden] { display: none; }
-    @media (prefers-reduced-motion: reduce) { .persona-banner { animation: none; } }
+    .entry-chip:hover { border-color: var(--brand-soft); }
 
     .app-body {
       flex: 1; padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px;
@@ -561,6 +561,21 @@
     .checkin-person { display: flex; align-items: center; gap: 6px; font-size: 11px; }
     .checkin-person .ci-state { margin-left: auto; font-size: 10px; color: var(--muted); }
     .checkin-person.done .ci-state { color: var(--good-text); font-weight: 700; }
+    .checkin-person.noshow { opacity: .78; }
+    .checkin-person.noshow .ci-state { color: var(--danger-text); font-weight: 700; }
+    .card-btn.danger { background: var(--paper); color: var(--danger-text); border: 1px solid rgba(180,72,63,.35); }
+
+    /* slot-picker: capacity stepper (①②) */
+    .capacity-stepper { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 6px 0 2px; }
+    .cap-btn {
+      width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper);
+      color: var(--ink); font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; transition: transform 0.12s ease;
+    }
+    .cap-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .cap-btn:not(:disabled):hover { transform: translateY(-1px); border-color: var(--brand-soft); }
+    .cap-num { font-size: 22px; font-weight: 800; color: var(--ink); min-width: 32px; text-align: center; }
+    .cap-num small { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 2px; }
 
     /* credit ledger */
     .credit-balance { display: flex; align-items: baseline; gap: 4px; }
@@ -585,6 +600,7 @@
     .split-person-row { display: flex; align-items: center; gap: 6px; font-size: 11px; }
     .split-person-row .sp-amt { margin-left: auto; font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; }
     .split-req-badge { font-size: 9px; font-weight: 700; color: var(--brand-text); background: rgba(51,84,156,.13); border-radius: 999px; padding: 1.5px 6px; }
+    .split-req-badge.paid { color: var(--good-text); background: rgba(63,143,107,.13); }
 
     /* friend suggestion */
     .rf-person-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
@@ -942,8 +958,6 @@
                   </div>
                 </div>
 
-                <div class="persona-banner" id="personaBanner" hidden></div>
-
                 <div class="view-pane" id="viewList">
                   <div class="ai-status-chip"><span class="asc-dot"></span><span>OfficeMate AI가 매칭 중...</span></div>
                   <button class="room-list-newbtn" id="btnNewRoom" type="button">＋ 새 모임 만들기</button>
@@ -1256,14 +1270,11 @@
     fsm: 'IDLE', // IDLE, PARSING, CONFIRM, RECRUITING, FULL, ROOM_CREATED
     slot: null,
     pendingField: null, // which field we're asking about
-    persona: 'host',
     participants: [],
     capacity: 4,
     roomActive: false,
     demoRunning: false,
     demoTimers: [],
-    guestJoinedFromDM: false,
-    guestCutsceneDone: false,
     pendingJoins: [],
     joinTimer: null,
     taFastTimer: null,
@@ -1275,7 +1286,14 @@
     checkedIn: [],
     checkinDone: false,
     onlineMode: null,
+    // -- no-show simulation (demo trigger only, see reminder card) --
+    demoNoShow: false,
+    noShowList: [],
+    _noShowIdx: -1,
     splitPerPerson: null,
+    settleTotal: 0,
+    settleAttendees: null,
+    settleReceivedCount: 0,
     view: 'list',
     activeTab: 'chat',
     roomListUnread: true,
@@ -1645,8 +1663,30 @@
         '</div>';
       }).join('') +
       '<div class="note-inline" data-slot-hint>2개 이상 선택하면 매칭 확률이 올라가요 ↑ (0개 선택됨)</div>' +
+      '<div class="note-inline" data-slot-summary hidden></div>' +
       '<div class="card-btn-row"><button class="card-btn primary" data-act="slot-confirm" disabled>선택 완료</button></div>';
     return wrap;
+  }
+
+  // 탭은 시간대별 칩 목록을 걸러 보여주는 필터일 뿐, 선택 자체는 탭과 무관하게
+  // state.slotPicks에 daypart|time 키로 누적된다 — 탭을 넘나들며 고른 슬롯이
+  // 안 보이는 동안에도 사라지지 않았음을 보여주기 위해 별도 선택 요약을 렌더링한다.
+  function updateSlotSummary(node) {
+    var summaryEl = node.querySelector('[data-slot-summary]');
+    if (!summaryEl) return;
+    if (!state.slotPicks.length) { summaryEl.hidden = true; summaryEl.textContent = ''; return; }
+    var grouped = {};
+    var order = [];
+    state.slotPicks.forEach(function (key) {
+      var parts = key.split('|');
+      var d = parts[0], t = parts[1];
+      if (!grouped[d]) { grouped[d] = []; order.push(d); }
+      grouped[d].push(t);
+    });
+    summaryEl.hidden = false;
+    summaryEl.textContent = '선택됨: ' + order.map(function (d) {
+      return DAYPART_LABEL[d] + ' ' + grouped[d].join(', ');
+    }).join(' · ');
   }
 
   function wireSlotPickerCard(node) {
@@ -1670,6 +1710,7 @@
         else { state.slotPicks.splice(idx, 1); chip.classList.remove('primary'); chip.classList.add('ghost'); }
         hint.textContent = (state.slotPicks.length >= 2 ? '2개 이상 선택 완료 — 매칭 확률이 높아졌어요 ↑' : '2개 이상 선택하면 매칭 확률이 올라가요 ↑') + ' (' + state.slotPicks.length + '개 선택됨)';
         confirmBtn.disabled = state.slotPicks.length === 0;
+        updateSlotSummary(node);
       });
     });
     confirmBtn.addEventListener('click', function () {
@@ -1729,7 +1770,62 @@
       if (btn.disabled) return;
       disableCardButtons(node);
       state.forcedOnlineMode = 'online';
+      promptCapacityThenFinalize();
+    });
+  }
+
+  // 팀원 프로토타입(index-2.html)의 단계형 방 생성 플로우 중 가장 구체적이었던
+  // "인원 스테퍼(2~99명, +/- 버튼)" 단계를 슬롯피커 경로에 이식.
+  // 기존 데모는 슬롯피커로 개설 시 인원이 4명으로 고정돼 있었는데,
+  // 그 지점만 우리 카드/버튼 토큰으로 재구현해 얹었다 — 자연어 개설·확인카드·인스펙터는 그대로 둔다.
+  function buildCapacityStepCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    if (!state.slot.count) state.slot.count = 4;
+    wrap.innerHTML =
+      '<div class="card-title">👥 몇 명이 모이나요?</div>' +
+      '<div class="note-inline">본인 포함 최소 2명 · 최대 ' + (ROSTER.length + 1) + '명까지 정할 수 있어요.</div>' +
+      '<div class="capacity-stepper">' +
+        '<button class="cap-btn" type="button" data-cap-step="-1">−</button>' +
+        '<span class="cap-num" data-cap-num>' + state.slot.count + '<small>명</small></span>' +
+        '<button class="cap-btn" type="button" data-cap-step="1">+</button>' +
+      '</div>' +
+      '<div class="card-btn-row"><button class="card-btn primary" data-act="capacity-confirm">확정하고 계속</button></div>';
+    return wrap;
+  }
+
+  function wireCapacityStepCard(node) {
+    var numEl = node.querySelector('[data-cap-num]');
+    var minusBtn = node.querySelector('[data-cap-step="-1"]');
+    var plusBtn = node.querySelector('[data-cap-step="1"]');
+    var capMax = ROSTER.length + 1;
+    function render() {
+      numEl.innerHTML = state.slot.count + '<small>명</small>';
+      minusBtn.disabled = state.slot.count <= 2;
+      plusBtn.disabled = state.slot.count >= capMax;
+    }
+    render();
+    minusBtn.addEventListener('click', function () {
+      if (minusBtn.disabled) return;
+      state.slot.count = Math.max(2, state.slot.count - 1);
+      render();
+    });
+    plusBtn.addEventListener('click', function () {
+      if (plusBtn.disabled) return;
+      state.slot.count = Math.min(capMax, state.slot.count + 1);
+      render();
+    });
+    var confirmBtn = node.querySelector('[data-act="capacity-confirm"]');
+    confirmBtn.addEventListener('click', function () {
+      if (confirmBtn.disabled) return;
+      disableCardButtons(node);
       finalizeSlotFromPicker();
+    });
+  }
+
+  function promptCapacityThenFinalize() {
+    botSayCard(buildCapacityStepCard()).then(function (row) {
+      wireCapacityStepCard(row.querySelector('.card') || row);
     });
   }
 
@@ -1772,7 +1868,7 @@
     confirmBtn.addEventListener('click', function () {
       if (confirmBtn.disabled) return;
       disableCardButtons(node);
-      finalizeSlotFromPicker();
+      promptCapacityThenFinalize();
     });
   }
 
@@ -1840,8 +1936,6 @@
       if (dissolveBtn) dissolveBtn.addEventListener('click', forceDissolveDemo);
       startTimeAttack();
       scheduleJoins();
-      var guestCutsceneTimer = setTimeout(runGuestCutscene, reduceMotion ? 0 : 900);
-      state.demoTimers.push(guestCutsceneTimer);
     });
   }
 
@@ -1914,7 +2008,9 @@
       if (state.fsm !== 'RECRUITING') return;
       var person = state.pendingJoins.shift();
       state.participants.push(person);
-      addGuestBubble(person, pickJoinPhrase(person));
+      // 개설자(김대리) 시점 고정 — 참가자가 "말하는" 척하는 대신, 개설자가 받는
+      // 초대 수락 이벤트로 표현한다 (디파짓 500P 커밋까지 한 줄에 담아 중복 메시지 없이).
+      appendToast('📩 ' + person.name + '님이 초대를 수락하고 500P를 걸었어요');
       logMatchScore(person);
       updateRecruitCard();
       if (state.participants.length >= state.capacity) {
@@ -2059,9 +2155,18 @@
     return wrap;
   }
 
-  function pickJoinPhrase(person) {
-    var phrases = ['저요! 참여할게요 🙋', '좋아요, 낄게요!', '오 저도 갈래요', '참여합니다 👍'];
-    return phrases[Math.floor(Math.random() * phrases.length)];
+  // 상황별 아이스브레이커 문구 풀 — 슬롯(메뉴·시간대·인원)에서 결정적으로 고른다 (Math.random 미사용)
+  var ICEBREAKER_LINES = [
+    '다들 오늘 {MENU} 모임 기대하고 계셨죠? 서로 어떤 팀인지부터 소개해볼까요?',
+    '{MENU} 좋아하게 된 계기가 다들 궁금하네요 — 한 분씩 짧게 말해볼까요?',
+    '처음 뵙는 분도 있으니 부서랑 이름만 가볍게 소개해봐요!',
+    '자리에 앉으면 바로 주문부터 하고, 기다리는 동안 요즘 팀 근황 얘기 나눠볼까요?'
+  ];
+  function pickIcebreaker() {
+    var menu = (state.slot && state.slot.menuLabel) || '이 모임';
+    var seed = menu + '|' + ((state.slot && state.slot.daypart) || '') + '|' + state.capacity;
+    var idx = strHash(seed) % ICEBREAKER_LINES.length;
+    return ICEBREAKER_LINES[idx].split('{MENU}').join(menu);
   }
 
   function onCapacityFull() {
@@ -2078,7 +2183,7 @@
     }).then(function () {
       return wait(reduceMotion ? 0 : 500);
     }).then(function () {
-      return botSay('🧊 AI 아이스브레이커: "다들 오늘 모임 기대하고 계셨죠? 서로 어떤 팀인지부터 소개해볼까요?"');
+      return botSay('🧊 AI 아이스브레이커: "' + pickIcebreaker() + '"');
     }).then(function () {
       return wait(reduceMotion ? 0 : 700);
     }).then(function () {
@@ -2133,9 +2238,12 @@
     var wrap = document.createElement('div');
     wrap.className = 'card';
     var items = [
-      { key: 'sponsored1', title: '신메뉴 카페 원정단', meta: '스폰서드 · 참여 시 아메리카노 쿠폰 자동 적용', sponsored: true, emoji: '☕' },
+      { key: 'sponsored1', title: '신메뉴 카페 원정단', meta: '스폰서드 · 화요일 오전 10시 · 참여 시 아메리카노 쿠폰 자동 적용', sponsored: true, emoji: '☕' },
       { key: 'feed1', title: '목요일 점심 · 라멘 탐방대', meta: '2명 모집중 · 신뢰도 70+ 추천', emoji: '🍜' },
-      { key: 'feed2', title: '금요일 오후 · 신메뉴 카페 원정', meta: '3명 모집중 · 온라인 15분', emoji: '☕' }
+      { key: 'feed2', title: '금요일 오후 5시 · 신메뉴 카페 원정', meta: '3명 모집중 · 온라인 15분', emoji: '☕' },
+      { key: 'feed3', title: '월요일 아침 7시 30분 · 조기 러닝크루', meta: '4명 모집중 · 오프라인 30분 · 신뢰도 60+ 추천', emoji: '🏃' },
+      { key: 'feed4', title: '수요일 저녁 7시 · 보드게임 소셜', meta: '5명 모집중 · 부서 다양성 매칭', emoji: '🎲' },
+      { key: 'feed5', title: '금요일 점심 12시 30분 · 초밥 오마카세', meta: '3명 모집중 · 예산 3만원대', emoji: '🍣' }
     ];
     wrap.innerHTML =
       '<div class="card-title">🔎 탐색 피드</div>' +
@@ -2171,8 +2279,12 @@
     var newRoomBtn = node.querySelector('[data-act="feed-new-room"]');
     if (newRoomBtn) newRoomBtn.addEventListener('click', function () {
       if (newRoomBtn.disabled) return;
-      newRoomBtn.disabled = true;
-      botSay('네! 왼쪽 예시 버튼처럼 문장을 입력하거나 "슬롯 직접 선택으로 열기"를 눌러 새 모임을 열어보세요 🙂');
+      if (state.fsm !== 'IDLE') {
+        newRoomBtn.disabled = true;
+        botSay('지금 진행 중인 모임이 있어요. 채팅 탭에서 이어서 진행해주세요.');
+        return;
+      }
+      ensureRoomReady();
     });
   }
 
@@ -2327,6 +2439,8 @@
     inspectorLog('RULE', state.onlineMode === 'online' ? 'slot≤30min → ONLINE · Meet 링크 생성' : '오프라인 판별 → QR 체크인 방식');
     state.checkedIn = [];
     state.checkinDone = false;
+    state.noShowList = [];
+    state._noShowIdx = (state.demoNoShow && state.participants.length > 1) ? state.participants.length - 1 : -1;
     var isOnline = state.onlineMode === 'online';
     var wrap = document.createElement('div');
     wrap.className = 'card';
@@ -2354,42 +2468,82 @@
   function scheduleOtherCheckins(node) {
     state.participants.forEach(function (p, idx) {
       if (idx === 0) return;
+      if (idx === state._noShowIdx) {
+        // (데모) 노쇼 시뮬레이션: 이 참여자는 끝까지 체크인하지 않는다
+        var noDelay = reduceMotion ? 60 : 2200;
+        var tNo = setTimeout(function () { declareNoShow(node, idx); }, noDelay);
+        state.demoTimers.push(tNo);
+        return;
+      }
       var delay = reduceMotion ? 50 : (700 + idx * 500 + Math.random() * 300);
       var t = setTimeout(function () { markCheckedIn(node, idx); }, delay);
       state.demoTimers.push(t);
     });
   }
 
+  function declareNoShow(node, idx) {
+    var row = node.querySelector('[data-checkin-person="' + idx + '"]');
+    if (!row || row.classList.contains('noshow')) return;
+    row.classList.add('noshow');
+    row.querySelector('.ci-state').textContent = '노쇼';
+    if (!state.noShowList) state.noShowList = [];
+    if (state.noShowList.indexOf(idx) === -1) state.noShowList.push(idx);
+    checkAllCheckedIn(node);
+  }
+
   function checkAllCheckedIn(node) {
     if (state.checkinDone) return;
-    if (state.checkedIn.length >= state.participants.length) {
-      state.checkinDone = true;
-      state.meetingsCount = (state.meetingsCount || 0) + 1;
-      state.participants.forEach(function (p) {
-        if (p.name.indexOf('나') === -1) state.newColleagues[p.name] = true;
-      });
-      bumpTrust(3);
-      setStage('checkin', '전원 체크인이 완료되면 디파짓이 자동으로 환급되고 참석 보너스가 적립됩니다.');
-      botSay('전원 체크인 완료! 디파짓 환급과 참석 보너스를 바로 적립할게요 🎉').then(function () {
+    var noShowCount = (state.noShowList || []).length;
+    if (state.checkedIn.length + noShowCount < state.participants.length) return;
+
+    state.checkinDone = true;
+    state.meetingsCount = (state.meetingsCount || 0) + 1;
+    state.participants.forEach(function (p, idx) {
+      if (p.name.indexOf('나') === -1 && state.noShowList.indexOf(idx) === -1) state.newColleagues[p.name] = true;
+    });
+
+    if (noShowCount > 0) {
+      var noShowNames = state.noShowList.map(function (i) { return state.participants[i].name; }).join(', ');
+      var attendCount = state.participants.length - noShowCount;
+      var forfeited = 500 * noShowCount;
+      var bonus = Math.floor(forfeited / Math.max(1, attendCount));
+      bumpTrust(-4 * noShowCount);
+      inspectorLog('RULE', noShowNames + ' · 체크인 마감 시간 초과 → 노쇼 판정, 디파짓 몰수 규칙 적용');
+      setStage('checkin', '체크인 마감 — 일부 참여자가 노쇼로 판정되어 디파짓이 몰수되고 남은 참석자에게 분배됩니다.');
+      botSay('⏱ 체크인 마감 시간이 지났어요. ' + noShowNames + '님은 노쇼로 처리되어 디파짓 500P가 몰수됩니다.').then(function () {
         addCreditTx('디파짓 환급 + 정상 참석 적립', 550);
-        appendToast('✅ +500P 환급 · +50P 적립 · 신뢰도 +3');
+        addCreditTx('노쇼 디파짓 분배 보너스 (' + noShowNames + ' 몫)', bonus);
+        appendToast('🚫 ' + noShowNames + ' 노쇼 · 디파짓 500P×' + noShowCount + ' 몰수 → 참석자 ' + attendCount + '명에게 분배');
         return botSayCard(buildCreditCard());
       }).then(function () {
         return wait(reduceMotion ? 0 : 400);
       }).then(function () {
-        setStage('settle', '더치페이(n-빵) 정산과 크레딧 충전까지 한 화면에서 끝냅니다.');
-        return botSay('마지막으로 이번 모임 정산을 도와드릴게요 💰');
-      }).then(function () {
-        return botSayCard(buildSplitCard());
-      }).then(function (row) {
-        wireSplitCard(row.querySelector('.card') || row);
-        return wait(reduceMotion ? 0 : 400);
+        setStage('settle', '모임 비용은 김대리님이 먼저 결제하고, n-빵 정산으로 나머지 참석자에게 받습니다 (디파짓 P와는 별도 · 원 단위).');
+        return botSay('마지막으로 오늘 모임 비용을 정산할게요 💳');
       }).then(function () {
         return botSayCard(buildPaymentCard());
       }).then(function (row) {
         wirePaymentCard(row.querySelector('.card') || row);
       });
+      return;
     }
+
+    bumpTrust(3);
+    setStage('checkin', '전원 체크인이 완료되면 디파짓이 자동으로 환급되고 참석 보너스가 적립됩니다.');
+    botSay('전원 체크인 완료! 디파짓 환급과 참석 보너스를 바로 적립할게요 🎉').then(function () {
+      addCreditTx('디파짓 환급 + 정상 참석 적립', 550);
+      appendToast('✅ +500P 환급 · +50P 적립 · 신뢰도 +3');
+      return botSayCard(buildCreditCard());
+    }).then(function () {
+      return wait(reduceMotion ? 0 : 400);
+    }).then(function () {
+      setStage('settle', '모임 비용은 김대리님이 먼저 결제하고, n-빵 정산으로 나머지 참석자에게 받습니다 (디파짓 P와는 별도 · 원 단위).');
+      return botSay('마지막으로 오늘 모임 비용을 정산할게요 💳');
+    }).then(function () {
+      return botSayCard(buildPaymentCard());
+    }).then(function (row) {
+      wirePaymentCard(row.querySelector('.card') || row);
+    });
   }
 
   function wireCheckinCard(node) {
@@ -2453,18 +2607,29 @@
     });
   }
 
-  /* ================= payment (post-settle) ================= */
+  /* ================= settlement (원 단위 — 디파짓 P와 별도) =================
+     흐름: ① 김대리(나)가 총액을 먼저 결제 → ② 나를 제외한 참석자에게 n-빵 요청
+     → ③ 각자 순차 입금 연출 → ④ 전원 입금 완료 시 정산 종료. 김대리 시점 고정 —
+     "내가 결제할 금액" 화면(상대방 시점)은 등장하지 않는다. */
+  function settlementAttendees() {
+    var noShowList = state.noShowList || [];
+    return state.participants.filter(function (p, idx) { return noShowList.indexOf(idx) === -1; });
+  }
+
   function buildPaymentCard() {
-    var amount = state.splitPerPerson || 0;
+    var attendees = settlementAttendees();
+    var total = (attendees.length || state.capacity) * 12000;
+    state.settleTotal = total;
+    state.settleAttendees = attendees;
     var wrap = document.createElement('div');
     wrap.className = 'card';
     wrap.innerHTML =
-      '<div class="card-title">💳 결제 수단 선택</div>' +
-      '<div class="note-inline">내 정산 금액 <b>' + amount.toLocaleString() + 'P</b>를 아래 수단 중 하나로 즉시 결제할 수 있어요.</div>' +
+      '<div class="card-title">💳 모임 비용 결제</div>' +
+      '<div class="note-inline">오늘 모임 비용 <b>' + total.toLocaleString() + '원</b>을 김대리님이 먼저 결제할게요. 나머지는 n-빵으로 받을게요.</div>' +
       '<div class="pay-method-row">' +
         '<button class="pay-method-btn" data-paysim="네이버페이">🟢 네이버페이</button>' +
         '<button class="pay-method-btn" data-paysim="카카오페이">🟡 카카오페이</button>' +
-        '<button class="pay-method-btn" data-paysim="카드">💳 카드</button>' +
+        '<button class="pay-method-btn" data-paysim="법인카드">💳 법인카드</button>' +
       '</div>' +
       '<div class="note-inline" data-pay-result></div>' +
       '<span class="sim-badge">SIMULATED</span>';
@@ -2475,37 +2640,53 @@
     var resultEl = node.querySelector('[data-pay-result]');
     node.querySelectorAll('[data-paysim]').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        if (node.dataset.paid === '1') return;
+        node.dataset.paid = '1';
         node.querySelectorAll('[data-paysim]').forEach(function (b) { b.disabled = true; });
-        resultEl.textContent = '✅ ' + btn.getAttribute('data-paysim') + '로 ' + (state.splitPerPerson || 0).toLocaleString() + 'P 결제 완료';
+        var method = btn.getAttribute('data-paysim');
+        var total = state.settleTotal || 0;
+        resultEl.textContent = '✅ ' + method + '로 ' + total.toLocaleString() + '원 결제 완료';
+        inspectorLog('LEDGER', '모임 비용 총액 결제 ' + total.toLocaleString() + '원 (' + method + ', 김대리)');
+        wait(reduceMotion ? 0 : 500).then(function () {
+          return botSayCard(buildSplitCard());
+        }).then(function (row) {
+          wireSplitCard(row.querySelector('.card') || row);
+        });
       });
     });
   }
 
-  /* ================= n-bbang split settle ================= */
+  /* ================= n-bbang split request (나를 제외한 참석자에게만) ================= */
   function buildSplitCard() {
-    var count = state.participants.length || state.capacity;
-    var total = count * 12000;
-    var perPerson = Math.round(total / count);
+    var attendees = state.settleAttendees || settlementAttendees();
+    var total = state.settleTotal || ((attendees.length || state.capacity) * 12000);
+    var others = attendees.filter(function (p) { return p.name.indexOf('나') === -1; });
+    var perPerson = attendees.length ? Math.round(total / attendees.length) : 0;
     state.splitPerPerson = perPerson;
     var wrap = document.createElement('div');
     wrap.className = 'card';
-    var rows = state.participants.map(function (p, idx) {
-      return '<div class="split-person-row" data-split-person="' + idx + '"><span class="avatar a' + (idx % 4) + '" style="width:20px;height:20px;font-size:9px;margin-left:0;">' + p.initial + '</span><span>' + p.name + '</span><span class="sp-amt">' + perPerson.toLocaleString() + 'P</span></div>';
+    var meRow =
+      '<div class="split-person-row"><span class="avatar a0" style="width:20px;height:20px;font-size:9px;margin-left:0;">김</span>' +
+      '<span>김대리(나)</span><span class="split-req-badge paid" style="margin-left:auto;">결제함 ✓</span></div>';
+    var rows = others.map(function (p, idx) {
+      return '<div class="split-person-row" data-split-person="' + idx + '"><span class="avatar a' + (idx % 4) + '" style="width:20px;height:20px;font-size:9px;margin-left:0;">' + p.initial + '</span><span>' + p.name + '</span><span class="sp-amt">' + perPerson.toLocaleString() + '원</span></div>';
     }).join('');
     wrap.innerHTML =
-      '<div class="card-title">🧾 n-빵 정산</div>' +
-      '<div class="settle-line"><span>총 결제 금액</span><span class="amt">' + total.toLocaleString() + 'P</span></div>' +
-      '<div class="split-list">' + rows + '</div>' +
-      '<div class="card-btn-row"><button class="card-btn primary" data-act="send-split-request">정산 요청 보내기</button></div>' +
+      '<div class="card-title">🧮 n-빵 정산 요청</div>' +
+      '<div class="settle-line"><span>총 결제 금액</span><span class="amt">' + total.toLocaleString() + '원</span></div>' +
+      ((state.noShowList || []).length ? '<div class="note-inline">노쇼 참여자는 정산 인원에서 제외됐어요.</div>' : '') +
+      '<div class="split-list">' + meRow + rows + '</div>' +
+      '<div class="card-btn-row"><button class="card-btn primary" data-act="send-split-request"' + (others.length ? '' : ' disabled') + '>정산 요청 보내기</button></div>' +
       '<span class="sim-badge">SIMULATED</span>';
     return wrap;
   }
 
   function wireSplitCard(node) {
+    var others = (state.settleAttendees || settlementAttendees()).filter(function (p) { return p.name.indexOf('나') === -1; });
     var btn = node.querySelector('[data-act="send-split-request"]');
     btn.addEventListener('click', function () {
       if (btn.disabled) return;
-      node.querySelectorAll('.split-person-row').forEach(function (row) {
+      node.querySelectorAll('.split-person-row[data-split-person]').forEach(function (row) {
         if (!row.querySelector('.split-req-badge')) {
           var badge = document.createElement('span');
           badge.className = 'split-req-badge';
@@ -2515,6 +2696,42 @@
       });
       btn.disabled = true;
       btn.textContent = '정산 요청 완료';
+      if (!others.length) { finishSettlement(node); return; }
+      inspectorLog('LEDGER', others.length + '명에게 각 ' + (state.splitPerPerson || 0).toLocaleString() + '원 정산 요청 발송');
+      scheduleSettlementDeposits(node, others);
+    });
+  }
+
+  // 요청 후 몇 초 간격으로 상대가 입금하는 연출 — 요청됨 → 입금완료 배지 전이.
+  function scheduleSettlementDeposits(node, others) {
+    state.settleReceivedCount = 0;
+    others.forEach(function (p, idx) {
+      var delay = reduceMotion ? 60 : (900 + idx * 900);
+      var t = setTimeout(function () { markSettlementPaid(node, p, idx, others.length); }, delay);
+      state.demoTimers.push(t);
+    });
+  }
+
+  function markSettlementPaid(node, person, idx, othersCount) {
+    var row = node.querySelector('[data-split-person="' + idx + '"]');
+    var badge = row ? row.querySelector('.split-req-badge') : null;
+    if (badge) { badge.textContent = '입금완료 ✓'; badge.classList.add('paid'); }
+    state.settleReceivedCount = (state.settleReceivedCount || 0) + 1;
+    inspectorLog('LEDGER', person.name + ' 정산 입금 ' + (state.splitPerPerson || 0).toLocaleString() + '원 완료');
+    var isLast = state.settleReceivedCount >= othersCount;
+    // wait for this "보냈어요" bubble to actually render before closing out —
+    // otherwise the completion toast can race ahead of the last deposit message.
+    botSay(person.name + '님이 ' + (state.splitPerPerson || 0).toLocaleString() + '원을 보냈어요 ✓').then(function () {
+      if (isLast) finishSettlement();
+    });
+  }
+
+  function finishSettlement() {
+    appendToast('✅ 정산 완료 · 영수증 증빙 저장');
+    wait(reduceMotion ? 0 : 500).then(function () {
+      return botSay('오늘 모임 여기까지! 체크인부터 정산까지 전부 마무리됐어요. 다음에 또 만나요 👋');
+    }).then(function () {
+      addDayDivider('정산 완료');
     });
   }
 
@@ -2597,7 +2814,11 @@
       '<div class="card-btn-row">' +
         '<button class="card-btn good" data-act="reminder-attend" type="button">참석할게요</button>' +
         '<button class="card-btn ghost" data-act="reminder-cancel" type="button">취소할게요</button>' +
-      '</div>';
+      '</div>' +
+      '<div class="card-btn-row" style="margin-top:2px;">' +
+        '<button class="card-btn danger" data-act="reminder-noshow-demo" type="button" style="font-size:10.5px;">(데모) 노쇼 시뮬레이션 보기</button>' +
+      '</div>' +
+      '<div class="note-inline" style="opacity:.7;">데모용 버튼이에요 — 참여자 한 명이 체크인하지 않는 상황과 디파짓 몰수·분배를 보여드려요.</div>';
     return wrap;
   }
 
@@ -2631,6 +2852,18 @@
         proceedToCheckinFlow();
       });
     });
+    var noshowBtn = node.querySelector('[data-act="reminder-noshow-demo"]');
+    if (noshowBtn) {
+      noshowBtn.addEventListener('click', function () {
+        if (noshowBtn.disabled) return;
+        markFeature('reminder');
+        disableCardButtons(node);
+        state.demoNoShow = true;
+        botSay('네, 참석할게요! (데모: 이번엔 참여자 한 명이 체크인하지 않는 상황을 보여드릴게요)').then(function () {
+          proceedToCheckinFlow();
+        });
+      });
+    }
   }
 
   function buildWaitlistPromotionCard(removed, promoted) {
@@ -2681,23 +2914,26 @@
   function pickPlacesFor(menu) {
     var base = menu || '맛집';
     var names = {
-      '마라탕': ['마라공방 본점', '탕화쿵푸 역삼점', '이연 마라탕'],
-      '삼겹살': ['옛날 그 삼겹살', '연탄집 본점', '숯불애 삼겹살'],
-      '커피챗': ['카페 어라운드', '블랙워터 로스터스', '카페 결'],
-      '초밥': ['스시효', '초밥한잔', '스시노']
+      '마라탕': ['마라공방 본점', '탕화쿵푸 역삼점', '이연 마라탕', '마라마라 2호점'],
+      '삼겹살': ['옛날 그 삼겹살', '연탄집 본점', '숯불애 삼겹살', '한돈일번지'],
+      '커피챗': ['카페 어라운드', '블랙워터 로스터스', '카페 결', '테라로사 사옥점'],
+      '초밥': ['스시효', '초밥한잔', '스시노', '오마카세 결']
     };
-    var list = names[base] || ['사내 근처 맛집 A', '사내 근처 맛집 B', '사내 근처 맛집 C'];
-    var seat = ['4인석 여유', '4인석 가능', '2~4인석'];
-    var price = ['₩₩', '₩₩', '₩₩₩'];
+    var list = names[base] || ['사내 근처 맛집 A', '사내 근처 맛집 B', '사내 근처 맛집 C', '사내 근처 맛집 D'];
+    var cap = state.capacity || (state.slot && state.slot.count) || 4;
+    var seat = [cap + '인석 여유', cap + '인 단체석 가능', '2~4인석 위주', '룸 예약 가능'];
+    var price = ['₩₩', '₩₩', '₩₩₩', '₩₩'];
     var reason = [
-      '단체석이 넉넉해 대기 없이 바로 입장 가능해요',
-      '평점 대비 가성비가 좋아 팀 점심에 자주 쓰여요',
-      '조용한 룸이 있어 대화하기 좋아요'
+      cap + '명 단체석이 넉넉해 대기 없이 바로 입장 가능해요',
+      '평점 대비 가성비가 좋아 ' + (state.workMode === '재택' ? '오랜만에 모이는 팀에도' : '사무실 근처 팀 모임에') + ' 자주 쓰여요',
+      (state.mealPref ? state.mealPref + ' 취향에 맞고, ' : '') + '조용한 룸이 있어 대화하기 좋아요',
+      '정원 ' + cap + '명 기준으로 좌석을 미리 배정해둘 수 있어요'
     ];
     return [
       { name: list[0], dist: '도보 3분', stars: 5, rating: '4.6', x: 30, y: 20, seat: seat[0], price: price[0], reason: reason[0] },
       { name: list[1], dist: '도보 6분', stars: 4, rating: '4.3', x: 20, y: 34, seat: seat[1], price: price[1], reason: reason[1] },
-      { name: list[2] || list[0], dist: '도보 8분', stars: 4, rating: '4.1', x: 42, y: 28, seat: seat[2], price: price[2], reason: reason[2] }
+      { name: list[2] || list[0], dist: '도보 8분', stars: 4, rating: '4.1', x: 42, y: 28, seat: seat[2], price: price[2], reason: reason[2] },
+      { name: list[3] || list[0], dist: '도보 10분', stars: 4, rating: '4.0', x: 12, y: 12, seat: seat[3], price: price[3], reason: reason[3] }
     ];
   }
 
@@ -2788,11 +3024,6 @@
     addUserBubble(text);
     chatInput.value = '';
 
-    if (state.persona === 'guest') {
-      handleGuestInput(text);
-      return;
-    }
-
     if (state.fsm === 'IDLE' || state.fsm === 'CONFIRM' && !state.slot) {
       tryParseFresh(text);
       return;
@@ -2870,173 +3101,44 @@
     botSayCard(buildConfirmCard(state.slot)).then(wireConfirmCard);
   }
 
-  /* ================= guest persona ================= */
-  function handleGuestInput(text) {
-    if (!state.slot || (state.fsm !== 'RECRUITING' && state.fsm !== 'FULL' && state.fsm !== 'ROOM_CREATED')) {
-      botSay('아직 모집 중인 모임에만 반응할 수 있어요. 상단 [개설자 김대리] 탭에서 먼저 모임을 만들어보세요!');
-      return;
-    }
 
-    var alreadyIn = state.participants.some(function (p) { return p.name === '박주임'; });
-
-    if (/참여|낄게|갈래|할게|신청|끼워|저요/.test(text)) {
-      if (alreadyIn) {
-        botSay('이미 참여 확정된 모임이에요! 대화방에서 만나요 🙌');
-      } else if (state.fsm === 'RECRUITING') {
-        sendGuestInvite();
-      } else {
-        botSay('앗, 이미 정원이 마감된 모임이에요. 다음 모집을 기다려주세요!');
-      }
-      return;
+  /* ================= room entry (single fixed 김대리/host viewpoint — no persona switching) ================= */
+  // Both the "+" entry points and the left-rail example buttons funnel through
+  // this so the room always opens the same way: switch into the bot room, and if
+  // this is the first time, let the bot ask + offer example chips before anything
+  // else happens (avoids interleaving an auto-sent user bubble before the greeting).
+  function ensureRoomReady() {
+    if (!state.roomEntered) {
+      state.roomEntered = true;
+      showRoomView();
+      return beginRoomFlow();
     }
-    if (/시간|몇\s*시|언제/.test(text)) {
-      botSay((state.slot.dateLabel || '날짜 미정') + ' ' + (state.slot.timeLabel || '시간 미정') + '이에요.');
-      return;
-    }
-    if (/메뉴|뭐\s*먹|무슨\s*음식/.test(text)) {
-      botSay((state.slot.emoji || '🍽️') + ' ' + (state.slot.menuLabel || '메뉴 미정') + ' 모임이에요.');
-      return;
-    }
-    if (/인원|몇\s*명|정원/.test(text)) {
-      botSay('정원 ' + state.capacity + '명 중 ' + state.participants.length + '명 참여중이에요.');
-      return;
-    }
-    if (/디파짓|보증금|환불|포인트/.test(text)) {
-      botSay('참여 디파짓은 500P예요. 정상 참석하면 +50P와 함께 전액 환급돼요. 노쇼 시엔 환급되지 않아요.');
-      return;
-    }
-    if (/취소|안\s*갈래|빠질게/.test(text)) {
-      if (alreadyIn) {
-        botSay('참여를 취소할까요? 지금은 데모에서 취소 기능은 준비 중이에요 — 실제 서비스에선 디파짓 규정에 따라 환급돼요.');
-      } else {
-        botSay('아직 참여 신청 전이에요. 참여하시려면 "참여할게요"라고 말해보세요!');
-      }
-      return;
-    }
-
-    botSay('음, 이해하지 못했어요. "참여할게요", "시간 언제예요?", "메뉴 뭐예요?" 처럼 물어봐 주세요!');
+    if (state.view !== 'room') showRoomView();
+    return Promise.resolve();
   }
 
-  function sendGuestInvite() {
-    if (!state.slot) return;
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">' + (state.slot.emoji || '🍽️') + ' 참여 제안</div>' +
-      '<div class="note-inline">' + fmtSlotTitle(state.slot) + ' 모임에 자리가 있어요, 참여하실래요?</div>' +
-      '<div class="deposit-row">🪙 참여 시 디파짓 <b>500P</b> · 정상 참석하면 전액 환급 <b>+50P</b></div>' +
-      '<div class="card-btn-row">' +
-        '<button class="card-btn good" data-act="join-yes" type="button">500P 걸고 참여</button>' +
-        '<button class="card-btn ghost" data-act="join-no" type="button">다음에요</button>' +
-      '</div>';
-    botSayCard(wrap).then(function (row) {
-      var yesBtn = row.querySelector('[data-act="join-yes"]');
-      var noBtn = row.querySelector('[data-act="join-no"]');
-      yesBtn.addEventListener('click', function () {
-        disableCardButtons(row);
-        botSay('참여 확정! 개설자에게도 알렸어요 🙌').then(function () {
-          // guard: skip if 박주임 already joined via the regular ROSTER queue in the
-          // meantime — prevents a double-count now that this scene runs automatically.
-          var already = state.participants.some(function (p) { return p.name === '박주임'; });
-          if (state.fsm === 'RECRUITING' && !state.guestJoinedFromDM && !already) {
-            state.guestJoinedFromDM = true;
-            state.participants.push({ name: '박주임', initial: '박', cls: 'a1' });
-            // reflect on host card too (shared state / same card in DOM if host view active)
-            updateRecruitCard();
-            if (state.participants.length >= state.capacity) setTimeout(onCapacityFull, 700);
-          }
-        });
+  function openSlotPickerFlow() {
+    if (state.fsm === 'IDLE') {
+      state.fsm = 'PARSING';
+      botSay('슬롯 선택 카드를 보여드릴게요 🗓️').then(function () {
+        return botSayCard(buildSlotPickerCard());
+      }).then(function (row) {
+        wireSlotPickerCard(row.querySelector('.card') || row);
       });
-      noBtn.addEventListener('click', function () {
-        disableCardButtons(row);
-        botSay('알겠어요, 다음 기회에 함께해요!');
-      });
-    });
+    } else {
+      botSay('지금 다른 모임이 진행 중이에요. [↺ 처음부터] 버튼으로 초기화한 뒤 다시 시도해주세요.');
+    }
   }
 
-  /* ================= automatic guest-viewpoint cutscene (replaces manual persona tabs) ================= */
-  function showPersonaBanner(text) {
-    var el = document.getElementById('personaBanner');
-    if (!el) return;
-    el.textContent = text;
-    el.hidden = false;
-  }
-
-  function hidePersonaBanner() {
-    var el = document.getElementById('personaBanner');
-    if (el) el.hidden = true;
-  }
-
-  function forceHostPersona() {
-    state.persona = 'host';
-    roomSubtitle.textContent = state.roomActive
-      ? state.participants.map(function (p) { return p.initial; }).join(', ') + ' 참여중'
-      : '개설자 김대리 · 항상 대기중';
-  }
-
-  // fires automatically partway through recruiting — no manual tab needed.
-  // Skips silently if the room already filled up before the timer landed.
-  function runGuestCutscene() {
-    if (state.guestCutsceneDone) return;
-    if (state.fsm !== 'RECRUITING' || !state.slot || state.guestJoinedFromDM) return;
-    var already = state.participants.some(function (p) { return p.name === '박주임'; });
-    if (already) return;
-    state.guestCutsceneDone = true;
-    // claim 박주임's turn from the ROSTER queue so the regular join scheduler
-    // can't also add them independently while this DM-invite cutscene plays out.
-    state.pendingJoins = (state.pendingJoins || []).filter(function (p) { return p.name !== '박주임'; });
-    state.persona = 'guest';
-    showPersonaBanner('👀 지금은 박주임(초대받은 동료) 시점이에요');
-    roomSubtitle.textContent = '참여자 박주임 시점';
-    sendGuestInvite();
-    var t = setTimeout(function () {
-      if (state.fsm !== 'RECRUITING') { returnToHostPersona(); return; }
-      var joinBtn = document.querySelector('[data-act="join-yes"]');
-      if (joinBtn && !joinBtn.disabled) joinBtn.click();
-      var t2 = setTimeout(returnToHostPersona, reduceMotion ? 0 : 1400);
-      state.demoTimers.push(t2);
-    }, reduceMotion ? 0 : 1500);
-    state.demoTimers.push(t);
-  }
-
-  function returnToHostPersona() {
-    if (state.persona !== 'guest') return;
-    forceHostPersona();
-    botSay('다시 김대리(개설자) 시점으로 돌아갈게요 🔁').then(function () {
-      hidePersonaBanner();
-    });
-  }
-
-  /* ================= example buttons ================= */
+  /* ================= example buttons (left rail) — open the bot room and act immediately ================= */
   exampleBtns.forEach(function (btn) {
     btn.addEventListener('click', function () {
       if (btn.getAttribute('data-special') === 'slot-picker') {
-        if (state.persona !== 'host') forceHostPersona();
-        if (!state.roomEntered) { state.roomEntered = true; showRoomView(); beginRoomFlow(); }
-        else if (state.view !== 'room') { showRoomView(); }
-        if (state.fsm === 'IDLE') {
-          state.fsm = 'PARSING';
-          botSay('슬롯 선택 카드를 보여드릴게요 🗓️').then(function () {
-            return botSayCard(buildSlotPickerCard());
-          }).then(function (row) {
-            wireSlotPickerCard(row.querySelector('.card') || row);
-          });
-        } else {
-          botSay('지금 다른 모임이 진행 중이에요. [↺ 처음부터] 버튼으로 초기화한 뒤 다시 시도해주세요.');
-        }
+        ensureRoomReady().then(openSlotPickerFlow);
         return;
       }
       var text = btn.getAttribute('data-example');
-      if (state.persona !== 'host') {
-        forceHostPersona();
-      }
-      // bug fix: example buttons only fill #chatInput, which lives inside the
-      // room view — without this, clicking an example while still on the room
-      // list does nothing visible (input is hidden, nothing to focus/send).
-      if (!state.roomEntered) { state.roomEntered = true; showRoomView(); beginRoomFlow(); }
-      else if (state.view !== 'room') { showRoomView(); }
-      chatInput.value = text;
-      chatInput.focus();
+      ensureRoomReady().then(function () { handleUserInput(text); });
     });
   });
 
@@ -3080,9 +3182,7 @@
     if (tab === 'chat') {
       if (state.view === 'room') { viewRoom.hidden = false; } else { viewList.hidden = false; renderRoomList(); }
       roomTitle.textContent = 'OfficeMate';
-      roomSubtitle.textContent = state.view === 'room'
-        ? (state.persona === 'guest' ? '참여자 박주임 시점' : '개설자 김대리 · 항상 대기중')
-        : '대화방 목록';
+      roomSubtitle.textContent = state.view === 'room' ? '개설자 김대리 · 항상 대기중' : '대화방 목록';
     } else if (tab === 'explore') {
       markFeature('explore');
       viewExplore.hidden = false;
@@ -3176,11 +3276,7 @@
       '</div>';
     activeRow.querySelector('.rli-preview').textContent = activeLastMsg;
     activeRow.addEventListener('click', function () {
-      showRoomView();
-      if (!state.roomEntered) {
-        state.roomEntered = true;
-        beginRoomFlow();
-      }
+      ensureRoomReady();
     });
     roomListEl.appendChild(activeRow);
 
@@ -3205,9 +3301,48 @@
     });
   }
 
+  var ENTRY_EXAMPLES = ['내일 점심 마라탕 3명', '금요일 저녁 삼겹살 먹을 사람', '모레 오후 3시 커피챗 2명'];
+
+  // 방 생성은 폼/시트가 아니라 대화 그 자체 — 봇 방으로 들어오면 봇이 먼저 말을
+  // 걸고, 예시 칩과 슬롯피커 버튼을 채팅 카드로 제안한다. "+"·좌측 예시 버튼 모두
+  // 결국 이 한 곳(대화)으로 모인다.
+  function buildRoomEntryPromptCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="note-inline">아래 문장을 눌러보거나 자유롭게 입력해보세요.</div>' +
+      '<div class="entry-chip-row">' +
+        ENTRY_EXAMPLES.map(function (t) { return '<button class="entry-chip" type="button" data-entry-example="' + t + '">' + t + '</button>'; }).join('') +
+      '</div>' +
+      '<div class="card-btn-row" style="margin-top:8px;"><button class="card-btn ghost" type="button" data-act="entry-slotpicker">🎛 직접 선택하기</button></div>';
+    return wrap;
+  }
+
+  function wireRoomEntryPromptCard(node) {
+    node.querySelectorAll('[data-entry-example]').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        chatInput.value = chip.getAttribute('data-entry-example');
+        chatInput.focus();
+      });
+    });
+    var slotBtn = node.querySelector('[data-act="entry-slotpicker"]');
+    if (slotBtn) slotBtn.addEventListener('click', function () {
+      if (slotBtn.disabled) return;
+      disableCardButtons(node);
+      openSlotPickerFlow();
+    });
+  }
+
   function beginRoomFlow() {
     addDayDivider('대화 시작');
-    botSay('안녕하세요! 저는 OfficeMate예요. "내일 점심 마라탕 3명"처럼 한 줄만 말씀해주시면 모집부터 방 생성까지 제가 처리할게요 🍱');
+    return botSay('안녕하세요! 저는 OfficeMate예요.').then(function () {
+      return botSay('어떤 모임을 열까요? 한 줄로 말씀해주세요 ✨');
+    }).then(function () {
+      return botSayCard(buildRoomEntryPromptCard());
+    }).then(function (row) {
+      wireRoomEntryPromptCard(row.querySelector('.card') || row);
+      chatInput.focus();
+    });
   }
 
   appBackBtn.addEventListener('click', function () {
@@ -3215,14 +3350,13 @@
   });
 
   btnNewRoom.addEventListener('click', function () {
-    showRoomView();
-    if (!state.roomEntered) {
-      state.roomEntered = true;
-      beginRoomFlow();
-    }
     if (state.fsm !== 'IDLE') {
+      showRoomView();
+      if (!state.roomEntered) { state.roomEntered = true; beginRoomFlow(); }
       botSay('지금 진행 중인 모임이 있어요. 이 방에서 이어서 진행해주세요.');
+      return;
     }
+    ensureRoomReady();
   });
 
   function resetAll() {
@@ -3234,7 +3368,6 @@
     state.participants = [];
     state.capacity = 4;
     state.roomActive = false;
-    state.guestJoinedFromDM = false;
     state.pendingJoins = [];
     state.joinTimer = null;
     state.taFastTimer = null;
@@ -3244,15 +3377,19 @@
     state.checkinDone = false;
     state.onlineMode = null;
     state.forcedOnlineMode = null;
+    state.demoNoShow = false;
+    state.noShowList = [];
+    state._noShowIdx = -1;
+    state.splitPerPerson = null;
+    state.settleTotal = 0;
+    state.settleAttendees = null;
+    state.settleReceivedCount = 0;
     state.slotPicks = [];
     state.mergeOffered = false;
     state.deadlineReminded = false;
     state.inspVirtualSec = 0;
     resetInspectorLog();
     resetFeatureChecklist();
-    state.persona = 'host';
-    state.guestCutsceneDone = false;
-    hidePersonaBanner();
     chatBody.innerHTML = '';
     botAvatar.textContent = '🍱';
     setStage('parse', '입력창에 자연어 한 줄을 입력하면 파서가 날짜·시간·메뉴·인원을 추출합니다. 예시 버튼을 눌러 시작해보세요.');
@@ -3341,9 +3478,9 @@
       .then(function () {
         state.roomEntered = true;
         showRoomView();
-        beginRoomFlow();
+        return beginRoomFlow();
       })
-      .then(function () { return autoWait(900); })
+      .then(function () { return autoWait(400); })
       .then(function () { return typeIntoInput('내일 점심 마라탕 3명'); })
       .then(function () {
         if (!state.demoRunning) return;
@@ -3363,16 +3500,6 @@
         return waitForStage('room', 22000);
       })
       .then(function () { return autoWait(600); })
-      .then(function () {
-        if (!state.demoRunning) return;
-        // guest-viewpoint cutscene fires on its own timer inside startRecruiting();
-        // just give it a window to show its banner and auto-revert before moving on.
-        return waitForSelector('#personaBanner:not([hidden])', 6000);
-      })
-      .then(function () {
-        if (!state.demoRunning) return;
-        return waitForSelector('#personaBanner[hidden]', 8000);
-      })
       .then(function () { return waitForStage('place', 12000); })
       .then(function () { return autoWait(2000); })
       .then(function () { return waitForSelector('[data-act="reminder-attend"]', 8000); })
