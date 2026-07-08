@@ -1,0 +1,816 @@
+<title>OfficeMate — HR 콘솔</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1D1B24;--ink-soft:#4A4959;--paper:#EEF0F3;--paper-raised:#FFFFFF;--line:#D8DAE1;
+  --brand:#33549C;--brand-deep:#24397A;--brand-text:#2A4784;--brand-soft:#A9BAD9;
+  --morning:#6F92C4;--lunch:#C99334;--dinner:#7A4F76;
+  --good:#3F8F6B;--good-text:#2E6B4F;--warn:#C97A2E;--warn-text:#9C5A1E;--danger:#B4483F;--danger-text:#8C3A32;
+  --muted:#6B6A78;--panel:#16151D;
+  --sans:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --serif:Georgia,"Times New Roman",serif;--mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+}
+html,body{height:100%}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);font-size:13px;height:100vh;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
+
+/* ── Shell ── */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:228px;background:var(--panel);border-right:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;flex-shrink:0}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+
+/* ── Sidebar ── */
+.logo-area{padding:20px 18px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:30px;height:30px;background:var(--brand);border-radius:8px;display:grid;place-items:center;font-size:14px;flex-shrink:0;color:#fff;font-weight:700}
+.logo-text{font-size:18px;font-weight:600;color:#fff;font-family:var(--serif);font-style:italic;letter-spacing:.3px}
+.logo-sub{font-size:9.5px;color:rgba(255,255,255,.35);font-family:var(--mono);margin-top:2px;letter-spacing:.4px}
+.nav-wrap{flex:1;overflow-y:auto;padding:10px 0}
+.nav-group{padding:14px 16px 4px;font-size:9.5px;font-weight:700;color:rgba(255,255,255,.28);letter-spacing:.8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;margin:1px 8px;border-radius:7px;cursor:pointer;font-size:12.5px;color:rgba(255,255,255,.72);font-weight:500;transition:all .12s;user-select:none;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav-item.active{background:rgba(169,186,217,.18);color:#C7D3EC}
+.nav-badge{font-size:9px;background:var(--danger);color:#fff;border-radius:10px;padding:1px 6px;margin-left:auto;font-weight:700}
+.nav-badge.good{background:var(--good)}
+.sidebar-bottom{padding:12px;border-top:1px solid rgba(255,255,255,.08)}
+.org-row{display:flex;align-items:center;gap:9px;padding:9px 10px;background:rgba(255,255,255,.05);border-radius:9px}
+.org-av{width:28px;height:28px;border-radius:50%;background:var(--brand);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.org-name{font-size:11.5px;font-weight:600;color:#fff}
+.org-plan{font-size:10px;color:rgba(255,255,255,.35)}
+.priv-badge{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;color:#C7D3EC;background:rgba(169,186,217,.14);border:1px solid rgba(169,186,217,.3);border-radius:20px;padding:4px 10px;margin:0 12px 12px}
+
+/* ── Topbar ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--paper-raised);border-bottom:1px solid var(--line);flex-shrink:0}
+.page-title{font-size:16px;font-weight:700;color:var(--ink)}
+.page-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.tb-right{display:flex;align-items:center;gap:8px}
+.priv-chip{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--brand-text);background:#E7ECF6;border:1px solid var(--brand-soft);border-radius:20px;padding:5px 11px;margin-right:6px}
+.btn{border:none;border-radius:7px;font-family:inherit;cursor:pointer;font-weight:700;transition:all .12s;display:inline-flex;align-items:center;gap:6px;font-size:11.5px}
+.btn-brand{background:var(--brand);color:#fff;padding:8px 15px}
+.btn-brand:hover{background:var(--brand-deep)}
+.btn-outline{background:#fff;color:var(--ink-soft);border:1px solid var(--line);padding:8px 15px}
+.btn-outline:hover{border-color:var(--brand-soft);color:var(--brand-text)}
+.btn-danger{background:var(--danger);color:#fff;padding:8px 15px}
+.btn-good{background:var(--good);color:#fff;padding:8px 15px}
+.btn-sm{font-size:10.5px;padding:5px 11px;border-radius:6px;font-weight:600;font-family:inherit;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:4px}
+.bsm-brand{background:#E7ECF6;color:var(--brand-text)}
+.bsm-danger{background:#F8EBE9;color:var(--danger-text)}
+.bsm-good{background:#E7F3ED;color:var(--good-text)}
+.bsm-gray{background:#EEF0F3;color:var(--muted);border:1px solid var(--line)}
+.bsm-warn{background:#F8EEE1;color:var(--warn-text)}
+
+/* ── Content ── */
+.content{flex:1;overflow-y:auto;padding:20px 24px}
+.page{display:none}.page.active{display:block}
+
+/* ── Cards ── */
+.panel{background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--line)}
+.ph-title{font-size:12.5px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:7px}
+.ph-meta{font-size:10.5px;color:var(--muted);font-family:var(--mono)}
+.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.mc{background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;padding:15px 17px}
+.mc-lbl{font-size:10.5px;color:var(--muted);margin-bottom:8px;font-weight:600}
+.mc-val{font-size:26px;font-weight:700;line-height:1;font-family:var(--serif)}
+.mc-sub{font-size:10.5px;color:var(--muted);margin-top:6px}
+.mc-sub.up{color:var(--good-text)}
+.mc-sub.down{color:var(--good-text)}
+.mc-spark{margin-top:8px;height:26px}
+.two-col{display:grid;grid-template-columns:1fr 320px;gap:16px}
+
+/* ── Status ── */
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-danger{background:var(--danger)}.dot-warn{background:var(--warn)}
+.dot-good{background:var(--good)}.dot-brand{background:var(--brand)}
+.badge{font-size:9.5px;font-weight:700;padding:2px 9px;border-radius:5px;display:inline-block}
+.badge-danger{background:#F8EBE9;color:var(--danger-text)}
+.badge-warn{background:#F8EEE1;color:var(--warn-text)}
+.badge-good{background:#E7F3ED;color:var(--good-text)}
+.badge-brand{background:#E7ECF6;color:var(--brand-text)}
+.badge-gray{background:#EEF0F3;color:var(--muted)}
+
+/* ── List rows ── */
+.list-row{display:flex;align-items:center;gap:11px;padding:11px 18px;border-bottom:1px solid #F0F1F4;cursor:pointer;transition:background .1s}
+.list-row:hover{background:#F7F8FA}
+.list-row:last-child{border-bottom:none}
+.row-content{flex:1;min-width:0}
+.row-title{font-size:12.5px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-desc{font-size:10.5px;color:var(--muted);margin-top:3px}
+.env-tag{font-size:9.5px;background:#EEF0F3;border:1px solid var(--line);border-radius:5px;padding:2px 8px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+
+/* ── Bar ── */
+.bar-bg{flex:1;height:7px;background:#EEF0F3;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.bar-danger{background:var(--danger)}.bar-warn{background:var(--warn)}
+.bar-good{background:var(--good)}.bar-brand{background:var(--brand)}
+.bar-lunch{background:var(--lunch)}.bar-morning{background:var(--morning)}.bar-dinner{background:var(--dinner)}
+
+/* ── Data table ── */
+.dt{width:100%;border-collapse:collapse;background:var(--paper-raised);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.dt th{text-align:left;padding:10px 14px;background:#F7F8FA;font-size:10.5px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap}
+.dt td{padding:10px 14px;font-size:11.5px;color:var(--ink-soft);border-bottom:1px solid #F0F1F4}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:#F7F8FA}
+
+/* ── Filter ── */
+.fbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.fchip{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--line);background:var(--paper-raised);cursor:pointer;font-weight:500;color:var(--muted);transition:all .12s}
+.fchip:hover{border-color:var(--brand-soft)}.fchip.on{background:var(--brand-deep);color:#fff;border-color:var(--brand-deep)}
+
+/* ── Overlay / Modal ── */
+.ov{display:none;position:fixed;inset:0;background:rgba(22,21,29,.55);z-index:100;align-items:center;justify-content:center}
+.ov.show{display:flex}
+.modal{background:var(--paper-raised);border-radius:16px;width:560px;max-height:82vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.modal-hd{display:flex;align-items:flex-start;justify-content:space-between;padding:20px 22px 15px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper-raised)}
+.modal-title{font-size:15px;font-weight:700;color:var(--ink)}
+.modal-close{background:none;border:none;cursor:pointer;font-size:19px;color:var(--muted);padding:2px 6px}
+.modal-body{padding:20px 22px}
+.info-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #F0F1F4;font-size:12px}
+.info-row:last-child{border-bottom:none}
+.info-lbl{color:var(--muted)}
+.info-val{font-weight:600;color:var(--ink)}
+.ai-reason{background:#E7ECF6;border-radius:9px;padding:13px 15px;font-size:12px;color:var(--brand-deep);line-height:1.7;margin-top:8px;border-left:3px solid var(--brand)}
+
+/* ── Policy cards ── */
+.policy-card{background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;padding:17px;margin-bottom:11px;display:flex;align-items:center;gap:13px}
+.policy-card.active{border-color:var(--brand-soft);background:#F5F7FB}
+.policy-icon{font-size:24px;flex-shrink:0}
+.policy-info{flex:1}
+.policy-name{font-size:13px;font-weight:700;color:var(--ink)}
+.policy-desc{font-size:11px;color:var(--muted);margin-top:3px}
+.tg-switch{width:40px;height:22px;border-radius:11px;background:#D8DAE1;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tg-switch.on{background:var(--brand)}
+.tg-switch::after{content:"";width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:left .2s}
+.tg-switch.on::after{left:20px}
+.seg{display:flex;gap:6px}
+.seg-opt{font-size:11.5px;padding:6px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:600;color:var(--muted)}
+.seg-opt.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+/* ── Timeline / Live feed ── */
+.tl-item{display:flex;gap:11px;margin-bottom:13px;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){.tl-item{animation:none}}
+.tl-dot-col{display:flex;flex-direction:column;align-items:center}
+.tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.tl-line{width:1px;background:var(--line);flex:1;margin-top:3px}
+.tl-item:last-child .tl-line{display:none}
+.tl-body{flex:1}
+.tl-time{font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:1px}
+.tl-title{font-size:12px;font-weight:600;color:var(--ink)}
+.tl-desc{font-size:11px;color:var(--muted);margin-top:1px}
+
+/* ── Alert bar ── */
+.alert-bar{display:flex;align-items:center;gap:11px;background:var(--paper-raised);border:1px solid var(--line);border-left:4px solid var(--danger);border-radius:9px;padding:11px 15px;margin-bottom:16px;font-size:12px}
+.alert-bar.warn{border-left-color:var(--warn)}
+.alert-bar.good{border-left-color:var(--good)}
+.alert-action{margin-left:auto;font-size:10.5px;font-weight:700;color:var(--brand-text);cursor:pointer;text-decoration:underline;white-space:nowrap}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--panel);color:#fff;padding:10px 16px;border-radius:9px;font-size:12px;font-weight:500;z-index:300;opacity:0;transform:translateY(6px);transition:all .22s;pointer-events:none;max-width:340px}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ── ONA network ── */
+.ona-wrap{display:grid;grid-template-columns:1fr 380px;gap:16px}
+.ona-canvas-box{background:var(--paper-raised);border:1px solid var(--line);border-radius:12px;padding:10px}
+
+/* ── Heatmap ── */
+.heat-table{width:100%;border-collapse:collapse}
+.heat-table th{font-size:10px;color:var(--muted);font-weight:700;padding:6px;text-align:center}
+.heat-table td{padding:4px}
+.heat-cell{height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-family:var(--mono);color:#fff;font-weight:600}
+.heat-rowlbl{font-size:10.5px;color:var(--muted);font-weight:600;text-align:right;padding-right:10px!important;white-space:nowrap}
+
+/* ── Report format cards ── */
+.fmt-card{background:var(--paper-raised);border:2px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;transition:all .12s}
+.fmt-card.sel{border-color:var(--brand);background:#F5F7FB}
+.fmt-name{font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.fmt-desc{font-size:11px;color:var(--muted)}
+
+/* ── Sponsor ── */
+.sponsor-card{display:flex;align-items:center;gap:13px;padding:14px 18px;border-bottom:1px solid #F0F1F4}
+.sponsor-card:last-child{border-bottom:none}
+.sponsor-icon{width:38px;height:38px;border-radius:10px;background:#E7ECF6;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+</style>
+
+<div class="app">
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar">
+  <div class="logo-area">
+    <div class="logo">
+      <div class="logo-mark">OM</div>
+      <div><div class="logo-text">OfficeMate</div><div class="logo-sub">HR CONSOLE v2.4</div></div>
+    </div>
+  </div>
+  <div class="nav-wrap">
+    <div class="nav-group">개요</div>
+    <div class="nav-item active" onclick="nav('dashboard',this)">⊞ 대시보드</div>
+    <div class="nav-group">인사이트</div>
+    <div class="nav-item" onclick="nav('ona',this)">◈ 부서 연결 (ONA)</div>
+    <div class="nav-item" onclick="nav('engagement',this)">▦ 참여 현황</div>
+    <div class="nav-item" onclick="nav('signals',this)">✦ AI 시그널 <span class="nav-badge">4</span></div>
+    <div class="nav-group">운영</div>
+    <div class="nav-item" onclick="nav('budget',this)">₩ 예산·정산</div>
+    <div class="nav-item" onclick="nav('sponsors',this)">◆ 스폰서 관리 <span class="nav-badge good">1</span></div>
+    <div class="nav-item" onclick="nav('report',this)">▤ 리포트 생성</div>
+    <div class="nav-group">설정</div>
+    <div class="nav-item" onclick="nav('policy',this)">⚙ 정책 설정</div>
+  </div>
+  <div class="priv-badge">🔒 개인 식별 불가 · 부서 단위 집계</div>
+  <div class="sidebar-bottom">
+    <div class="org-row">
+      <div class="org-av">테</div>
+      <div><div class="org-name">테크노어 HR팀</div><div class="org-plan">Team Plan · 412명</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="tbTitle">대시보드</div>
+      <div class="page-sub" id="tbSub">2026.07.07 · 이번 주 매칭 118건 확정</div>
+    </div>
+    <div class="tb-right">
+      <span class="priv-chip">🔒 부서 단위 집계</span>
+      <button class="btn btn-outline" onclick="toast('최신 데이터로 새로고침했습니다.')">⟳ 새로고침</button>
+      <button class="btn btn-brand" onclick="nav('report',document.querySelectorAll('.nav-item')[6])">▤ 리포트 생성</button>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- ━━ 1. 대시보드 ━━ -->
+    <div id="page-dashboard" class="page active">
+      <div class="alert-bar warn">
+        <div class="dot dot-warn"></div>
+        <span><b>주의</b> — 플랫폼개발본부, 4주 연속 참여율 하위 10% · 팀 슬롯 개설 권장</span>
+        <div class="alert-action" onclick="nav('signals',document.querySelectorAll('.nav-item')[3])">AI 시그널 보기 →</div>
+      </div>
+      <div class="metric-row">
+        <div class="mc">
+          <div class="mc-lbl">주간 참여율</div><div class="mc-val" style="color:var(--brand-text)">34%</div>
+          <div class="mc-sub up">▲ 6%p 전주 대비</div>
+          <svg class="mc-spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,20 15,18 30,19 45,14 60,15 75,9 100,4" fill="none" stroke="#33549C" stroke-width="2"/></svg>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">매칭 성사율</div><div class="mc-val" style="color:var(--good-text)">78%</div>
+          <div class="mc-sub up">▲ 3%p 전주 대비</div>
+          <svg class="mc-spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,16 15,17 30,13 45,15 60,10 75,11 100,6" fill="none" stroke="#3F8F6B" stroke-width="2"/></svg>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">노쇼율</div><div class="mc-val" style="color:var(--good-text)">2.1%</div>
+          <div class="mc-sub up">▼ 0.8%p 전주 대비 (개선)</div>
+          <svg class="mc-spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,6 15,9 30,8 45,13 60,15 75,18 100,20" fill="none" stroke="#3F8F6B" stroke-width="2"/></svg>
+        </div>
+        <div class="mc">
+          <div class="mc-lbl">부서 간 신규 연결</div><div class="mc-val" style="color:var(--ink)">312</div>
+          <div class="mc-sub up">▲ 41건 전월 대비</div>
+          <svg class="mc-spark" viewBox="0 0 100 26" preserveAspectRatio="none"><polyline points="0,22 15,19 30,17 45,16 60,12 75,10 100,3" fill="none" stroke="#24397A" stroke-width="2"/></svg>
+        </div>
+      </div>
+      <div class="two-col">
+        <div>
+          <div class="panel">
+            <div class="ph"><div class="ph-title"><div class="dot dot-brand"></div>오늘의 모임</div><div class="ph-meta">6건 예정</div></div>
+            <div id="meetingList"></div>
+          </div>
+          <div class="panel">
+            <div class="ph"><div class="ph-title">📈 이번 주 시간대별 매칭 분포</div></div>
+            <div style="padding:15px 18px;display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;align-items:center;gap:10px;font-size:11px"><span style="min-width:56px;color:var(--muted)">아침</span><div class="bar-bg"><div class="bar-fill bar-morning" style="width:28%"></div></div><span style="color:var(--morning);font-weight:700">22건</span></div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:11px"><span style="min-width:56px;color:var(--muted)">점심</span><div class="bar-bg"><div class="bar-fill bar-lunch" style="width:82%"></div></div><span style="color:var(--lunch);font-weight:700">64건</span></div>
+              <div style="display:flex;align-items:center;gap:10px;font-size:11px"><span style="min-width:56px;color:var(--muted)">저녁</span><div class="bar-bg"><div class="bar-fill bar-dinner" style="width:41%"></div></div><span style="color:var(--dinner);font-weight:700">32건</span></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="panel" style="margin-bottom:16px">
+            <div class="ph"><div class="ph-title">🏢 본부별 참여율</div></div>
+            <div style="padding:13px 18px;display:flex;flex-direction:column;gap:9px">
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600">플랫폼개발본부</span><span class="badge badge-warn">하위 10%</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:6px;border-bottom:1px solid #F0F1F4"><span style="font-size:10.5px;color:var(--muted)">참여율 19%</span><span style="font-size:10.5px;color:var(--muted)">42명</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600">영업본부</span><span class="badge badge-good">우수</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:6px;border-bottom:1px solid #F0F1F4"><span style="font-size:10.5px;color:var(--muted)">참여율 51%</span><span style="font-size:10.5px;color:var(--muted)">88명</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600">경영지원본부</span><span class="badge badge-brand">평균</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:10.5px;color:var(--muted)">참여율 33%</span><span style="font-size:10.5px;color:var(--muted)">56명</span></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="ph"><div class="ph-title">🕐 실시간 활동 피드</div><span style="font-size:9.5px;color:var(--good-text);font-weight:700" id="liveTag">● LIVE</span></div>
+            <div id="liveFeed" style="padding:15px 18px;max-height:340px;overflow-y:auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━ 2. 부서 연결 (ONA) ━━ -->
+    <div id="page-ona" class="page">
+      <div class="alert-bar good"><div class="dot dot-good"></div><span>부서 간 연결 강도는 <b>모임 성사 건수</b>만 집계합니다 · 참석자 개인 식별 불가 · 집계 데이터만 표시</span></div>
+      <div class="ona-wrap">
+        <div class="ona-canvas-box">
+          <canvas id="onaCanvas" width="640" height="440" style="width:100%;height:440px"></canvas>
+        </div>
+        <div class="panel" style="margin-bottom:0">
+          <div class="ph"><div class="ph-title">부서 쌍 · 이번 달 모임 수</div></div>
+          <table class="dt" style="border:none;border-radius:0">
+            <thead><tr><th>부서 A</th><th>부서 B</th><th>모임 수</th><th>전월비</th></tr></thead>
+            <tbody id="onaPairBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━ 3. 참여 현황 ━━ -->
+    <div id="page-engagement" class="page">
+      <div class="panel">
+        <div class="ph"><div class="ph-title">🗓 시간대 × 요일 슬롯 히트맵</div><div class="ph-meta">최근 4주 평균 · 슬롯 채움율(%)</div></div>
+        <div style="padding:16px 18px;overflow-x:auto">
+          <table class="heat-table" id="heatTable"></table>
+        </div>
+      </div>
+      <div class="two-col">
+        <div class="panel">
+          <div class="ph"><div class="ph-title">🏢 팀별 참여율</div><div class="ph-meta">42개 팀</div></div>
+          <div id="teamBarList" style="padding:14px 18px;display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+        <div class="panel" style="margin-bottom:0">
+          <div class="ph"><div class="ph-title">📊 8주 참여 추이</div></div>
+          <div style="padding:16px 18px">
+            <svg viewBox="0 0 280 120" style="width:100%;height:150px">
+              <polyline points="0,90 35,84 70,78 105,70 140,66 175,52 210,44 245,30 280,20" fill="none" stroke="#33549C" stroke-width="2.5"/>
+              <polyline points="0,90 35,84 70,78 105,70 140,66 175,52 210,44 245,30 280,20 280,120 0,120" fill="#E7ECF6" stroke="none" opacity=".6"/>
+            </svg>
+            <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);font-family:var(--mono)"><span>8주 전</span><span>이번 주</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ━━ 4. AI 시그널 ━━ -->
+    <div id="page-signals" class="page">
+      <div class="alert-bar"><div class="dot dot-brand"></div><span>AI가 참여 패턴을 분석해 자동으로 제안합니다 · 모든 제안은 부서/그룹 단위 집계 기반</span></div>
+      <div id="signalList"></div>
+    </div>
+
+    <!-- ━━ 5. 예산·정산 ━━ -->
+    <div id="page-budget" class="page">
+      <div class="metric-row" style="grid-template-columns:repeat(3,1fr)">
+        <div class="mc"><div class="mc-lbl">이번 달 집행액</div><div class="mc-val" style="color:var(--brand-text)">₩4,820,000</div><div class="mc-sub">예산 대비 68% 소진</div></div>
+        <div class="mc"><div class="mc-lbl">증빙 완료율</div><div class="mc-val" style="color:var(--good-text)">100%</div><div class="mc-sub">전 건 자동 수집</div></div>
+        <div class="mc"><div class="mc-lbl">절감된 정산 공수</div><div class="mc-val" style="color:var(--ink)">12h<span style="font-size:14px">/월</span></div><div class="mc-sub">자동화 이전 대비</div></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="ph-title">💳 카테고리별 크레딧 집행</div></div>
+        <div style="padding:15px 18px;display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:11px"><span style="min-width:56px;color:var(--muted)">식대</span><div class="bar-bg"><div class="bar-fill bar-lunch" style="width:74%"></div></div><span style="color:var(--lunch);font-weight:700">₩2,960,000</span></div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:11px"><span style="min-width:56px;color:var(--muted)">회식</span><div class="bar-bg"><div class="bar-fill bar-dinner" style="width:38%"></div></div><span style="color:var(--dinner);font-weight:700">₩1,340,000</span></div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:11px"><span style="min-width:56px;color:var(--muted)">행사</span><div class="bar-bg"><div class="bar-fill bar-brand" style="width:13%"></div></div><span style="color:var(--brand);font-weight:700">₩520,000</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="ph-title">🧾 거래 내역</div><button class="btn-sm bsm-brand" onclick="toast('증빙 12건을 zip으로 일괄 다운로드합니다...');setTimeout(()=>toast('✓ 다운로드 완료 — transactions_2026-07.zip'),1600)">⬇ 증빙 일괄 다운로드</button></div>
+        <table class="dt">
+          <thead><tr><th>모임명</th><th>구분</th><th>인원</th><th>금액</th><th>증빙 상태</th><th></th></tr></thead>
+          <tbody id="txBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ━━ 6. 스폰서 관리 ━━ -->
+    <div id="page-sponsors" class="page">
+      <div class="panel">
+        <div class="ph"><div class="ph-title">🆕 신규 스폰서 승인 대기</div><div class="ph-meta">1건</div></div>
+        <div class="sponsor-card">
+          <div class="sponsor-icon">🥗</div>
+          <div style="flex:1"><div style="font-size:12.5px;font-weight:700">그린테이블 샐러드</div><div style="font-size:10.5px;color:var(--muted);margin-top:2px">회사 도보 5분 · 점심 쿠폰 15% 할인 제안</div></div>
+          <button class="btn-sm bsm-good" onclick="toast('그린테이블 샐러드 스폰서 제휴를 승인했습니다.');this.closest('.sponsor-card').style.opacity='.4'">승인</button>
+          <button class="btn-sm bsm-danger" onclick="toast('그린테이블 샐러드 제휴 요청을 거절했습니다.');this.closest('.sponsor-card').style.opacity='.4'">거절</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="ph-title">◆ 활성 스폰서</div><div class="ph-meta">5곳</div></div>
+        <div id="sponsorList"></div>
+      </div>
+    </div>
+
+    <!-- ━━ 7. 리포트 생성 ━━ -->
+    <div id="page-report" class="page">
+      <div style="max-width:620px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:11px;color:var(--ink)">리포트 형식</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:18px" id="fmtCards"></div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:9px;color:var(--ink)">기간</div>
+        <div style="display:flex;gap:10px;margin-bottom:18px">
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="period" checked style="accent-color:var(--brand)"> 이번 주</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="period" style="accent-color:var(--brand)"> 이번 달</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="period" style="accent-color:var(--brand)"> 이번 분기</label>
+          <label style="display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer"><input type="radio" name="period" style="accent-color:var(--brand)"> 직접 설정</label>
+        </div>
+        <button class="btn btn-brand" style="width:100%;justify-content:center;padding:12px;font-size:13px" onclick="genReport()">PDF 리포트 생성</button>
+      </div>
+    </div>
+
+    <!-- ━━ 8. 정책 설정 ━━ -->
+    <div id="page-policy" class="page">
+      <div style="max-width:660px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--ink)">디파짓 · 참여 정책</div>
+        <div class="policy-card active">
+          <div class="policy-icon">💰</div>
+          <div class="policy-info"><div class="policy-name">노쇼 디파짓 금액</div><div class="policy-desc">모임 미참석(노쇼) 시 차감되는 포인트</div></div>
+          <div class="seg" id="depositSeg">
+            <button class="seg-opt" onclick="segPick(this,'depositSeg')">0P</button>
+            <button class="seg-opt on" onclick="segPick(this,'depositSeg')">300P</button>
+            <button class="seg-opt" onclick="segPick(this,'depositSeg')">500P</button>
+          </div>
+        </div>
+        <div class="policy-card active">
+          <div class="policy-icon">🎫</div>
+          <div class="policy-info"><div class="policy-name">최초 면제 횟수</div><div class="policy-desc">신규 입사자 노쇼 디파짓 면제 횟수</div></div>
+          <div class="seg" id="exemptSeg">
+            <button class="seg-opt" onclick="segPick(this,'exemptSeg')">0회</button>
+            <button class="seg-opt on" onclick="segPick(this,'exemptSeg')">1회</button>
+            <button class="seg-opt" onclick="segPick(this,'exemptSeg')">2회</button>
+          </div>
+        </div>
+        <div class="policy-card active">
+          <div class="policy-icon">🕶</div>
+          <div class="policy-info"><div class="policy-name">익명 집계 수준</div><div class="policy-desc">리포트·대시보드에 표시되는 최소 집계 단위</div></div>
+          <div class="seg" id="anonSeg">
+            <button class="seg-opt" onclick="segPick(this,'anonSeg')">팀</button>
+            <button class="seg-opt on" onclick="segPick(this,'anonSeg')">본부</button>
+            <button class="seg-opt" onclick="segPick(this,'anonSeg')">전사</button>
+          </div>
+        </div>
+        <div class="policy-card active">
+          <div class="policy-icon">📍</div>
+          <div class="policy-info"><div class="policy-name">온·오프 자동 판별</div><div class="policy-desc">체크인 후 30분 이내 미체류 시 노쇼 자동 판정</div></div>
+          <button class="tg-switch on" onclick="this.classList.toggle('on');toast('자동 판별 규칙이 변경되었습니다.')"></button>
+        </div>
+        <div class="policy-card">
+          <div class="policy-icon">🔔</div>
+          <div class="policy-info"><div class="policy-name">참여율 급락 알림</div><div class="policy-desc">팀 참여율이 4주 연속 하위 10%일 때 HR 담당자에게 알림</div></div>
+          <button class="tg-switch on" onclick="this.classList.toggle('on');toast('알림 규칙이 변경되었습니다.')"></button>
+        </div>
+        <div class="policy-card">
+          <div class="policy-icon">📅</div>
+          <div class="policy-info"><div class="policy-name">주간 요약 리포트 자동 발송</div><div class="policy-desc">매주 월요일 09:00, 경영진 요약 리포트 자동 메일 발송</div></div>
+          <button class="tg-switch" onclick="this.classList.toggle('on');toast('알림 규칙이 변경되었습니다.')"></button>
+        </div>
+        <div style="margin-top:18px;display:flex;gap:8px">
+          <button class="btn btn-brand" onclick="toast('정책이 저장되었습니다.')">정책 저장</button>
+          <button class="btn btn-outline" onclick="toast('변경 사항을 초기화했습니다.')">초기화</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ══ 모임 상세 Modal ══ -->
+<div class="ov" id="meetingOv" onclick="if(event.target===this)closeMeeting()">
+  <div class="modal">
+    <div class="modal-hd"><div><div class="modal-title" id="mtTitle"></div><div style="margin-top:6px;display:flex;gap:5px" id="mtBadges"></div></div><button class="modal-close" onclick="closeMeeting()">✕</button></div>
+    <div class="modal-body" id="mtBody"></div>
+  </div>
+</div>
+
+<!-- ══ AI 시그널 상세 Modal ══ -->
+<div class="ov" id="signalOv" onclick="if(event.target===this)closeSignal()">
+  <div class="modal">
+    <div class="modal-hd"><div><div class="modal-title" id="sgTitle"></div><div style="margin-top:6px;display:flex;gap:5px" id="sgBadges"></div></div><button class="modal-close" onclick="closeSignal()">✕</button></div>
+    <div class="modal-body" id="sgBody"></div>
+  </div>
+</div>
+
+<!-- ══ Toast ══ -->
+<div class="toast" id="toastEl"></div>
+
+<script>
+const pageInfo={
+  dashboard:{title:'대시보드',sub:'2026.07.07 · 이번 주 매칭 118건 확정'},
+  ona:{title:'부서 연결 (ONA)',sub:'조직 네트워크 분석 · 집계 데이터만 사용'},
+  engagement:{title:'참여 현황',sub:'전사 42개 팀 · 4주 이동평균 기준'},
+  signals:{title:'AI 시그널',sub:'AI 자동 감지 4건 · 부서/그룹 단위 제안'},
+  budget:{title:'예산·정산',sub:'이번 달 집행 ₩4,820,000 · 증빙 완료율 100%'},
+  sponsors:{title:'스폰서 관리',sub:'활성 5곳 · 승인 대기 1건'},
+  report:{title:'리포트 생성',sub:'경영진 요약·ONA 진단·예산 증빙 자동 생성'},
+  policy:{title:'정책 설정',sub:'디파짓·익명화·알림 규칙 관리'},
+};
+
+function nav(id, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add('active');
+  const info=pageInfo[id]||{title:id,sub:''};
+  document.getElementById('tbTitle').textContent=info.title;
+  document.getElementById('tbSub').textContent=info.sub;
+  if(id==='ona')renderOna();
+  if(id==='engagement')renderEngagement();
+  if(id==='signals')renderSignals();
+  if(id==='budget')renderBudget();
+  if(id==='sponsors')renderSponsors();
+  if(id==='report')renderReportCards();
+}
+
+// ── Toast ──
+function toast(msg){
+  const t=document.getElementById('toastEl');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ── 1. 오늘의 모임 ──
+const meetings=[
+  {id:1,time:'08:30',type:'아침',dept:'개발팀 × 디자인팀',n:4,loc:'1층 카페',status:'확정'},
+  {id:2,time:'12:00',type:'점심',dept:'영업팀 × 기획팀',n:6,loc:'회사앞 파스타집',status:'확정'},
+  {id:3,time:'12:00',type:'점심',dept:'재무팀 × 인사팀',n:4,loc:'구내식당',status:'체크인 완료'},
+  {id:4,time:'12:30',type:'점심',dept:'개발팀 (러닝 동호회)',n:12,loc:'한강공원',status:'확정'},
+  {id:5,time:'18:00',type:'저녁',dept:'디자인팀 × 재무팀',n:5,loc:'○○이자카야',status:'확정'},
+  {id:6,time:'19:00',type:'저녁',dept:'영업팀 신입 버디매칭',n:3,loc:'회식장소 미정',status:'조율 중'},
+];
+const typeBadge={아침:'badge-brand',점심:'badge-warn',저녁:'badge-good'};
+function renderMeetingList(){
+  const el=document.getElementById('meetingList');
+  el.innerHTML=meetings.map(m=>`
+    <div class="list-row" onclick="openMeeting(${m.id})">
+      <span class="badge ${typeBadge[m.type]||'badge-gray'}">${m.type}</span>
+      <div class="row-content"><div class="row-title">${m.dept}</div><div class="row-desc">${m.time} · ${m.n}명 · ${m.loc}</div></div>
+      <span class="env-tag">${m.status}</span>
+      <button class="btn-sm bsm-brand" onclick="event.stopPropagation();openMeeting(${m.id})">상세</button>
+    </div>`).join('');
+}
+function openMeeting(id){
+  const m=meetings.find(x=>x.id===id);if(!m)return;
+  document.getElementById('mtTitle').textContent=m.dept;
+  document.getElementById('mtBadges').innerHTML=`<span class="badge ${typeBadge[m.type]}">${m.type}</span><span class="env-tag">${m.status}</span>`;
+  document.getElementById('mtBody').innerHTML=`
+    <div class="info-row"><span class="info-lbl">시간</span><span class="info-val">2026.07.07 ${m.time}</span></div>
+    <div class="info-row"><span class="info-lbl">참여 규모</span><span class="info-val">${m.n}명 (부서 집계)</span></div>
+    <div class="info-row"><span class="info-lbl">장소</span><span class="info-val">${m.loc}</span></div>
+    <div class="info-row"><span class="info-lbl">상태</span><span class="info-val">${m.status}</span></div>
+    <div style="margin-top:14px"><div style="font-size:12px;font-weight:700;margin-bottom:6px">🔒 개인정보 안내</div>
+    <div class="ai-reason">참석자 개인 식별 정보는 저장·표시되지 않습니다. 본 화면은 부서/팀 단위 집계만 제공합니다.</div></div>
+    <div style="margin-top:14px;display:flex;gap:6px">
+      <button class="btn btn-outline" onclick="toast('참여 알림을 재발송했습니다.')">알림 재발송</button>
+      <button class="btn btn-brand" onclick="toast('모임 확정 처리되었습니다.');closeMeeting()">확정 처리</button>
+    </div>`;
+  document.getElementById('meetingOv').classList.add('show');
+}
+function closeMeeting(){document.getElementById('meetingOv').classList.remove('show')}
+
+// ── 실시간 활동 피드 ──
+const liveEvents=[
+  {icon:'✓',color:'var(--good)',title:'모임 확정',desc:'영업팀 × 기획팀 점심 모임'},
+  {icon:'●',color:'var(--brand)',title:'체크인 완료',desc:'재무팀 × 인사팀 (2/4명)'},
+  {icon:'✓',color:'var(--good)',title:'모임 확정',desc:'디자인팀 × 재무팀 저녁 모임'},
+  {icon:'●',color:'var(--brand)',title:'체크인 완료',desc:'개발팀 러닝 동호회 (9/12명)'},
+  {icon:'💳',color:'var(--lunch)',title:'크레딧 정산',desc:'구내식당 · ₩48,000'},
+  {icon:'✓',color:'var(--good)',title:'모임 확정',desc:'개발팀 × 디자인팀 아침 모임'},
+  {icon:'●',color:'var(--brand)',title:'체크인 완료',desc:'영업팀 신입 버디매칭 (3/3명)'},
+];
+let liveIdx=0,liveInterval=null;
+function pushLive(){
+  const el=document.getElementById('liveFeed');if(!el)return;
+  const e=liveEvents[liveIdx%liveEvents.length];liveIdx++;
+  const now=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  const item=document.createElement('div');
+  item.className='tl-item';
+  item.innerHTML=`<div class="tl-dot-col"><div class="tl-dot" style="background:${e.color}"></div><div class="tl-line"></div></div><div class="tl-body"><div class="tl-time">${now}</div><div class="tl-title">${e.icon} ${e.title}</div><div class="tl-desc">${e.desc}</div></div>`;
+  el.insertBefore(item,el.firstChild);
+  while(el.children.length>8)el.removeChild(el.lastChild);
+}
+function startLiveFeed(){
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  pushLive();pushLive();pushLive();
+  const tag=document.getElementById('liveTag');
+  if(reduced){if(tag)tag.textContent='정적 피드 (모션 감소 설정)';return;}
+  if(liveInterval)clearInterval(liveInterval);
+  liveInterval=setInterval(pushLive,4200);
+}
+
+// ── 2. ONA 네트워크 ──
+const onaDepts=['개발','영업','인사','기획','재무','디자인'];
+const onaMatrix=[
+  [0,8,5,14,3,22],
+  [8,0,4,11,6,3],
+  [5,4,0,7,9,4],
+  [14,11,7,0,5,18],
+  [3,6,9,5,0,2],
+  [22,3,4,18,2,0],
+];
+function drawOna(){
+  const cv=document.getElementById('onaCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,r=Math.min(W,H)/2-70;
+  const pts=onaDepts.map((d,i)=>{
+    const a=(Math.PI*2*i)/onaDepts.length - Math.PI/2;
+    return {x:cx+r*Math.cos(a),y:cy+r*Math.sin(a),name:d};
+  });
+  for(let i=0;i<onaDepts.length;i++){
+    for(let j=i+1;j<onaDepts.length;j++){
+      const v=onaMatrix[i][j];if(v<=0)continue;
+      ctx.beginPath();
+      ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
+      ctx.strokeStyle='rgba(51,84,156,'+Math.min(.15+v/28,.75)+')';
+      ctx.lineWidth=Math.max(1,v/3.2);
+      ctx.stroke();
+    }
+  }
+  pts.forEach(p=>{
+    ctx.beginPath();ctx.arc(p.x,p.y,26,0,Math.PI*2);
+    ctx.fillStyle='#33549C';ctx.fill();
+    ctx.font='bold 13px sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(p.name,p.x,p.y);
+  });
+}
+function renderOnaPairs(){
+  const rows=[];
+  for(let i=0;i<onaDepts.length;i++)for(let j=i+1;j<onaDepts.length;j++)
+    if(onaMatrix[i][j]>0)rows.push({a:onaDepts[i],b:onaDepts[j],v:onaMatrix[i][j]});
+  rows.sort((x,y)=>y.v-x.v);
+  const body=document.getElementById('onaPairBody');if(!body)return;
+  body.innerHTML=rows.map(r=>{
+    const delta=Math.round((Math.random()*30-8));
+    const up=delta>=0;
+    return `<tr><td>${r.a}팀</td><td>${r.b}팀</td><td style="font-weight:700">${r.v}건</td>
+    <td style="color:${up?'var(--good-text)':'var(--danger-text)'};font-weight:700">${up?'▲':'▼'} ${Math.abs(delta)}%</td></tr>`;
+  }).join('');
+}
+let onaRendered=false;
+function renderOna(){ drawOna(); if(!onaRendered){renderOnaPairs();onaRendered=true;} }
+
+// ── 3. 참여 현황 히트맵 ──
+const heatDays=['월','화','수','목','금'];
+const heatSlots=['09-10','10-12','12-13','13-17','17-19'];
+const heatData=[
+  [22,35,88,41,20],
+  [18,30,92,38,25],
+  [24,33,95,44,30],
+  [20,28,90,40,52],
+  [15,26,80,35,18],
+];
+function heatColor(v){
+  const t=v/100;
+  const r=Math.round(238-(238-51)*t), g=Math.round(240-(240-84)*t), b=Math.round(243-(243-156)*t);
+  return `rgb(${r},${g},${b})`;
+}
+function renderHeat(){
+  const table=document.getElementById('heatTable');if(!table)return;
+  let html='<tr><th></th>'+heatSlots.map(s=>`<th>${s}</th>`).join('')+'</tr>';
+  heatDays.forEach((d,i)=>{
+    html+=`<tr><td class="heat-rowlbl">${d}요일</td>`+heatSlots.map((s,j)=>{
+      const v=heatData[i][j];
+      return `<td><div class="heat-cell" style="background:${heatColor(v)}">${v}%</div></td>`;
+    }).join('')+'</tr>';
+  });
+  table.innerHTML=html;
+}
+const teamStats=[
+  {name:'플랫폼개발본부 - 인프라팀',rate:19,flag:true},
+  {name:'플랫폼개발본부 - 백엔드팀',rate:24,flag:true},
+  {name:'영업본부 - 1팀',rate:58,flag:false},
+  {name:'영업본부 - 2팀',rate:51,flag:false},
+  {name:'디자인팀',rate:44,flag:false},
+  {name:'기획팀',rate:37,flag:false},
+  {name:'인사팀',rate:33,flag:false},
+];
+function renderTeamBars(){
+  const el=document.getElementById('teamBarList');if(!el)return;
+  el.innerHTML=teamStats.map(t=>`
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+        <span style="font-weight:600;color:${t.flag?'var(--danger-text)':'var(--ink-soft)'}">${t.name}${t.flag?' ⚠':''}</span>
+        <span style="font-weight:700;color:${t.flag?'var(--danger-text)':'var(--ink-soft)'}">${t.rate}%</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill ${t.flag?'bar-danger':'bar-brand'}" style="width:${t.rate}%"></div></div>
+    </div>`).join('');
+}
+let engagementRendered=false;
+function renderEngagement(){ renderHeat(); if(!engagementRendered){renderTeamBars();engagementRendered=true;} }
+
+// ── 4. AI 시그널 ──
+const signals=[
+  {id:1,icon:'📉',title:'침체 팀 감지',target:'플랫폼개발본부 · 인프라팀',
+   evidence:'4주 연속 참여율 19% 이하, 팀 내 매칭 신청 0건',action:'팀 슬롯 개설 제안',btn:'good',
+   detail:'해당 팀은 최근 4주간 참여율이 전사 평균(34%) 대비 현저히 낮고, 팀 내부 신청 건수가 0건으로 집계되었습니다. 팀 단위 전용 슬롯을 개설하면 참여 장벽을 낮출 수 있습니다.'},
+  {id:2,icon:'🏃',title:'반복 참여 패턴 감지',target:'러닝 관심 그룹 · 12명 (집계)',
+   evidence:'동일 시간대 러닝 모임 참여 4회 이상 반복 (개인 미식별, 그룹 집계)',action:'동호회 개설 제안',btn:'good',
+   detail:'최근 6주간 아침 시간대 러닝 모임에 반복적으로 참여한 인원이 다수 확인되었습니다(그룹 집계 12명). 정식 동호회로 전환하면 예산 지원 및 정기 슬롯 배정이 가능합니다.'},
+  {id:3,icon:'🍜',title:'수요 초과 감지',target:'목요일 점심 슬롯',
+   evidence:'목요 점심 슬롯 신청률 138% (공급 대비 초과)',action:'슬롯 공급 확대',btn:'brand',
+   detail:'목요일 점심 시간대는 최근 3주 연속 공급 가능한 슬롯 대비 신청이 초과되어 대기열이 발생하고 있습니다. 슬롯 수를 확대하거나 인접 시간대로 분산을 유도할 것을 제안합니다.'},
+  {id:4,icon:'🧑‍💼',title:'온보딩 미참여 감지',target:'최근 입사 3주 이내 그룹 · 3명 (집계)',
+   evidence:'입사 후 3주 경과, 매칭 참여 이력 0건 (그룹 집계)',action:'버디 매칭 제안',btn:'brand',
+   detail:'입사 3주 이내 신규 구성원 중 아직 매칭 프로그램에 참여하지 않은 인원이 그룹 집계로 3명 확인되었습니다. 온보딩 버디 매칭을 우선 배정하면 조기 적응에 도움이 됩니다.'},
+];
+function renderSignals(){
+  const el=document.getElementById('signalList');if(!el)return;
+  el.innerHTML=signals.map(s=>`
+    <div class="panel">
+      <div style="display:flex;align-items:center;gap:14px;padding:16px 18px">
+        <div style="font-size:26px">${s.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--ink)">${s.title} <span style="font-weight:500;color:var(--muted);font-size:11.5px">— ${s.target}</span></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">근거: ${s.evidence}</div>
+        </div>
+        <button class="btn-sm bsm-gray" onclick="openSignal(${s.id})">상세</button>
+        <button class="btn-sm bsm-${s.btn}" onclick="toast('${s.action} — 담당자에게 전달되었습니다.')">${s.action}</button>
+      </div>
+    </div>`).join('');
+}
+function openSignal(id){
+  const s=signals.find(x=>x.id===id);if(!s)return;
+  document.getElementById('sgTitle').textContent=s.title;
+  document.getElementById('sgBadges').innerHTML=`<span class="badge badge-brand">${s.target}</span>`;
+  document.getElementById('sgBody').innerHTML=`
+    <div class="info-row"><span class="info-lbl">감지 근거</span><span class="info-val" style="font-size:11px;text-align:right;max-width:320px">${s.evidence}</span></div>
+    <div class="info-row"><span class="info-lbl">제안 조치</span><span class="info-val">${s.action}</span></div>
+    <div style="margin-top:14px"><div style="font-size:12px;font-weight:700;margin-bottom:6px">🤖 AI 분석 상세</div>
+    <div class="ai-reason">${s.detail}</div></div>
+    <div style="margin-top:14px;display:flex;gap:6px">
+      <button class="btn btn-outline" onclick="toast('시그널을 무시 처리했습니다.');closeSignal()">무시</button>
+      <button class="btn btn-brand" onclick="toast('${s.action} — 담당자에게 전달되었습니다.');closeSignal()">${s.action}</button>
+    </div>`;
+  document.getElementById('signalOv').classList.add('show');
+}
+function closeSignal(){document.getElementById('signalOv').classList.remove('show')}
+
+// ── 5. 예산·정산 ──
+const transactions=[
+  {name:'영업팀 × 기획팀 점심',n:6,amount:48000,proof:'완료'},
+  {name:'재무팀 × 인사팀 점심',n:4,amount:36000,proof:'완료'},
+  {name:'개발팀 러닝 동호회',n:12,amount:0,proof:'완료'},
+  {name:'디자인팀 × 재무팀 저녁',n:5,amount:125000,proof:'완료'},
+  {name:'영업팀 신입 버디매칭',n:3,amount:52000,proof:'완료'},
+  {name:'플랫폼개발본부 신규 팀 슬롯',n:8,amount:64000,proof:'완료'},
+];
+function renderBudget(){
+  const body=document.getElementById('txBody');if(!body)return;
+  body.innerHTML=transactions.map(t=>`
+    <tr><td>${t.name}</td><td><span class="badge badge-gray">${t.n>0?'모임':'동호회'}</span></td>
+    <td>${t.n}명</td><td style="font-family:var(--mono)">₩${t.amount.toLocaleString()}</td>
+    <td><span class="badge badge-good">${t.proof}</span></td>
+    <td><button class="btn-sm bsm-gray" onclick="toast('증빙 영수증을 조회합니다.')">증빙 보기</button></td></tr>`).join('');
+}
+
+// ── 6. 스폰서 ──
+const sponsors=[
+  {icon:'🍝',name:'회사앞 파스타집',desc:'점심 쿠폰 10% 할인 · 도보 3분',usage:72},
+  {icon:'🏀',name:'○○스포츠 센터',desc:'동호회 이용권 20% 할인',usage:54},
+  {icon:'☕',name:'1층 카페',desc:'아침 모임 음료 1+1',usage:88},
+  {icon:'🍶',name:'○○이자카야',desc:'저녁 회식 15% 할인',usage:41},
+  {icon:'🍱',name:'구내식당 프리미엄관',desc:'점심 세트 정가 유지 특전',usage:63},
+];
+function renderSponsors(){
+  const el=document.getElementById('sponsorList');if(!el)return;
+  el.innerHTML=sponsors.map(s=>`
+    <div class="sponsor-card">
+      <div class="sponsor-icon">${s.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12.5px;font-weight:700">${s.name}</div>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:2px">${s.desc}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <div class="bar-bg" style="max-width:180px"><div class="bar-fill bar-brand" style="width:${s.usage}%"></div></div>
+          <span style="font-size:10px;color:var(--muted);font-family:var(--mono)">쿠폰 사용률 ${s.usage}%</span>
+        </div>
+      </div>
+      <button class="btn-sm bsm-gray" onclick="toast('${s.name} 제휴 상세 정보를 조회합니다.')">상세</button>
+      <button class="btn-sm bsm-danger" onclick="toast('${s.name} 제휴를 일시 중지했습니다.')">중지</button>
+    </div>`).join('');
+}
+
+// ── 7. 리포트 ──
+const fmts=[
+  {id:1,name:'경영진 요약 1p',desc:'핵심 지표 한눈에 보기'},
+  {id:2,name:'조직문화 진단 (ONA)',desc:'부서 간 연결 네트워크 분석'},
+  {id:3,name:'예산 집행 증빙',desc:'정산·증빙 자료 일괄 포함'},
+];
+let selFmt=1;
+function renderReportCards(){
+  const el=document.getElementById('fmtCards');if(!el)return;
+  el.innerHTML=fmts.map(f=>`<div class="fmt-card ${f.id===selFmt?'sel':''}" onclick="pickFmt(${f.id})">
+    <div class="fmt-name">${f.name}</div><div class="fmt-desc">${f.desc}</div></div>`).join('');
+}
+function pickFmt(id){selFmt=id;renderReportCards();}
+function genReport(){
+  const f=fmts.find(x=>x.id===selFmt);
+  toast(`${f.name} 리포트를 생성 중입니다...`);
+  setTimeout(()=>toast(`✓ ${f.name} 리포트가 생성되었습니다.`),2200);
+}
+
+// ── 8. 정책 세그먼트 ──
+function segPick(el,groupId){
+  document.getElementById(groupId).querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('on'));
+  el.classList.add('on');
+  toast('정책 값이 변경되었습니다: '+el.textContent);
+}
+
+// ── Init ──
+renderMeetingList();
+startLiveFeed();
+</script>

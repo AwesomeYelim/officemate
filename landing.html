@@ -1,0 +1,3696 @@
+<title>OfficeMate — 동료와의 밥 한 끼, 오늘부터</title>
+<style>
+  :root {
+    --ink: #1D1B24;
+    --ink-soft: #4A4959;
+    --paper: #EEF0F3;
+    --paper-raised: #FFFFFF;
+    --line: #D8DAE1;
+
+    --brand: #33549C;
+    --brand-deep: #24397A;
+    --brand-text: #2A4784;
+    --brand-soft: #A9BAD9;
+
+    --morning: #6F92C4;
+    --lunch: #C99334;
+    --dinner: #7A4F76;
+
+    --good: #3F8F6B;
+    --good-text: #2E6B4F;
+    --warn: #C97A2E;
+    --warn-text: #9C5A1E;
+    --danger: #B4483F;
+    --danger-text: #8C3A32;
+
+    --muted: #6B6A78;
+    --panel: #16151D;
+    --panel-line: #2C2B36;
+    --panel-muted: #B2B1BE;
+    --panel-card: #1F1E29;
+
+    --font-body: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+      "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --font-serif: Georgia, "Iowan Old Style", "Noto Serif KR", serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+    --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+  }
+
+  * { box-sizing: border-box; }
+  /* bug fix: the full-bleed nav breakout below uses margin-inline: calc(50% -
+     50vw). 100vw includes the vertical scrollbar's track width, so it
+     overshoots the visible viewport by the scrollbar width and would
+     otherwise add its own horizontal scrollbar. `overflow-x: hidden` would
+     "fix" that, but any ancestor with non-visible overflow disables
+     position:sticky for descendants (it would break the sticky nav itself).
+     `overflow: clip` clips the same way without establishing a scroll
+     container, so sticky keeps working. */
+  html { scroll-behavior: smooth; overflow-x: clip; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { max-width: 1240px; margin: 0 auto; padding: var(--sp-5) var(--sp-5) var(--sp-8); display: flex; flex-direction: column; gap: var(--sp-8); }
+
+  /* ---------- Nav ---------- */
+  .nav { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); padding: var(--sp-3) 0; border-bottom: 1px solid var(--line); }
+  .wordmark { font-family: var(--font-serif); font-style: italic; font-size: 17px; letter-spacing: 0.02em; color: var(--brand-text); }
+  .nav-links { display: flex; align-items: center; gap: var(--sp-5); font-size: 13px; color: var(--ink-soft); }
+  .nav-links a { color: inherit; text-decoration: none; }
+  .nav-links a:hover, .nav-links a:focus-visible { color: var(--brand-text); }
+  .nav .btn-sm { font-size: 12.5px; padding: 8px 16px; }
+  @media (max-width: 640px) { .nav-links a.hide-m { display: none; } }
+
+  .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--brand); color: #fff; border: none; border-radius: 999px; padding: 13px 26px; font-family: var(--font-body); font-size: 14.5px; font-weight: 700; cursor: pointer; text-decoration: none; }
+  .btn-primary:hover { background: var(--brand-deep); }
+  .btn-primary:focus-visible, .btn-ghost:focus-visible, .email-form input:focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 2px; }
+  .btn-ghost { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--brand-text); border: 1px solid var(--brand-soft); border-radius: 999px; padding: 12px 24px; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; }
+  .btn-ghost:hover { border-color: var(--brand); }
+
+  /* ---------- Hero ---------- */
+  .hero { display: grid; grid-template-columns: 1.15fr auto; gap: var(--sp-7); align-items: center; padding-top: var(--sp-5); }
+  @media (max-width: 880px) { .hero { grid-template-columns: 1fr; justify-items: center; } .hero-copy { align-items: center; text-align: center; } }
+  .hero-copy { display: flex; flex-direction: column; gap: var(--sp-4); }
+  .eyebrow { font-family: var(--font-mono); text-transform: uppercase; font-size: 11.5px; letter-spacing: 0.12em; color: var(--muted); }
+  h1 { margin: 0; font-size: clamp(32px, 4.6vw, 52px); line-height: 1.18; font-weight: 800; letter-spacing: -0.015em; text-wrap: balance; }
+  h1 em { font-family: var(--font-serif); font-style: italic; font-weight: 400; color: var(--brand-text); }
+  .lede { margin: 0; max-width: 56ch; font-size: 16px; line-height: 1.7; color: var(--ink-soft); }
+  .cta-row { display: flex; flex-wrap: wrap; gap: var(--sp-3); align-items: center; }
+  .trust-note { font-size: 12.5px; color: var(--muted); }
+  .trust-note b { color: var(--ink); font-weight: 700; }
+
+  .day-arc-wrap { max-width: 520px; width: 100%; }
+  .day-arc { height: 8px; border-radius: 999px;
+    background: linear-gradient(90deg, var(--morning) 0%, var(--morning) 33%, var(--lunch) 33%, var(--lunch) 66%, var(--dinner) 66%, var(--dinner) 100%); }
+  .day-arc-labels { display: flex; justify-content: space-between; margin-top: var(--sp-2); font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .day-arc-labels span b { color: var(--ink); font-weight: 700; }
+
+  /* ---------- Phone kit ---------- */
+  .phone { width: 226px; flex: none; }
+  .phone-col-hero { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .hero-phone { cursor: pointer; transition: transform 0.2s ease; }
+  .hero-phone:hover, .hero-phone:focus-visible { transform: translateY(-2px); }
+  .hero-phone-hint { margin: 0; font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-align: center; }
+  .hero-phone-hint a { color: var(--brand-text); }
+  .hero-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typingDot 1.1s ease infinite; }
+  .phone-bezel { background: linear-gradient(160deg, #201f29, #0b0a10); border-radius: 32px; padding: 9px;
+    box-shadow: 0 22px 40px -14px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.05); position: relative; }
+  .phone-notch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 62px; height: 16px; background: #0b0a10; border-radius: 0 0 12px 12px; z-index: 2; }
+  .phone-screen { background: var(--paper-raised); border-radius: 24px; overflow: hidden; display: flex; flex-direction: column; height: 452px; position: relative; }
+  .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 9px 16px 0; }
+  .status-time { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .status-icons { display: flex; align-items: center; gap: 4px; }
+  .signal-bars { display: flex; align-items: flex-end; gap: 1.5px; height: 8px; }
+  .signal-bars span { width: 2.5px; background: var(--ink); border-radius: 1px; }
+  .signal-bars span:nth-child(1) { height: 3px; }
+  .signal-bars span:nth-child(2) { height: 5px; }
+  .signal-bars span:nth-child(3) { height: 6.5px; }
+  .signal-bars span:nth-child(4) { height: 8px; }
+  .battery { width: 17px; height: 9px; border: 1px solid var(--ink); border-radius: 2px; padding: 1px; position: relative; }
+  .battery::after { content: ""; position: absolute; right: -3px; top: 2.5px; width: 2px; height: 4px; background: var(--ink); border-radius: 0 1px 1px 0; }
+  .battery-fill { height: 100%; width: 78%; background: var(--ink); border-radius: 1px; }
+  .app-header { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 14px 10px; border-bottom: 1px solid var(--line); }
+  .bot-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; flex: none; }
+  .app-header-text .name { font-size: 12px; font-weight: 700; line-height: 1.2; }
+  .app-header-text .subtitle { font-size: 10px; color: var(--muted); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-left: auto; flex: none; }
+  .app-body { flex: 1; padding: 12px 12px 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; font-size: 11.8px; line-height: 1.5; color: var(--ink); }
+  .bubble { background: var(--paper); border-radius: 13px 13px 13px 3px; padding: 8px 11px; max-width: 90%; align-self: flex-start; }
+  .m-card { background: #fff; border: 1px solid var(--line); border-radius: 13px; padding: 10px 11px; display: flex; flex-direction: column; gap: 6px; }
+  .note { font-size: 9.5px; color: var(--muted); font-style: italic; line-height: 1.4; }
+  .toast { background: var(--ink); color: #fff; border-radius: 11px; padding: 9px 11px; font-size: 10.5px; display: flex; align-items: center; gap: 7px; }
+  .tag { display: inline-flex; align-self: flex-start; padding: 2.5px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: 0.01em; }
+  .tag.good { background: rgba(63,143,107,.13); color: var(--good-text); }
+  .tag.warn { background: rgba(201,122,46,.13); color: var(--warn-text); }
+  .tag.brand { background: rgba(51,84,156,.13); color: var(--brand-text); }
+  .chip-sm { display: inline-flex; align-self: flex-start; padding: 4px 9px; border-radius: 999px; background: var(--paper); font-size: 10.5px; color: var(--ink-soft); }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 4px; }
+  .gauge { display: flex; flex-direction: column; gap: 4px; }
+  .gauge-track { height: 6px; border-radius: 999px; background: var(--paper); overflow: hidden; }
+  .gauge-fill { height: 100%; border-radius: 999px; background: var(--brand); }
+  .gauge-fill.good { background: var(--good); }
+  .gauge-label { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .avatar-stack { display: flex; }
+  .avatar-stack span { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; margin-left: -6px; }
+  .avatar-stack span:first-child { margin-left: 0; }
+
+  /* ---------- Section scaffolding ---------- */
+  section { display: flex; flex-direction: column; gap: var(--sp-5); }
+  .sec-eyebrow { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--brand-text); }
+  section > h2 { margin: 0; font-size: clamp(22px, 2.6vw, 28px); font-weight: 800; letter-spacing: -0.01em; text-wrap: balance; }
+  .sec-lede { margin: 0; max-width: 62ch; font-size: 14.5px; line-height: 1.7; color: var(--ink-soft); }
+  .sec-lede b { color: var(--ink); }
+
+  /* ---------- 모임 카드 ---------- */
+  .meet-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--sp-4); }
+  .meet-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 18px; padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-2); }
+  .meet-card .emoji { font-size: 26px; line-height: 1; }
+  .meet-card h3 { margin: 0; font-size: 15px; font-weight: 800; }
+  .meet-card p { margin: 0; font-size: 12.5px; line-height: 1.6; color: var(--ink-soft); }
+  .meet-card .meta { font-family: var(--font-mono); font-size: 10.5px; color: var(--muted); }
+
+  /* ---------- How it works ---------- */
+  .how-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-4); counter-reset: how; }
+  .how-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 18px; padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3); }
+  .how-card .n { font-family: var(--font-serif); font-style: italic; font-size: 24px; color: var(--brand); }
+  .how-card h3 { margin: 0; font-size: 15.5px; font-weight: 800; }
+  .how-card p { margin: 0; font-size: 13px; line-height: 1.65; color: var(--ink-soft); }
+
+  /* ---------- 노쇼 방지 ---------- */
+  .noshow-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-4); }
+  .ns-card { background: var(--paper-raised); border: 1px solid var(--line); border-radius: 18px; padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3); }
+  .ns-card h3 { margin: 0; font-size: 15px; font-weight: 800; }
+  .ns-card p { margin: 0; font-size: 13px; line-height: 1.65; color: var(--ink-soft); }
+
+  /* ---------- 회사 모임 확장 (dark) ---------- */
+  .company-panel { background: var(--panel); border-radius: 28px; padding: var(--sp-7) var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-5); }
+  .company-panel .sec-eyebrow { color: var(--brand-soft); }
+  .company-panel h2 { margin: 0; font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: clamp(21px, 2.4vw, 26px); color: #fff; }
+  .company-panel .sec-lede { color: var(--panel-muted); }
+  .company-panel .sec-lede b { color: #fff; }
+  .co-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-4); }
+  .co-card { background: var(--panel-card); border: 1px solid var(--panel-line); border-radius: 16px; padding: var(--sp-4) var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-2); }
+  .co-card h3 { margin: 0; font-size: 14.5px; font-weight: 800; color: #fff; }
+  .co-card p { margin: 0; font-size: 12.5px; line-height: 1.65; color: var(--panel-muted); }
+  .co-note { margin: 0; font-size: 12px; font-style: italic; color: var(--panel-muted); }
+  .co-note b { color: #fff; font-style: normal; }
+
+  /* ---------- 산출물 ---------- */
+
+  /* ---------- Final CTA ---------- */
+  .cta-final { text-align: center; display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); padding: var(--sp-6) 0 0; border-top: 1px solid var(--line); }
+  .cta-final h2 { margin: 0; font-size: clamp(24px, 3vw, 32px); font-weight: 800; letter-spacing: -0.01em; text-wrap: balance; }
+  .cta-final .sec-lede { text-align: center; }
+  .email-form { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-2); width: 100%; max-width: 480px; }
+  .email-form input { flex: 1; min-width: 220px; border: 1px solid var(--line); border-radius: 999px; padding: 13px 20px; font-family: var(--font-body); font-size: 14px; background: var(--paper-raised); color: var(--ink); }
+  .email-form input::placeholder { color: var(--muted); }
+  .disclaimer { margin: 0; font-size: 11.5px; font-style: italic; color: var(--muted); }
+
+  footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); border-top: 1px solid var(--line); padding-top: var(--sp-4); font-size: 12px; color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+  /* ---------- 라이브 데모 (scoped: #om-demo) ---------- */
+  @keyframes headerPulse { 0% { background: rgba(63,143,107,0.25); } 100% { background: var(--paper-raised); } }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes typingDot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+  #om-demo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+
+    button { font-family: inherit; }
+    :focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 2px; }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 260px minmax(340px, 420px) 260px;
+      gap: var(--sp-6);
+      align-items: start;
+      justify-content: center;
+    }
+    @media (max-width: 980px) {
+      .demo-grid { grid-template-columns: 1fr; justify-items: center; }
+      .side-panel { width: 100%; max-width: 420px; }
+    }
+
+    .side-panel { display: flex; flex-direction: column; gap: var(--sp-4); position: sticky; top: var(--sp-5); }
+    /* bug fix: sticky only makes sense next to a taller center column (desktop
+       3-col grid). On the stacked single-column mobile layout it pinned the
+       aside over the phone/controls below it as the page scrolled. This rule
+       must come AFTER the unconditional ".side-panel { position: sticky }"
+       rule above (same specificity) so it actually wins the cascade at
+       narrow widths — a media query placed earlier in source order does not
+       override a later unconditional rule of equal specificity. */
+    @media (max-width: 980px) {
+      .side-panel { position: static; }
+    }
+    .side-card {
+      background: var(--paper-raised); border: 1px solid var(--line); border-radius: 18px;
+      padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3);
+    }
+    .side-card h2 { margin: 0; font-size: 13.5px; font-weight: 800; }
+    .side-card p.hint { margin: 0; font-size: 11.5px; line-height: 1.55; color: var(--ink-soft); }
+
+    .example-btn {
+      text-align: left; background: var(--paper); border: 1px solid var(--line); border-radius: 12px;
+      padding: 10px 12px; font-size: 12px; color: var(--ink); cursor: pointer;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+    }
+    .example-btn:hover { background: #fff; border-color: var(--brand-soft); transform: translateY(-1px); }
+    .example-btn .tag-mini { display:block; font-family: var(--font-mono); font-size: 9.5px; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .stage-list { display: flex; flex-direction: column; gap: 2px; }
+    .stage-item {
+      display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-radius: 10px;
+      font-size: 12px; color: var(--muted); transition: background 0.2s ease, color 0.2s ease;
+    }
+    .stage-item .dot {
+      width: 20px; height: 20px; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--line);
+      display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--muted);
+      flex: none; transition: all 0.2s ease;
+    }
+    .stage-item.active { background: rgba(51,84,156,0.09); color: var(--ink); font-weight: 700; }
+    .stage-item.active .dot { background: var(--brand); border-color: var(--brand); color: #fff; }
+    .stage-item.done { color: var(--ink-soft); }
+    .stage-item.done .dot { background: var(--good); border-color: var(--good); color: #fff; }
+
+    .badge-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; background: rgba(51,84,156,.12); color: var(--brand-text); }
+
+    /* feature checklist */
+    .feat-head-row { display: flex; align-items: center; justify-content: space-between; }
+    .feat-counter { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; color: var(--brand-text); }
+    .feat-list { display: flex; flex-direction: column; gap: 1px; }
+    .feat-item {
+      display: flex; align-items: center; gap: 8px; background: transparent; border: none; text-align: left;
+      padding: 6px 4px; font-size: 12px; color: var(--ink-soft); cursor: pointer; border-radius: 8px;
+      font-family: inherit; transition: background 0.15s ease, color 0.15s ease;
+    }
+    .feat-item:hover { background: var(--paper); }
+    .feat-item.done { color: var(--ink); font-weight: 700; }
+    .feat-check {
+      width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line); flex: none;
+      display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--muted);
+      transition: all 0.2s ease;
+    }
+    .feat-item.done .feat-check { background: var(--good); border-color: var(--good); color: #fff; }
+
+    /* AI engine inspector (terminal log) */
+    .insp-card { background: var(--panel); border: 1px solid var(--panel-line); color: var(--panel-muted); }
+    .insp-card summary { cursor: pointer; list-style: none; }
+    .insp-card summary::-webkit-details-marker { display: none; }
+    .insp-card summary h2 { color: #fff; display: inline; }
+    .insp-card .hint { color: var(--panel-muted); }
+    .insp-log {
+      display: flex; flex-direction: column; gap: 3px; max-height: 220px; overflow-y: auto;
+      font-family: var(--font-mono); font-size: 10.5px; line-height: 1.5; margin-top: var(--sp-2);
+    }
+    .insp-line { opacity: 0; animation: inspIn 0.25s ease forwards; white-space: pre-wrap; word-break: break-word; }
+    @keyframes inspIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .insp-time { color: var(--panel-muted); }
+    .insp-tag { font-weight: 700; padding: 0 3px; border-radius: 3px; }
+    .insp-tag.parse { color: var(--brand-soft); }
+    .insp-tag.match { color: #7FD9AE; }
+    .insp-tag.rule { color: #E3B368; }
+    .insp-tag.ledger { color: #8FB0EF; }
+    .insp-tag.refund { color: #E38C82; }
+    .insp-empty { color: var(--panel-muted); font-style: italic; }
+    @media (prefers-reduced-motion: reduce) { .insp-line { opacity: 1 !important; } }
+
+    .phone-col { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); width: 100%; }
+
+    .demo-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .ctrl-btn {
+      display: inline-flex; align-items: center; gap: 6px; background: var(--paper-raised); border: 1px solid var(--line);
+      border-radius: 999px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .ctrl-btn:hover { background: #fff; transform: translateY(-1px); }
+    .ctrl-btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .ctrl-btn.primary:hover { background: var(--brand-deep); }
+    .ctrl-btn.stop { background: var(--danger); color: #fff; border-color: var(--danger); }
+    .ctrl-btn.stop:hover { background: var(--danger-text); }
+    .ctrl-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .persona-tabs { display: flex; gap: 6px; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+    .persona-tab {
+      border: none; background: transparent; border-radius: 999px; padding: 7px 14px; font-size: 11.5px; font-weight: 700;
+      color: var(--muted); cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
+    }
+    .persona-tab.active { background: var(--brand); color: #fff; }
+
+    .phone { width: 390px; max-width: 100%; flex: none; }
+    .phone-bezel {
+      background: linear-gradient(160deg, #201f29, #0b0a10);
+      border-radius: 40px;
+      padding: 10px;
+      box-shadow: 0 28px 60px -18px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.05);
+      position: relative;
+    }
+    .phone-screen {
+      background: var(--paper);
+      border-radius: 32px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 760px;
+      max-height: 82vh;
+      position: relative;
+    }
+    @media (max-width: 980px) {
+      .phone { width: min(390px, 92vw); }
+      .phone-screen { height: 640px; max-height: 72vh; }
+    }
+
+    .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 4px; background: var(--paper-raised); flex: none; }
+    .status-time { font-family: var(--font-mono); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .status-icons { display: flex; align-items: center; gap: 5px; }
+    .signal-bars { display: flex; align-items: flex-end; gap: 2px; height: 9px; }
+    .signal-bars span { width: 3px; background: var(--ink); border-radius: 1px; }
+    .signal-bars span:nth-child(1) { height: 3px; }
+    .signal-bars span:nth-child(2) { height: 5px; }
+    .signal-bars span:nth-child(3) { height: 7px; }
+    .signal-bars span:nth-child(4) { height: 9px; }
+    .battery { width: 19px; height: 10px; border: 1px solid var(--ink); border-radius: 2px; padding: 1px; position: relative; }
+    .battery::after { content: ""; position: absolute; right: -3px; top: 3px; width: 2px; height: 4px; background: var(--ink); border-radius: 0 1px 1px 0; }
+    .battery-fill { height: 100%; width: 82%; background: var(--ink); border-radius: 1px; }
+
+    .app-header {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--paper-raised);
+      border-bottom: 1px solid var(--line); flex: none; transition: background 0.4s ease;
+    }
+    .app-header.pulse { animation: headerPulse 0.9s ease; }
+    .app-back { font-size: 16px; color: var(--muted); flex: none; }
+    .bot-avatar {
+      width: 34px; height: 34px; border-radius: 10px; background: var(--brand); color: #fff;
+      display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex: none;
+    }
+    .app-header-text { flex: 1; min-width: 0; }
+    .app-header-text .name { font-size: 13.5px; font-weight: 800; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .app-header-text .subtitle { font-size: 10.5px; color: var(--muted); }
+    .app-header-icons { display: flex; gap: 10px; color: var(--muted); font-size: 15px; flex: none; }
+
+    /* persona banner — automatic guest-viewpoint cutscene, replaces manual persona tabs */
+    @keyframes personaSlide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+    .persona-banner {
+      flex: none; background: rgba(51,84,156,.12); border-bottom: 1px solid rgba(51,84,156,.2);
+      color: var(--brand-text); font-size: 11.5px; font-weight: 700; text-align: center;
+      padding: 8px 14px; animation: personaSlide 0.3s ease;
+    }
+    .persona-banner[hidden] { display: none; }
+    @media (prefers-reduced-motion: reduce) { .persona-banner { animation: none; } }
+
+    .app-body {
+      flex: 1; padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px;
+      overflow-y: auto; overflow-x: hidden; font-size: 13px; line-height: 1.5; background: var(--paper);
+      scroll-behavior: smooth;
+    }
+    .app-body::-webkit-scrollbar { width: 6px; }
+    .app-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
+
+    .view-pane { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+    .view-pane[hidden] { display: none; }
+
+    .ai-status-chip {
+      display: flex; align-items: center; gap: 8px; margin: 10px 12px 4px; padding: 8px 12px;
+      background: rgba(51,84,156,.09); border: 1px solid rgba(51,84,156,.18); border-radius: 12px;
+      font-size: 11px; color: var(--brand-text); font-weight: 700; flex: none;
+    }
+    .ai-status-chip .asc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); flex: none; animation: ascPulse 1.6s ease infinite; }
+    @keyframes ascPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+    .room-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 0 10px; }
+    .room-list-item {
+      display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer;
+      border-bottom: 1px solid var(--line); position: relative; transition: background 0.15s ease;
+    }
+    .room-list-item:hover { background: rgba(0,0,0,0.02); }
+    .rli-avatar-wrap { position: relative; flex: none; }
+    .rli-unread-dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--danger); border: 2px solid var(--paper-raised); }
+    .rli-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+    .rli-top-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .rli-name { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rli-time { font-size: 10px; color: var(--muted); flex: none; }
+    .rli-bottom-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .rli-preview { font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rli-badge { flex: none; min-width: 17px; height: 17px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 9.5px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
+    .rli-avatars { display: flex; align-items: center; }
+    .rli-avatars .avatar { width: 30px; height: 30px; font-size: 11px; }
+
+    .room-list-newbtn {
+      margin: 8px 12px 2px; border: none; border-radius: 12px; background: var(--brand); color: #fff;
+      font-size: 12.5px; font-weight: 800; padding: 11px; cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; justify-content: center; gap: 6px; flex: none;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .room-list-newbtn:hover { background: var(--brand-deep); transform: translateY(-1px); }
+
+    .day-divider { align-self: center; font-family: var(--font-mono); font-size: 10px; color: var(--muted); background: rgba(0,0,0,0.05); padding: 3px 10px; border-radius: 999px; margin: 2px 0; }
+
+    .msg-row { display: flex; gap: 7px; max-width: 92%; opacity: 0; animation: msgIn 0.32s ease forwards; }
+    .msg-row.bot { align-self: flex-start; }
+    .msg-row.user { align-self: flex-end; flex-direction: row-reverse; }
+
+    .msg-avatar { width: 24px; height: 24px; border-radius: 7px; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; flex: none; }
+    .msg-col { display: flex; flex-direction: column; gap: 3px; max-width: 100%; }
+    .msg-name { font-size: 10px; color: var(--muted); font-weight: 700; }
+    .msg-row.user .msg-col { align-items: flex-end; }
+
+    .bubble { align-self: auto; background: var(--paper-raised); border-radius: 14px 14px 14px 3px; padding: 9px 12px; max-width: 100%; box-shadow: 0 1px 0 rgba(0,0,0,0.03); white-space: pre-wrap; word-break: break-word; }
+    .msg-row.user .bubble { background: var(--brand); color: #fff; border-radius: 14px 14px 3px 14px; }
+    .msg-time { font-size: 9px; color: var(--muted); padding: 0 2px; }
+
+    .typing-bubble { background: var(--paper-raised); border-radius: 14px 14px 14px 3px; padding: 10px 14px; display: inline-flex; gap: 4px; align-self: flex-start; }
+    .typing-bubble span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typingDot 1.1s ease infinite; }
+    .typing-bubble span:nth-child(2) { animation-delay: 0.15s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.3s; }
+
+    .card {
+      background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex;
+      flex-direction: column; gap: 8px; max-width: 280px; box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+    }
+    .card-title { font-size: 12.5px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+    .field-row { display: flex; flex-direction: column; gap: 4px; }
+    .field-line { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .field-line .k { color: var(--muted); width: 44px; flex: none; font-size: 10.5px; }
+    .field-line .v { font-weight: 700; }
+    .field-line .v.missing { color: var(--warn-text); font-weight: 400; font-style: italic; }
+
+    .tag { display: inline-flex; align-self: flex-start; padding: 2.5px 8px; border-radius: 999px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.01em; }
+    .tag.good { background: rgba(63,143,107,.13); color: var(--good-text); }
+    .tag.warn { background: rgba(201,122,46,.13); color: var(--warn-text); }
+    .tag.danger { background: rgba(180,72,63,.13); color: var(--danger-text); }
+    .tag.brand { background: rgba(51,84,156,.13); color: var(--brand-text); }
+
+    .card-btn-row { display: flex; gap: 6px; }
+    .card-btn {
+      flex: 1; border: none; border-radius: 10px; padding: 8px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+      transition: transform 0.12s ease, filter 0.12s ease; font-family: inherit;
+    }
+    .card-btn.primary { background: var(--brand); color: #fff; }
+    .card-btn.ghost { background: var(--paper); color: var(--ink); }
+    .card-btn.good { background: var(--good); color: #fff; }
+    .card-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .card-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
+
+    .gauge { display: flex; flex-direction: column; gap: 5px; }
+    .gauge-track { height: 8px; border-radius: 999px; background: var(--paper); overflow: hidden; }
+    .gauge-fill { height: 100%; border-radius: 999px; background: var(--brand); transition: width 0.5s ease; }
+    .gauge-fill.good { background: var(--good); }
+    .gauge-label { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; }
+
+    .avatar-stack { display: flex; align-items: center; }
+    .avatar { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; margin-left: -9px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex: none; }
+    .avatar:first-child { margin-left: 0; }
+    .avatar.a0 { background: var(--brand); }
+    .avatar.a1 { background: var(--lunch); }
+    .avatar.a2 { background: var(--dinner); }
+    .avatar.a3 { background: var(--morning); }
+    .avatar.empty { background: #fff; border: 1.5px dashed var(--line); color: var(--muted); font-weight: 600; }
+
+    .place-card { display: flex; gap: 10px; align-items: center; }
+    .place-map { width: 54px; height: 54px; border-radius: 10px; background: var(--paper); flex: none; }
+    .place-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+    .place-info .pn { font-size: 12px; font-weight: 800; }
+    .place-info .pm { font-size: 10.5px; color: var(--muted); }
+    .stars { color: var(--lunch); font-size: 10.5px; }
+
+    .note-inline { font-size: 10px; color: var(--muted); font-style: italic; line-height: 1.4; }
+
+    .ta-row {
+      display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700;
+      color: var(--warn-text); font-variant-numeric: tabular-nums;
+    }
+    .ta-row .ta-clock { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.02em; }
+    .ta-row.ta-done { color: var(--good-text); }
+    .ta-controls { display: flex; gap: 6px; margin-top: 2px; }
+    .ta-btn {
+      border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft); border-radius: 999px;
+      padding: 4px 10px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .ta-btn:hover { background: #fff; transform: translateY(-1px); }
+    .ta-btn.danger { color: var(--danger-text); border-color: rgba(180,72,63,.35); }
+    .ta-btn.danger:hover { background: rgba(180,72,63,.08); }
+    .ta-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+    .deposit-row {
+      display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--ink-soft);
+      background: rgba(201,147,52,.10); border-radius: 8px; padding: 5px 8px;
+    }
+    .deposit-row b { color: var(--warn-text); }
+    .settle-line { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
+    .settle-line .amt { font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .settle-line .amt.plus { color: var(--good-text); }
+
+    .sim-badge {
+      display: inline-flex; align-self: flex-start; border: 1px dashed var(--line); color: var(--muted);
+      border-radius: 999px; padding: 2px 8px; font-size: 9px; font-weight: 700; letter-spacing: 0.03em;
+    }
+
+    /* trust ring / onboarding */
+    .trust-ring-wrap { display: flex; align-items: center; gap: 10px; }
+    .trust-ring { width: 44px; height: 44px; flex: none; transform: rotate(-90deg); }
+    .trust-ring circle.track { fill: none; stroke: var(--paper); stroke-width: 5; }
+    .trust-ring circle.fill { fill: none; stroke: var(--brand); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+    .trust-ring-num { position: relative; }
+    .trust-num-box { display: flex; flex-direction: column; }
+    .trust-num-box .tn-val { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .trust-num-box .tn-label { font-size: 9.5px; color: var(--muted); }
+    .profile-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+
+    /* check-in / QR */
+    .checkin-mode-row { display: flex; align-items: center; gap: 6px; }
+    .checkin-mode-badge { font-size: 9.5px; font-weight: 700; padding: 2.5px 8px; border-radius: 999px; }
+    .checkin-mode-badge.online { background: rgba(63,143,107,.13); color: var(--good-text); }
+    .checkin-mode-badge.offline { background: rgba(51,84,156,.13); color: var(--brand-text); }
+    .qr-box {
+      width: 84px; height: 84px; margin: 4px auto; border-radius: 8px; background: #fff; border: 1px solid var(--line);
+      background-image: repeating-linear-gradient(0deg, var(--ink) 0 3px, transparent 3px 6px),
+        repeating-linear-gradient(90deg, var(--ink) 0 3px, transparent 3px 6px);
+      background-blend-mode: multiply; opacity: 0.82;
+    }
+    .checkin-list { display: flex; flex-direction: column; gap: 4px; }
+    .checkin-person { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+    .checkin-person .ci-state { margin-left: auto; font-size: 10px; color: var(--muted); }
+    .checkin-person.done .ci-state { color: var(--good-text); font-weight: 700; }
+
+    /* credit ledger */
+    .credit-balance { display: flex; align-items: baseline; gap: 4px; }
+    .credit-balance .cb-num { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .credit-balance .cb-unit { font-size: 11px; color: var(--muted); }
+    .credit-tx-list { display: flex; flex-direction: column; gap: 5px; max-height: 130px; overflow-y: auto; }
+    .credit-tx { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--ink-soft); }
+    .credit-tx .tx-amt { margin-left: auto; font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; flex: none; }
+    .credit-tx .tx-amt.plus { color: var(--good-text); }
+    .credit-tx .tx-amt.minus { color: var(--danger-text); }
+
+    /* payment / topup */
+    .pay-method-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pay-method-btn {
+      border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 10px;
+      padding: 7px 9px; font-size: 10.5px; font-weight: 700; cursor: pointer; font-family: inherit;
+    }
+    .pay-method-btn:hover { background: #fff; border-color: var(--brand-soft); }
+
+    /* n-bbang split */
+    .split-list { display: flex; flex-direction: column; gap: 4px; }
+    .split-person-row { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+    .split-person-row .sp-amt { margin-left: auto; font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .split-req-badge { font-size: 9px; font-weight: 700; color: var(--brand-text); background: rgba(51,84,156,.13); border-radius: 999px; padding: 1.5px 6px; }
+
+    /* friend suggestion */
+    .rf-person-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
+    .rf-person-row .rf-meta { margin-left: auto; font-size: 10px; color: var(--muted); }
+
+    /* mypage donut (department diversity) */
+    .donut { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; align-self: center; }
+    .donut-center { width: 42px; height: 42px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--ink); }
+
+    .input-bar {
+      display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--paper-raised);
+      border-top: 1px solid var(--line); flex: none;
+    }
+    .input-plus { width: 30px; height: 30px; border-radius: 50%; background: var(--paper); color: var(--muted); display: flex; align-items: center; justify-content: center; flex: none; font-size: 16px; }
+    .msg-input {
+      flex: 1; border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; font-size: 13px;
+      font-family: inherit; background: var(--paper); color: var(--ink); min-width: 0;
+    }
+    .msg-input:focus { outline: none; border-color: var(--brand); background: #fff; }
+    .send-btn {
+      width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--brand); color: #fff;
+      display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none; font-size: 15px;
+      transition: background 0.15s ease, transform 0.15s ease;
+    }
+    .send-btn:hover { background: var(--brand-deep); transform: scale(1.05); }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .autotype-cursor { display: inline-block; width: 1px; }
+
+    /* bottom tab bar (free navigation) */
+    .demo-tabbar {
+      display: flex; align-items: stretch; justify-content: space-around; flex: none;
+      background: var(--paper-raised); border-top: 1px solid var(--line); padding-bottom: 2px;
+    }
+    .demo-tab {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+      background: transparent; border: none; padding: 8px 4px 6px; font-family: inherit; font-size: 9.5px;
+      font-weight: 700; color: var(--muted); cursor: pointer; transition: color 0.15s ease;
+    }
+    .demo-tab .dt-icon { font-size: 18px; line-height: 1; }
+    .demo-tab.active { color: var(--brand); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .msg-row { opacity: 1 !important; }
+    }
+  }
+
+  /* =========================================================
+     Premium design pass — presentation layer only.
+     Brand palette, structure, copy, and #om-demo logic untouched;
+     placed last so it wins cascade ties at equal specificity.
+     ========================================================= */
+
+  /* ---- living aurora background ---- */
+  .aurora-bg { position: fixed; inset: 0; overflow: hidden; z-index: -1; pointer-events: none; }
+  .blob-wrap { position: absolute; inset: 0; transform: translate(var(--px, 0px), var(--py, 0px)); transition: transform 0.4s ease-out; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.32; }
+  .blob.b1 { width: 56vw; height: 56vw; top: -18%; left: -12%; background: radial-gradient(circle, var(--brand) 0%, transparent 70%); animation: auroraDrift1 80s ease-in-out infinite; }
+  .blob.b2 { width: 50vw; height: 50vw; top: 6%; right: -16%; background: radial-gradient(circle, var(--dinner) 0%, transparent 70%); animation: auroraDrift2 95s ease-in-out infinite; }
+  .blob.b3 { width: 46vw; height: 46vw; bottom: -22%; left: 12%; background: radial-gradient(circle, var(--morning) 0%, transparent 70%); animation: auroraDrift3 70s ease-in-out infinite; }
+  @keyframes auroraDrift1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(4vw, 3vh) scale(1.08); } }
+  @keyframes auroraDrift2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-3vw, 4vh) scale(1.05); } }
+  @keyframes auroraDrift3 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(3vw, -3vh) scale(1.1); } }
+
+  /* ---- scroll reveal ---- */
+  .reveal-pending { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal-pending.reveal-in { opacity: 1; transform: translateY(0); }
+
+  /* ---- glass nav ---- */
+  /* bug fix: .nav lives inside .page (max-width:1240px, centered), so its own
+     box only spans the content column — on scroll the translucent/blurred
+     background showed as a cut-off rectangle floating over the full-width
+     aurora instead of reading as a true top bar. Break it out to full-bleed
+     with the margin-inline trick, then restore the same visual left/right
+     inset via padding-inline so the wordmark/links still line up with the
+     rest of the page content at every viewport width. */
+  .nav {
+    position: sticky; top: 0; z-index: 40;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    background: rgba(238, 240, 243, 0.72);
+    margin-inline: calc(50% - 50vw);
+    padding-inline: calc(max(0px, (100vw - 1240px) / 2) + var(--sp-5));
+    border-bottom-color: rgba(29, 27, 36, 0.08);
+  }
+
+  /* bug fix: .nav-links a { color: inherit } (a descendant selector,
+     specificity 0,1,1) beats .btn-primary's own color:#fff (0,1,0) for the
+     "베타 신청" nav CTA since it's nested inside .nav-links — the button text
+     rendered near-invisible (ink-soft on brand-blue). Force white explicitly
+     with higher specificity, including hover/focus-visible so a fix at rest
+     doesn't regress on interaction. */
+  .nav-links a.btn-primary,
+  .nav-links a.btn-primary:hover,
+  .nav-links a.btn-primary:focus-visible {
+    color: #fff;
+  }
+
+  /* ---- typography / spacing scale-up ---- */
+  .page { gap: 88px; }
+  h1 { font-size: clamp(34px, 5.2vw, 62px); letter-spacing: -0.02em; }
+  .lede { font-size: 17px; }
+
+  /* ---- hero phone: float + glow ---- */
+  .phone-col-hero { position: relative; }
+  .phone-col-hero::before {
+    content: ""; position: absolute; inset: -10% -20%; z-index: -1;
+    background: radial-gradient(circle, rgba(51,84,156,.30) 0%, transparent 70%);
+    filter: blur(50px); pointer-events: none;
+  }
+  .hero-phone { animation: heroFloat 6s ease-in-out infinite; transition: filter 0.25s ease; }
+  .hero-phone:hover, .hero-phone:focus-visible { filter: brightness(1.04); }
+  @keyframes heroFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+  /* ---- card micro-interactions ---- */
+  .meet-card, .how-card, .ns-card, .co-card {
+    transition: transform 0.25s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s cubic-bezier(.2,.8,.2,1);
+  }
+  .meet-card:hover, .how-card:hover, .ns-card:hover, .co-card:hover {
+    transform: translateY(-3px); box-shadow: 0 14px 32px -14px rgba(51,84,156,.32);
+  }
+  #om-demo .side-card { transition: transform 0.25s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s cubic-bezier(.2,.8,.2,1); }
+  #om-demo .side-card:hover { transform: translateY(-3px); box-shadow: 0 14px 32px -14px rgba(51,84,156,.32); }
+
+  .btn-primary:hover, .card-btn:hover, .ctrl-btn:hover, .example-btn:hover, .demo-tab:hover {
+    transform: scale(1.02); filter: brightness(1.03);
+  }
+  .btn-ghost:hover { transform: scale(1.02); }
+
+  /* ---- dark panel refinement ---- */
+  .company-panel {
+    position: relative; border: 1px solid transparent;
+    background-image: linear-gradient(var(--panel), var(--panel)),
+      linear-gradient(135deg, var(--brand-soft) 0%, transparent 60%);
+    background-origin: border-box; background-clip: padding-box, border-box;
+    box-shadow: inset 0 0 60px rgba(51,84,156,.12);
+  }
+  .insp-card {
+    border: 1px solid transparent;
+    background-image: linear-gradient(var(--panel), var(--panel)),
+      linear-gradient(135deg, var(--brand-soft) 0%, transparent 60%);
+    background-origin: border-box; background-clip: padding-box, border-box;
+    box-shadow: inset 0 0 40px rgba(51,84,156,.10);
+  }
+
+  /* ---- detail polish ---- */
+  ::selection { background: var(--brand); color: #fff; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--brand-soft); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+  :focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 2px; }
+
+  @media (max-width: 880px) {
+    .blob { filter: blur(60px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .blob, .hero-phone, .reveal-pending { animation: none !important; }
+    .reveal-pending { opacity: 1 !important; transform: none !important; }
+  }
+</style>
+
+<div class="aurora-bg" aria-hidden="true">
+  <div class="blob-wrap" data-blob-wrap="0"><span class="blob b1"></span></div>
+  <div class="blob-wrap" data-blob-wrap="1"><span class="blob b2"></span></div>
+  <div class="blob-wrap" data-blob-wrap="2"><span class="blob b3"></span></div>
+</div>
+
+<div class="page">
+
+  <nav class="nav">
+    <div class="wordmark">OfficeMate</div>
+    <div class="nav-links">
+      <a href="#demo">라이브 데모</a>
+      <a class="hide-m" href="#how">어떻게 동작하나요</a>
+      <a class="hide-m" href="#features">핵심 기능</a>
+      <a class="btn-primary btn-sm" href="#beta">베타 신청</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">오피스챗 · 잔디 · 네이버웍스에서 바로</span>
+      <h1>오늘 점심,<br><em>옆 팀의 등산 좋아하는 동료</em>와<br>같이 먹어볼까요?</h1>
+      <p class="lede">AI가 취향 맞는 동료를 찾아 시간·장소까지 잡아드려요.</p>
+      <div class="cta-row">
+        <a class="btn-primary" href="#demo">▶ 라이브 데모 해보기</a>
+        <a class="btn-ghost" href="#beta">베타 신청하기</a>
+      </div>
+      <div class="day-arc-wrap">
+        <div class="day-arc"></div>
+        <div class="day-arc-labels">
+          <span><b>아침</b> · 07:30–09:30</span>
+          <span><b>점심</b> · 11:30–13:30</span>
+          <span><b>저녁</b> · 18:00–20:00</span>
+        </div>
+      </div>
+      <span class="trust-note">하루 세 끼, 새 동료를 만나는 순간.</span>
+    </div>
+
+    <div class="phone-col-hero">
+      <div class="phone hero-phone" id="heroPhone" tabindex="0" role="link" aria-label="라이브 데모로 이동">
+        <div class="phone-bezel">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="status-bar">
+              <span class="status-time" id="heroClock">11:42</span>
+              <span class="status-icons">
+                <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                <span class="battery"><span class="battery-fill"></span></span>
+              </span>
+            </div>
+            <div class="app-header">
+              <div class="bot-avatar">OM</div>
+              <div class="app-header-text">
+                <div class="name">OfficeMate 봇</div>
+                <div class="subtitle">점심 매칭 · 실시간 재생중</div>
+              </div>
+              <span class="status-dot"></span>
+            </div>
+            <div class="app-body" id="heroBody"></div>
+          </div>
+        </div>
+      </div>
+      <p class="hero-phone-hint">▶ 아래 데모에서 직접 조작해보세요 → <a href="#demo">#demo</a></p>
+    </div>
+  </header>
+
+  <!-- 이런 모임이 열려요 -->
+  <section>
+    <div class="sec-eyebrow">이런 모임이 열려요</div>
+    <h2>밥 한 끼부터 운동까지, 관심사로 만나는 동료</h2>
+    <p class="sec-lede">관심사로 만나는 자발적 모임, 72시간 안에 채워져요.</p>
+    <div class="meet-grid">
+      <article class="meet-card">
+        <span class="emoji">🍜</span>
+        <h3>점심 번개</h3>
+        <p>취향 맞는 4인, 오늘 바로.</p>
+        <span class="meta">매일 · 30분–1시간</span>
+      </article>
+      <article class="meet-card">
+        <span class="emoji">🇬🇧</span>
+        <h3>영어 스터디</h3>
+        <p>점심 30분, 꾸준하면 고정 그룹.</p>
+        <span class="meta">주 2회 · 온라인</span>
+      </article>
+      <article class="meet-card">
+        <span class="emoji">🏃</span>
+        <h3>퇴근 후 러닝크루</h3>
+        <p>한강 5km, 음료 쿠폰 스폰서드.</p>
+        <span class="meta">주 1회 · 저녁 슬롯</span>
+      </article>
+      <article class="meet-card">
+        <span class="emoji">🥾</span>
+        <h3>주말 등산</h3>
+        <p>부서 밖 등산 태그 친구 찾기.</p>
+        <span class="meta">주말 · 오프라인</span>
+      </article>
+    </div>
+    <p class="co-note">재테크·보드게임 등 무엇이든 열 수 있어요.</p>
+  </section>
+
+  <!-- How it works -->
+  <section id="how">
+    <div class="sec-eyebrow">어떻게 동작하나요</div>
+    <h2>신청은 10초, 나머지는 OfficeMate가</h2>
+    <div class="how-row">
+      <article class="how-card">
+        <span class="n">①</span>
+        <h3>슬롯을 고른다</h3>
+        <p>아침·점심·저녁 중 탭 한 번.</p>
+      </article>
+      <article class="how-card">
+        <span class="n">②</span>
+        <h3>AI가 모은다</h3>
+        <p>"목요일 점심 매운 거?" 한 줄이면 끝.</p>
+      </article>
+      <article class="how-card">
+        <span class="n">③</span>
+        <h3>만나고, 쌓인다</h3>
+        <p>체크인하면 환급 +50P, 신뢰도 상승.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 라이브 데모 -->
+  <section id="demo">
+    <div class="sec-eyebrow">라이브 데모 · 여기서 바로 실행됩니다</div>
+    <h2>말이 아니라 코드로 — 지금 직접 입력해보세요</h2>
+    <p class="sec-lede">이미지가 아니라 <b>실제로 동작하는 데모</b>입니다.</p>
+    <div id="om-demo">
+      <div class="demo-grid">
+
+        <!-- LEFT: try it yourself -->
+        <aside class="side-panel">
+          <div class="side-card">
+            <h2>💬 직접 해보세요</h2>
+            <p class="hint">아래 문장을 클릭하면 입력창에 자동으로 채워집니다. 직접 타이핑해도 좋아요 — 봇이 실제로 문장을 해석합니다.</p>
+            <button class="example-btn" data-example="내일 점심 마라탕 3명">
+              <span class="tag-mini">예시 1</span>내일 점심 마라탕 3명
+            </button>
+            <button class="example-btn" data-example="금요일 저녁 삼겹살 먹을 사람">
+              <span class="tag-mini">예시 2</span>금요일 저녁 삼겹살 먹을 사람
+            </button>
+            <button class="example-btn" data-example="모레 오후 3시 커피챗 2명">
+              <span class="tag-mini">예시 3</span>모레 오후 3시 커피챗 2명
+            </button>
+            <button class="example-btn" data-special="slot-picker" type="button">
+              <span class="tag-mini">예시 4</span>🗓️ 슬롯 직접 선택으로 열기
+            </button>
+            <p class="hint" style="margin-top:4px;">파서는 날짜·시간대·인원·메뉴 30여 개 사전을 조합해 인식합니다. 슬롯이 빠지면 봇이 되물어요.</p>
+          </div>
+          <div class="side-card">
+            <h2>🧠 파서가 이해하는 표현</h2>
+            <div class="badge-row">
+              <span class="badge">오늘/내일/모레/글피</span>
+              <span class="badge">이번주·다음주 요일</span>
+              <span class="badge">N월 N일</span>
+              <span class="badge">아침/점심/저녁</span>
+              <span class="badge">오전·오후 N시(반)</span>
+              <span class="badge">N명·한두세네다섯 명</span>
+              <span class="badge">메뉴·활동 30+</span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- CENTER: phone -->
+        <div class="phone-col">
+          <div class="demo-controls">
+            <button class="ctrl-btn primary" id="btnAutoDemo" type="button">▶ 자동 데모</button>
+            <button class="ctrl-btn stop" id="btnStopDemo" type="button" disabled>⏹ 중지</button>
+            <button class="ctrl-btn" id="btnReset" type="button">↺ 처음부터</button>
+          </div>
+
+          <div class="phone">
+            <div class="phone-bezel">
+              <div class="phone-screen">
+                <div class="status-bar">
+                  <span class="status-time" id="clockTime">09:12</span>
+                  <span class="status-icons">
+                    <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                    <span class="battery"><span class="battery-fill"></span></span>
+                  </span>
+                </div>
+                <div class="app-header" id="appHeader">
+                  <span class="app-back" id="appBackBtn">‹</span>
+                  <div class="bot-avatar" id="botAvatar">🍱</div>
+                  <div class="app-header-text">
+                    <div class="name" id="roomTitle">OfficeMate</div>
+                    <div class="subtitle" id="roomSubtitle">개설자 김대리 · 항상 대기중</div>
+                  </div>
+                  <div class="app-header-icons">
+                    <span>🔍</span><span>☰</span>
+                  </div>
+                </div>
+
+                <div class="persona-banner" id="personaBanner" hidden></div>
+
+                <div class="view-pane" id="viewList">
+                  <div class="ai-status-chip"><span class="asc-dot"></span><span>OfficeMate AI가 매칭 중...</span></div>
+                  <button class="room-list-newbtn" id="btnNewRoom" type="button">＋ 새 모임 만들기</button>
+                  <div class="room-list" id="roomList"></div>
+                </div>
+
+                <div class="view-pane" id="viewRoom" hidden>
+                  <div class="app-body" id="chatBody"></div>
+                  <div class="input-bar">
+                    <span class="input-plus">＋</span>
+                    <input class="msg-input" id="chatInput" type="text" placeholder="메시지를 입력하세요" autocomplete="off" />
+                    <button class="send-btn" id="sendBtn" type="button" aria-label="전송">➤</button>
+                  </div>
+                </div>
+
+                <div class="view-pane" id="viewExplore" hidden>
+                  <div class="app-body" id="exploreBody"></div>
+                </div>
+
+                <div class="view-pane" id="viewMy" hidden>
+                  <div class="app-body" id="myBody"></div>
+                </div>
+
+                <div class="demo-tabbar" role="tablist" aria-label="화면 전환">
+                  <button class="demo-tab active" id="tabChat" type="button" data-tab="chat"><span class="dt-icon">💬</span><span>채팅</span></button>
+                  <button class="demo-tab" id="tabExplore" type="button" data-tab="explore"><span class="dt-icon">🔍</span><span>탐색</span></button>
+                  <button class="demo-tab" id="tabMy" type="button" data-tab="my"><span class="dt-icon">🪪</span><span>마이</span></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: stage progress -->
+        <aside class="side-panel">
+          <div class="side-card">
+            <h2>📍 진행 단계</h2>
+            <div class="stage-list" id="stageList">
+              <div class="stage-item" data-stage="parse"><span class="dot">1</span>자연어 개설</div>
+              <div class="stage-item" data-stage="recruit"><span class="dot">2</span>모집 진행</div>
+              <div class="stage-item" data-stage="full"><span class="dot">3</span>정원 마감</div>
+              <div class="stage-item" data-stage="room"><span class="dot">4</span>방 생성</div>
+              <div class="stage-item" data-stage="place"><span class="dot">5</span>장소 추천</div>
+              <div class="stage-item" data-stage="checkin"><span class="dot">6</span>체크인</div>
+              <div class="stage-item" data-stage="settle"><span class="dot">7</span>정산</div>
+            </div>
+          </div>
+          <div class="side-card">
+            <div class="feat-head-row">
+              <h2>✅ 이 데모의 12개 기능</h2>
+              <span class="feat-counter" id="featCounter">체험 0/12</span>
+            </div>
+            <div class="feat-list" id="featList">
+              <button class="feat-item" data-feat="nlp" type="button" title="예시 1~3 버튼으로 체험"><span class="feat-check">○</span>자연어 개설</button>
+              <button class="feat-item" data-feat="slotpicker" type="button" title="예시 4 버튼으로 체험"><span class="feat-check">○</span>슬롯 직접 선택</button>
+              <button class="feat-item" data-feat="onoff" type="button" title="모집을 진행하면 자동으로 표시돼요"><span class="feat-check">○</span>온·오프 자동판별</button>
+              <button class="feat-item" data-feat="deposit" type="button" title="모집 시작 후 디파짓 카드에서 체험"><span class="feat-check">○</span>디파짓</button>
+              <button class="feat-item" data-feat="gauge" type="button" title="디파짓 확인 후 모집 카드에서 표시돼요"><span class="feat-check">○</span>매칭 게이지</button>
+              <button class="feat-item" data-feat="confirm" type="button" title="정원이 차면 자동으로 표시돼요"><span class="feat-check">○</span>확정·아이스브레이커</button>
+              <button class="feat-item" data-feat="merge" type="button" title="⏩ 빨리 감기 또는 💥 인원 미달로 마감 버튼으로 체험"><span class="feat-check">○</span>병합·방폭</button>
+              <button class="feat-item" data-feat="timeattack" type="button" title="모집을 시작하면 자동으로 표시돼요"><span class="feat-check">○</span>72h 타임어택</button>
+              <button class="feat-item" data-feat="checkin" type="button" title="장소 추천 이후 체크인 카드에서 체험"><span class="feat-check">○</span>체크인(QR·온라인)</button>
+              <button class="feat-item" data-feat="reminder" type="button" title="모임 1시간 전 카드에서 체험"><span class="feat-check">○</span>리마인더·대기승급</button>
+              <button class="feat-item" data-feat="mypage" type="button" title="클릭하면 🪪 마이 탭으로 이동합니다"><span class="feat-check">○</span>마이페이지·신뢰도</button>
+              <button class="feat-item" data-feat="explore" type="button" title="클릭하면 🔍 탐색 탭으로 이동합니다"><span class="feat-check">○</span>탐색 피드·스폰서드</button>
+            </div>
+          </div>
+          <div class="side-card">
+            <h2>ℹ️ 지금 이 화면</h2>
+            <p class="hint" id="stageDesc">입력창에 자연어 한 줄을 입력하면 파서가 날짜·시간·메뉴·인원을 추출합니다. 예시 버튼을 눌러 시작해보세요.</p>
+          </div>
+          <details class="side-card insp-card" id="inspCard" open>
+            <summary><h2>🔬 엔진 인스펙터</h2></summary>
+            <p class="hint">데모 진행 중 AI/엔진이 내리는 판단이 실시간 로그로 흐릅니다.</p>
+            <div class="insp-log" id="inspLog">
+              <div class="insp-empty" data-insp-empty>대기중 — 예시 버튼을 눌러 시작하면 로그가 흐릅니다.</div>
+            </div>
+          </details>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 핵심 기능 (MVP) -->
+  <section id="features">
+    <div class="sec-eyebrow">핵심 기능 · 이미 동작합니다</div>
+    <h2>MVP 4가지 — 데모·목업에서 실동작 검증 완료</h2>
+    <p class="sec-lede">아이디어가 아니라, 동작하는 코드입니다.</p>
+    <div class="noshow-row">
+      <article class="ns-card">
+        <span class="tag good">실동작</span>
+        <h3>📍 온·오프 자동판별 · QR 체크인</h3>
+        <p>30분 이하는 온라인 전환, QR로 디파짓 환급.</p>
+      </article>
+      <article class="ns-card">
+        <span class="tag good">실동작</span>
+        <h3>🪪 온보딩 · 신뢰도 링 · 탐색 피드</h3>
+        <p>태그 하나로 신뢰도 링·추천 피드가 즉시.</p>
+      </article>
+      <article class="ns-card">
+        <span class="tag good">실동작</span>
+        <h3>💰 가상 크레딧 원장</h3>
+        <p>디파짓 500P, 참석 시 +50P 전액 환급.</p>
+      </article>
+      <article class="ns-card">
+        <span class="tag warn">SIMULATED</span>
+        <h3>💬 메신저 · 캘린더 연동</h3>
+        <p>실연동·캘린더 자동등록은 다음 단계.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 회사 모임 확장 / 비즈니스 모델 티저 -->
+  <section id="company">
+    <div class="company-panel">
+      <span class="sec-eyebrow">그리고, 수익까지</span>
+      <h2>번개로 시작한 습관이 회식·행사·수익 모델로 이어집니다</h2>
+      <p class="sec-lede">회식·행사도 같은 방식으로.</p>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="cta-final" id="beta">
+    <div class="sec-eyebrow">2026 베타</div>
+    <h2>같은 회사, 몰랐던 동료.<br>다음 끼니에 만나보세요.</h2>
+    <p class="sec-lede">오피스챗 조직부터 순차 오픈됩니다.</p>
+    <form class="email-form">
+      <input type="email" placeholder="name@company.co.kr" aria-label="회사 이메일" />
+      <button class="btn-primary" type="button">베타 신청</button>
+    </form>
+    <p class="disclaimer">* 데모 페이지 — 신청 정보는 저장되지 않아요.</p>
+  </section>
+
+  <footer>
+    <span class="wordmark">OfficeMate</span>
+    <span>지란지교 해커톤 2026 · 오피스챗 부착형 AI 매칭 어시스턴트</span>
+  </footer>
+
+</div>
+<script>
+(function () {
+  "use strict";
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ================= DOM refs ================= */
+  var chatBody = document.getElementById('chatBody');
+  var chatInput = document.getElementById('chatInput');
+  var sendBtn = document.getElementById('sendBtn');
+  var roomTitle = document.getElementById('roomTitle');
+  var roomSubtitle = document.getElementById('roomSubtitle');
+  var botAvatar = document.getElementById('botAvatar');
+  var appHeader = document.getElementById('appHeader');
+  var stageDesc = document.getElementById('stageDesc');
+  var stageItems = document.querySelectorAll('.stage-item');
+  var btnAutoDemo = document.getElementById('btnAutoDemo');
+  var btnStopDemo = document.getElementById('btnStopDemo');
+  var btnReset = document.getElementById('btnReset');
+  var exampleBtns = document.querySelectorAll('.example-btn');
+  var clockTime = document.getElementById('clockTime');
+  var viewList = document.getElementById('viewList');
+  var viewRoom = document.getElementById('viewRoom');
+  var viewExplore = document.getElementById('viewExplore');
+  var viewMy = document.getElementById('viewMy');
+  var exploreBody = document.getElementById('exploreBody');
+  var myBody = document.getElementById('myBody');
+  var demoTabBtns = document.querySelectorAll('.demo-tab');
+  var roomListEl = document.getElementById('roomList');
+  var btnNewRoom = document.getElementById('btnNewRoom');
+  var appBackBtn = document.getElementById('appBackBtn');
+
+  /* ================= dictionaries ================= */
+  var DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+
+  var NUM_WORDS = { '한': 1, '두': 2, '세': 3, '네': 4, '다섯': 5, '여섯': 6, '일곱': 7, '여덟': 8 };
+
+  var MENU_DICT = [
+    { k: '마라탕', e: '🍲' }, { k: '마라샹궈', e: '🍲' }, { k: '국밥', e: '🍚' }, { k: '삼겹살', e: '🥓' },
+    { k: '초밥', e: '🍣' }, { k: '스시', e: '🍣' }, { k: '파스타', e: '🍝' }, { k: '쌀국수', e: '🍜' },
+    { k: '라멘', e: '🍜' }, { k: '우동', e: '🍜' }, { k: '커피챗', e: '☕' }, { k: '커피', e: '☕' },
+    { k: '보드게임', e: '🎲' }, { k: '러닝', e: '🏃' }, { k: '등산', e: '⛰️' }, { k: '치킨', e: '🍗' },
+    { k: '피자', e: '🍕' }, { k: '떡볶이', e: '🍢' }, { k: '족발', e: '🐷' }, { k: '보쌈', e: '🥬' },
+    { k: '햄버거', e: '🍔' }, { k: '샐러드', a: '샐러드', e: '🥗' }, { k: '냉면', e: '🍜' }, { k: '짜장면', e: '🍜' },
+    { k: '짬뽕', e: '🍜' }, { k: 'squash', e: '🏸' }, { k: '스쿼시', e: '🏸' }, { k: '테니스', e: '🎾' },
+    { k: '볼링', e: '🎳' }, { k: '요가', e: '🧘' }, { k: '헬스', e: '🏋️' }, { k: '독서모임', e: '📚' },
+    { k: '와인', e: '🍷' }, { k: '맥주', e: '🍺' }, { k: '분식', e: '🍢' }, { k: '카레', e: '🍛' },
+    { k: '스테이크', e: '🥩' }, { k: '샤브샤브', e: '🍲' }, { k: '곱창', e: '🍖' }, { k: '닭갈비', e: '🍗' }
+  ];
+
+  var GENERIC_ACTIVITY = ['먹을', '갈', '할', '하실', '가실', '먹으러', '모임', '점심', '저녁', '아침', '식사'];
+
+  /* ================= parser ================= */
+  // returns { date, time, menu, count, raw } with any field possibly null
+  function parseSentence(text) {
+    var raw = text.trim();
+    var result = { date: null, dateLabel: null, time: null, timeLabel: null, menu: null, menuLabel: null, emoji: null, count: null };
+
+    // ---- date ----
+    var today = new Date(2026, 6, 6); // demo-fixed "오늘" for deterministic weekday math
+    if (/글피/.test(raw)) {
+      result.date = addDays(today, 3); result.dateLabel = '글피';
+    } else if (/모레/.test(raw)) {
+      result.date = addDays(today, 2); result.dateLabel = '모레';
+    } else if (/내일/.test(raw)) {
+      result.date = addDays(today, 1); result.dateLabel = '내일';
+    } else if (/오늘/.test(raw)) {
+      result.date = today; result.dateLabel = '오늘';
+    } else {
+      var mMonthDay = raw.match(/(\d{1,2})월\s*(\d{1,2})일/);
+      if (mMonthDay) {
+        var mm = parseInt(mMonthDay[1], 10), dd = parseInt(mMonthDay[2], 10);
+        var d = new Date(2026, mm - 1, dd);
+        result.date = d; result.dateLabel = mm + '월 ' + dd + '일';
+      } else {
+        var mWeek = raw.match(/(이번\s*주|다음\s*주|다음주|이번주)?\s*(일|월|화|수|목|금|토)요일/);
+        if (mWeek) {
+          var targetDow = DAY_NAMES.indexOf(mWeek[2]);
+          var base = new Date(today);
+          var cur = base.getDay();
+          var diff = (targetDow - cur + 7) % 7;
+          if (diff === 0) diff = 7; // 이번주 같은 요일이면 다음 발생일로
+          if (/다음/.test(mWeek[1] || '')) diff += 7;
+          if (!mWeek[1] && diff <= 7) {
+            // "그냥 금요일" -> 가장 가까운 미래 그 요일 (오늘 포함 X)
+          }
+          result.date = addDays(base, diff);
+          result.dateLabel = (mWeek[1] ? mWeek[1].replace(/\s/g, '') : '이번주') + ' ' + mWeek[2] + '요일';
+        }
+      }
+    }
+
+    // ---- time ----
+    var mHM = raw.match(/오(전|후)\s*(\d{1,2})시\s*(반)?/);
+    if (mHM) {
+      var h = parseInt(mHM[2], 10);
+      var isPM = mHM[1] === '후';
+      var h24 = isPM ? (h === 12 ? 12 : h + 12) : (h === 12 ? 0 : h);
+      var minute = mHM[3] ? 30 : 0;
+      result.time = { h: h24, m: minute };
+      result.timeLabel = '오' + mHM[1] + ' ' + h + '시' + (mHM[3] ? ' 반' : '');
+    } else {
+      var mH = raw.match(/(\d{1,2})시\s*(반)?/);
+      if (mH) {
+        var hh = parseInt(mH[1], 10);
+        result.time = { h: hh, m: mH[2] ? 30 : 0 };
+        result.timeLabel = hh + '시' + (mH[2] ? ' 반' : '');
+      } else if (/점심/.test(raw)) {
+        result.time = { h: 12, m: 0 }; result.timeLabel = '점심 (12:00)';
+      } else if (/저녁/.test(raw)) {
+        result.time = { h: 18, m: 30 }; result.timeLabel = '저녁 (18:30)';
+      } else if (/아침/.test(raw)) {
+        result.time = { h: 8, m: 0 }; result.timeLabel = '아침 (08:00)';
+      }
+    }
+    // daypart tag even if exact time also given
+    if (/점심/.test(raw)) result.daypart = 'lunch';
+    else if (/저녁/.test(raw)) result.daypart = 'dinner';
+    else if (/아침/.test(raw)) result.daypart = 'morning';
+    else if (result.time) {
+      result.daypart = result.time.h < 11 ? 'morning' : (result.time.h < 17 ? 'lunch' : 'dinner');
+    }
+
+    // ---- menu / activity ----
+    for (var i = 0; i < MENU_DICT.length; i++) {
+      if (raw.indexOf(MENU_DICT[i].k) !== -1) {
+        result.menu = MENU_DICT[i].k;
+        result.emoji = MENU_DICT[i].e;
+        result.menuLabel = MENU_DICT[i].k;
+        break;
+      }
+    }
+
+    // ---- count ----
+    var mNum = raw.match(/(\d+)\s*(명|인)/);
+    if (mNum) {
+      result.count = parseInt(mNum[1], 10);
+    } else {
+      for (var w in NUM_WORDS) {
+        if (raw.indexOf(w + ' 명') !== -1 || raw.indexOf(w + '명') !== -1) {
+          result.count = NUM_WORDS[w];
+          break;
+        }
+      }
+    }
+
+    // did we recognize *anything* at all, or was this pure noise?
+    result.anySignal = !!(result.date || result.time || result.menu || result.count || /먹|모임|가실|하실/.test(raw));
+
+    return result;
+  }
+
+  function addDays(d, n) {
+    var r = new Date(d);
+    r.setDate(r.getDate() + n);
+    return r;
+  }
+
+  function fmtSlotSummary(slot) {
+    var parts = [];
+    parts.push(slot.dateLabel || '<날짜 미정>');
+    parts.push(slot.timeLabel || '<시간 미정>');
+    parts.push((slot.emoji ? slot.emoji + ' ' : '') + (slot.menuLabel || '<메뉴 미정>'));
+    parts.push(slot.count ? slot.count + '명' : '<인원 미정>');
+    return parts.join(' · ');
+  }
+
+  /* ================= chat engine ================= */
+  var state = {
+    fsm: 'IDLE', // IDLE, PARSING, CONFIRM, RECRUITING, FULL, ROOM_CREATED
+    slot: null,
+    pendingField: null, // which field we're asking about
+    persona: 'host',
+    participants: [],
+    capacity: 4,
+    roomActive: false,
+    demoRunning: false,
+    demoTimers: [],
+    guestJoinedFromDM: false,
+    guestCutsceneDone: false,
+    pendingJoins: [],
+    joinTimer: null,
+    taFastTimer: null,
+    trustScore: 82,
+    onboarded: false,
+    profileTags: ['점심러버', '마라탕고수'],
+    credit: 1200,
+    creditLedger: [],
+    checkedIn: [],
+    checkinDone: false,
+    onlineMode: null,
+    splitPerPerson: null,
+    view: 'list',
+    activeTab: 'chat',
+    roomListUnread: true,
+    roomEntered: false,
+    // -- slot picker / on-off auto detect --
+    slotPicks: [],
+    forcedOnlineMode: null,
+    // -- deposit --
+    depositFreeUsed: 0,
+    // -- recruiting reminders / merge --
+    mergeOffered: false,
+    deadlineReminded: false,
+    // -- onboarding extras --
+    profileIntro: '',
+    mealPref: null,
+    workMode: null,
+    privacyAgreed: false,
+    // -- mypage stats --
+    meetingsCount: 2,
+    noShowCount: 0,
+    newColleagues: { '이과장': true, '최사원': true, '정대리': true, '한사원': true },
+    // -- feature checklist / engine inspector (stage 5) --
+    featuresDone: {},
+    inspVirtualSec: 0
+  };
+
+  var FEATURE_KEYS = ['nlp', 'slotpicker', 'onoff', 'deposit', 'gauge', 'confirm', 'merge', 'timeattack', 'checkin', 'reminder', 'mypage', 'explore'];
+
+  var TRUST_R = 18;
+  var TRUST_C = 2 * Math.PI * TRUST_R;
+
+  var ROSTER = [
+    { name: '박주임', initial: '박', cls: 'a1' },
+    { name: '이과장', initial: '이', cls: 'a2' },
+    { name: '최사원', initial: '최', cls: 'a3' },
+    { name: '정대리', initial: '정', cls: 'a0' }
+  ];
+
+  var WAITLIST_ROSTER = [
+    { name: '한사원', initial: '한', cls: 'a1' }
+  ];
+
+  var SLOT_TIMES = {
+    morning: ['07:30', '08:00', '08:30', '09:00', '09:30'],
+    lunch: ['11:30', '12:00', '12:30', '13:00', '13:30'],
+    dinner: ['18:00', '18:30', '19:00', '19:30', '20:00']
+  };
+  var DAYPART_LABEL = { morning: '아침', lunch: '점심', dinner: '저녁' };
+  var DAYPART_EMOJI = { morning: '🌅', lunch: '🍜', dinner: '🌙' };
+
+  function scrollToBottom() {
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function appendNode(node) {
+    chatBody.appendChild(node);
+    scrollToBottom();
+    return node;
+  }
+
+  function botMsgRow(innerHtml) {
+    var row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.innerHTML =
+      '<div class="msg-avatar">🍱</div>' +
+      '<div class="msg-col">' + innerHtml + '</div>';
+    return row;
+  }
+
+  function userMsgRow(text) {
+    var row = document.createElement('div');
+    row.className = 'msg-row user';
+    row.innerHTML = '<div class="msg-col"><div class="bubble"></div></div>';
+    row.querySelector('.bubble').textContent = text;
+    return row;
+  }
+
+  function guestMsgRow(name, cls, text) {
+    var row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.innerHTML =
+      '<div class="msg-avatar" style="background:var(--' + (cls === 'a1' ? 'lunch' : cls === 'a2' ? 'dinner' : cls === 'a3' ? 'morning' : 'brand') + ')">' + name.charAt(0) + '</div>' +
+      '<div class="msg-col"><div class="msg-name">' + name + '</div><div class="bubble"></div></div>';
+    row.querySelector('.bubble').textContent = text;
+    return row;
+  }
+
+  function addBotBubble(text) {
+    var row = botMsgRow('<div class="bubble"></div>');
+    row.querySelector('.bubble').textContent = text;
+    appendNode(row);
+    return row;
+  }
+
+  function addUserBubble(text) {
+    appendNode(userMsgRow(text));
+  }
+
+  function addGuestBubble(person, text) {
+    appendNode(guestMsgRow(person.name, person.cls, text));
+  }
+
+  function appendToast(text) {
+    var row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.innerHTML = '<div class="msg-avatar">🍱</div><div class="msg-col"><div class="toast"></div></div>';
+    row.querySelector('.toast').textContent = text;
+    appendNode(row);
+    return row;
+  }
+
+  /* ================= engine inspector (visualizes existing logic only) ================= */
+  function inspStamp() {
+    // deterministic virtual clock — not tied to real time, no randomness
+    state.inspVirtualSec += 3 + (state.inspVirtualSec % 5);
+    var base = 9 * 3600 + 12 * 60; // 09:12:00 baseline, matches the demo's initial status-bar time
+    var t = (base + state.inspVirtualSec) % 86400;
+    var hh = Math.floor(t / 3600), mm = Math.floor((t % 3600) / 60), ss = t % 60;
+    return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
+  }
+
+  function inspectorLog(tag, text) {
+    var logEl = document.getElementById('inspLog');
+    if (!logEl) return;
+    var emptyNote = logEl.querySelector('[data-insp-empty]');
+    if (emptyNote) emptyNote.remove();
+    var row = document.createElement('div');
+    row.className = 'insp-line';
+    row.innerHTML = '<span class="insp-time">' + inspStamp() + '</span> <span class="insp-tag ' + tag.toLowerCase() + '">' + tag + '</span> <span class="insp-text"></span>';
+    row.querySelector('.insp-text').textContent = text;
+    logEl.appendChild(row);
+    while (logEl.children.length > 20) logEl.removeChild(logEl.firstChild);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function resetInspectorLog() {
+    var logEl = document.getElementById('inspLog');
+    if (!logEl) return;
+    logEl.innerHTML = '<div class="insp-empty" data-insp-empty>대기중 — 예시 버튼을 눌러 시작하면 로그가 흐릅니다.</div>';
+  }
+
+  // deterministic string hash (no Math.random) — used to derive stable,
+  // reproducible "score breakdown" numbers from existing names/state.
+  function strHash(s) {
+    var h = 0;
+    for (var i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) >>> 0; }
+    return h;
+  }
+  function pseudoFrac(seed, salt) {
+    return (strHash(seed + '|' + salt) % 1000) / 1000;
+  }
+
+  function logMatchScore(person) {
+    var tagOverlap = 0.25 + pseudoFrac(person.name, 'tag') * 0.35;
+    var deptDiv = 0.15 + pseudoFrac(person.name, 'dept') * 0.25;
+    var trustNorm = Math.round((state.trustScore / 100) * 100) / 100;
+    var score = Math.min(1, tagOverlap + deptDiv + (trustNorm - 0.5) * 0.2);
+    if (score < 0) score = 0;
+    inspectorLog('MATCH', person.name + ' · 태그교집합 +' + tagOverlap.toFixed(2) + ' · 부서다양성 +' + deptDiv.toFixed(2) +
+      ' · 신뢰도 ' + trustNorm.toFixed(2) + ' → score ' + score.toFixed(2));
+  }
+
+  function logParse(slot) {
+    var modeText = state.forcedOnlineMode
+      ? (state.forcedOnlineMode === 'online' ? '온라인' : '오프라인')
+      : (/커피/.test((slot.menu || slot.menuLabel || '')) ? '온라인' : '오프라인');
+    inspectorLog('PARSE', '슬롯: ' + (slot.dateLabel || '?') + ' ' + (slot.timeLabel || '?') +
+      ' · 인원: ' + (slot.count || '?') + ' · 취향: ' + (slot.menuLabel || '?') + ' · 모드: ' + modeText);
+  }
+
+  /* ================= feature checklist (visualizes existing logic only) ================= */
+  function markFeature(key) {
+    if (state.featuresDone[key]) return;
+    state.featuresDone[key] = true;
+    var item = document.querySelector('.feat-item[data-feat="' + key + '"]');
+    if (item) {
+      item.classList.add('done');
+      var check = item.querySelector('.feat-check');
+      if (check) check.textContent = '✓';
+    }
+    var counter = document.getElementById('featCounter');
+    if (counter) counter.textContent = '체험 ' + Object.keys(state.featuresDone).length + '/' + FEATURE_KEYS.length;
+  }
+
+  function resetFeatureChecklist() {
+    state.featuresDone = {};
+    document.querySelectorAll('.feat-item').forEach(function (item) {
+      item.classList.remove('done');
+      var check = item.querySelector('.feat-check');
+      if (check) check.textContent = '○';
+    });
+    var counter = document.getElementById('featCounter');
+    if (counter) counter.textContent = '체험 0/' + FEATURE_KEYS.length;
+  }
+
+  function addDayDivider(label) {
+    var div = document.createElement('div');
+    div.className = 'day-divider';
+    div.textContent = label;
+    appendNode(div);
+  }
+
+  // typing indicator returns a function to remove it, and a promise-based delay helper
+  function showTyping() {
+    var row = document.createElement('div');
+    row.className = 'msg-row bot';
+    row.innerHTML = '<div class="msg-avatar">🍱</div><div class="msg-col"><div class="typing-bubble"><span></span><span></span><span></span></div></div>';
+    appendNode(row);
+    return row;
+  }
+
+  function wait(ms) {
+    return new Promise(function (resolve) {
+      if (reduceMotion) { resolve(); return; }
+      var t = setTimeout(resolve, ms);
+      state.demoTimers.push(t);
+    });
+  }
+
+  function botSay(text) {
+    return new Promise(function (resolve) {
+      if (reduceMotion) {
+        addBotBubble(text);
+        resolve();
+        return;
+      }
+      var typingRow = showTyping();
+      var delay = 600 + Math.random() * 600;
+      var t = setTimeout(function () {
+        typingRow.remove();
+        addBotBubble(text);
+        resolve();
+      }, delay);
+      state.demoTimers.push(t);
+    });
+  }
+
+  function botSayCard(node) {
+    return new Promise(function (resolve) {
+      function place() {
+        var row = document.createElement('div');
+        row.className = 'msg-row bot';
+        row.innerHTML = '<div class="msg-avatar">🍱</div><div class="msg-col"></div>';
+        row.querySelector('.msg-col').appendChild(node);
+        appendNode(row);
+        resolve(row);
+      }
+      if (reduceMotion) { place(); return; }
+      var typingRow = showTyping();
+      var delay = 500 + Math.random() * 500;
+      var t = setTimeout(function () {
+        typingRow.remove();
+        place();
+      }, delay);
+      state.demoTimers.push(t);
+    });
+  }
+
+  /* ================= stage indicator ================= */
+  function setStage(name, descText) {
+    stageItems.forEach(function (el) {
+      var s = el.getAttribute('data-stage');
+      el.classList.remove('active', 'done');
+      var order = ['parse', 'recruit', 'full', 'room', 'place', 'checkin', 'settle'];
+      var curIdx = order.indexOf(name);
+      var elIdx = order.indexOf(s);
+      if (elIdx < curIdx) el.classList.add('done');
+      else if (elIdx === curIdx) el.classList.add('active');
+    });
+    if (descText) stageDesc.textContent = descText;
+  }
+
+  /* ================= parsing confirm card ================= */
+  function buildConfirmCard(slot) {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">📝 파싱 확인</div>' +
+      '<div class="field-row">' +
+        field('날짜', slot.dateLabel) +
+        field('시간', slot.timeLabel) +
+        field('메뉴', (slot.emoji ? slot.emoji + ' ' : '') + (slot.menuLabel || null)) +
+        field('인원', slot.count ? slot.count + '명' : null) +
+      '</div>' +
+      '<div class="card-btn-row">' +
+        '<button class="card-btn primary" data-act="start-recruit" type="button">모집 시작</button>' +
+        '<button class="card-btn ghost" data-act="edit-slot" type="button">수정</button>' +
+      '</div>';
+    return wrap;
+
+    function field(k, v) {
+      return '<div class="field-line"><span class="k">' + k + '</span><span class="v' + (v ? '' : ' missing') + '">' + (v || '미정') + '</span></div>';
+    }
+  }
+
+  function wireConfirmCard(cardRow) {
+    var startBtn = cardRow.querySelector('[data-act="start-recruit"]');
+    var editBtn = cardRow.querySelector('[data-act="edit-slot"]');
+    if (startBtn) startBtn.addEventListener('click', function () {
+      disableCardButtons(cardRow);
+      botSayCard(buildDepositCard()).then(function (row) {
+        wireDepositCard(row.querySelector('.card') || row);
+      });
+    });
+    if (editBtn) editBtn.addEventListener('click', function () {
+      disableCardButtons(cardRow);
+      state.fsm = 'PARSING';
+      botSay('수정할 부분을 다시 말씀해주세요. 예: "저녁 말고 점심으로 바꿔줘"');
+    });
+  }
+
+  function disableCardButtons(cardRow) {
+    var btns = cardRow.querySelectorAll('button');
+    btns.forEach(function (b) { b.disabled = true; });
+  }
+
+  /* ================= deposit (③) ================= */
+  function buildDepositCard() {
+    var free = state.depositFreeUsed || 0;
+    var exempt = free < 3;
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">🪙 참여 디파짓</div>' +
+      '<div class="note-inline">① 정상 참석 시 디파짓 전액 환급 + 50P 보너스</div>' +
+      '<div class="note-inline">② 모임 2시간 전까지 취소하면 페널티 없음</div>' +
+      '<div class="note-inline">③ 노쇼 시 디파짓 몰수 후 참석자에게 분배</div>' +
+      (exempt ? '<span class="tag good">최초 3회 면제 대상 · ' + (free + 1) + '/3회차</span>' : '<span class="tag brand">디파짓 500P</span>') +
+      '<div class="card-btn-row"><button class="card-btn primary" data-act="deposit-confirm">' + (exempt ? '면제 혜택으로 참여 확정' : '500P 예치하고 참여 확정') + '</button></div>';
+    return wrap;
+  }
+
+  function wireDepositCard(node) {
+    var btn = node.querySelector('[data-act="deposit-confirm"]');
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+      disableCardButtons(node);
+      var free = state.depositFreeUsed || 0;
+      markFeature('deposit');
+      if (free < 3) {
+        state.depositFreeUsed = free + 1;
+        addCreditTx('참여 디파짓(최초 3회 면제 적용)', 0);
+      } else {
+        addCreditTx('참여 디파짓 예치', -500);
+      }
+      startRecruiting();
+    });
+  }
+
+  /* ================= slot picker (①②) ================= */
+  function buildSlotPickerCard() {
+    state.slotPicks = [];
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">🗓️ 슬롯 직접 선택</div>' +
+      '<div class="persona-tabs" data-slot-tabs role="tablist">' +
+        ['morning', 'lunch', 'dinner'].map(function (d, i) {
+          return '<button class="persona-tab' + (i === 0 ? ' active' : '') + '" type="button" data-slot-daypart="' + d + '">' + DAYPART_LABEL[d] + '</button>';
+        }).join('') +
+      '</div>' +
+      ['morning', 'lunch', 'dinner'].map(function (d, i) {
+        return '<div class="chip-row" data-slot-panel="' + d + '"' + (i === 0 ? '' : ' hidden') + '>' +
+          SLOT_TIMES[d].map(function (t) {
+            return '<button class="card-btn ghost" style="flex:none;padding:6px 10px;" data-slot-chip="' + d + '|' + t + '">' + t + '</button>';
+          }).join('') +
+        '</div>';
+      }).join('') +
+      '<div class="note-inline" data-slot-hint>2개 이상 선택하면 매칭 확률이 올라가요 ↑ (0개 선택됨)</div>' +
+      '<div class="card-btn-row"><button class="card-btn primary" data-act="slot-confirm" disabled>선택 완료</button></div>';
+    return wrap;
+  }
+
+  function wireSlotPickerCard(node) {
+    var tabs = node.querySelectorAll('[data-slot-daypart]');
+    var panels = node.querySelectorAll('[data-slot-panel]');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        var d = tab.getAttribute('data-slot-daypart');
+        panels.forEach(function (p) { p.hidden = p.getAttribute('data-slot-panel') !== d; });
+      });
+    });
+    var hint = node.querySelector('[data-slot-hint]');
+    var confirmBtn = node.querySelector('[data-act="slot-confirm"]');
+    node.querySelectorAll('[data-slot-chip]').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        var key = chip.getAttribute('data-slot-chip');
+        var idx = state.slotPicks.indexOf(key);
+        if (idx === -1) { state.slotPicks.push(key); chip.classList.remove('ghost'); chip.classList.add('primary'); }
+        else { state.slotPicks.splice(idx, 1); chip.classList.remove('primary'); chip.classList.add('ghost'); }
+        hint.textContent = (state.slotPicks.length >= 2 ? '2개 이상 선택 완료 — 매칭 확률이 높아졌어요 ↑' : '2개 이상 선택하면 매칭 확률이 올라가요 ↑') + ' (' + state.slotPicks.length + '개 선택됨)';
+        confirmBtn.disabled = state.slotPicks.length === 0;
+      });
+    });
+    confirmBtn.addEventListener('click', function () {
+      if (confirmBtn.disabled) return;
+      disableCardButtons(node);
+      onSlotPickConfirmed();
+    });
+  }
+
+  function onSlotPickConfirmed() {
+    markFeature('slotpicker');
+    var picks = state.slotPicks.slice();
+    var first = picks[0].split('|');
+    var daypart = first[0], timeStr = first[1];
+    var hm = timeStr.split(':');
+    state.slot = {
+      date: addDays(new Date(2026, 6, 6), 1), dateLabel: '내일',
+      time: { h: parseInt(hm[0], 10), m: parseInt(hm[1], 10) },
+      timeLabel: picks.length > 1 ? (timeStr + ' 외 ' + (picks.length - 1) + '건') : timeStr,
+      daypart: daypart,
+      menu: null, menuLabel: '직접 선택', emoji: DAYPART_EMOJI[daypart],
+      count: 4, anySignal: true
+    };
+    setStage('parse', '슬롯 선택 카드로 시간을 직접 골랐습니다. 선택한 슬롯 길이에 따라 온·오프라인이 자동 판별됩니다.');
+    if (picks.length <= 1) {
+      inspectorLog('RULE', 'slot=30min → ONLINE · Meet 링크 자동 생성');
+      botSay('선택하신 슬롯은 30분이라 자동으로 온라인 모임으로 전환할게요 💻').then(function () {
+        return botSayCard(buildOnlineConfirmCard());
+      }).then(function (row) {
+        wireOnlineConfirmCard(row.querySelector('.card') || row);
+      });
+    } else {
+      inspectorLog('RULE', 'slot=60min → 근무형태 기반 온/오프 제안');
+      botSay('선택하신 슬롯이 60분 이상이라 근무형태에 맞춰 온/오프라인을 제안해드릴게요').then(function () {
+        return botSayCard(buildWorkModeSuggestCard());
+      }).then(function (row) {
+        wireWorkModeSuggestCard(row.querySelector('.card') || row);
+      });
+    }
+  }
+
+  function buildOnlineConfirmCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">💻 온라인 확정</div>' +
+      '<span class="tag good">Meet 링크 자동 생성</span>' +
+      '<div class="field-row"><div class="field-line"><span class="k">링크</span><span class="v">meet.officemate.dev/' + Math.random().toString(36).slice(2, 7) + '</span></div></div>' +
+      '<div class="note-inline">30분 이하 슬롯은 자동으로 온라인 화상 모임으로 전환됩니다.</div>' +
+      '<div class="card-btn-row"><button class="card-btn primary" data-act="online-ack">확인</button></div>';
+    return wrap;
+  }
+
+  function wireOnlineConfirmCard(node) {
+    var btn = node.querySelector('[data-act="online-ack"]');
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+      disableCardButtons(node);
+      state.forcedOnlineMode = 'online';
+      finalizeSlotFromPicker();
+    });
+  }
+
+  function buildWorkModeSuggestCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">🏢 근무형태를 알려주세요</div>' +
+      '<div class="note-inline">선택하신 슬롯이 60분이라 근무형태에 따라 온/오프라인을 제안해드려요.</div>' +
+      '<div class="profile-tags">' +
+        ['출근', '재택', '하이브리드'].map(function (w) {
+          return '<button class="card-btn ghost" style="flex:none;padding:5px 10px;" data-workmode="' + w + '">' + w + '</button>';
+        }).join('') +
+      '</div>' +
+      '<div class="note-inline" data-workmode-result style="display:none;"></div>' +
+      '<div class="card-btn-row" data-workmode-confirm-row style="display:none;"><button class="card-btn primary" data-act="workmode-confirm">확인</button></div>';
+    return wrap;
+  }
+
+  function wireWorkModeSuggestCard(node) {
+    var resultEl = node.querySelector('[data-workmode-result]');
+    var confirmRow = node.querySelector('[data-workmode-confirm-row]');
+    node.querySelectorAll('[data-workmode]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        node.querySelectorAll('[data-workmode]').forEach(function (b) { b.classList.remove('primary'); b.classList.add('ghost'); });
+        btn.classList.remove('ghost'); btn.classList.add('primary');
+        var w = btn.getAttribute('data-workmode');
+        state.workMode = w;
+        var map = { '출근': 'offline', '재택': 'online', '하이브리드': 'offline' };
+        state.forcedOnlineMode = map[w];
+        var msg = w === '출근' ? '사무실 출근이시니 오프라인 모임으로 제안할게요 🏢' :
+          w === '재택' ? '재택 근무시니 온라인 모임으로 제안할게요 💻' :
+          '하이브리드시니 우선 오프라인으로 잡고, 필요하면 언제든 온라인으로 바꿀 수 있어요 🔀';
+        resultEl.textContent = msg;
+        resultEl.style.display = 'block';
+        confirmRow.style.display = 'flex';
+      });
+    });
+    var confirmBtn = node.querySelector('[data-act="workmode-confirm"]');
+    confirmBtn.addEventListener('click', function () {
+      if (confirmBtn.disabled) return;
+      disableCardButtons(node);
+      finalizeSlotFromPicker();
+    });
+  }
+
+  function finalizeSlotFromPicker() {
+    state.pendingField = null;
+    state.fsm = 'CONFIRM';
+    logParse(state.slot);
+    botSayCard(buildConfirmCard(state.slot)).then(wireConfirmCard);
+  }
+
+  /* ================= recruiting flow ================= */
+  var TA_TOTAL_SEC = 72 * 3600; // 72시간 타임어택
+
+  function fmtTaClock(sec) {
+    var h = Math.floor(sec / 3600);
+    var m = Math.floor((sec % 3600) / 60);
+    var s = sec % 60;
+    return h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  }
+
+  function startTimeAttack() {
+    markFeature('timeattack');
+    stopTimeAttack();
+    state.taRemaining = TA_TOTAL_SEC;
+    var el = document.getElementById('taClock');
+    if (el) el.textContent = fmtTaClock(state.taRemaining);
+    if (reduceMotion) return;
+    state.taTimer = setInterval(function () {
+      state.taRemaining--;
+      var clock = document.getElementById('taClock');
+      if (clock) clock.textContent = fmtTaClock(state.taRemaining);
+      checkDeadlineTriggers();
+      if (state.taRemaining <= 0) stopTimeAttack();
+    }, 1000);
+  }
+
+  function stopTimeAttack() {
+    if (state.taTimer) { clearInterval(state.taTimer); state.taTimer = null; }
+    if (state.taFastTimer) { clearInterval(state.taFastTimer); state.taFastTimer = null; }
+  }
+
+  function finishTimeAttack() {
+    stopTimeAttack();
+    var row = document.getElementById('taRow');
+    if (row) {
+      row.classList.add('ta-done');
+      row.innerHTML = '⚡ 타임어택 성공 — <span class="ta-clock">' + fmtTaClock(state.taRemaining || TA_TOTAL_SEC) + '</span> 남기고 마감';
+    }
+  }
+
+  function startRecruiting() {
+    markFeature('gauge');
+    state.fsm = 'RECRUITING';
+    state.mergeOffered = false;
+    state.deadlineReminded = false;
+    state.capacity = Math.max(2, Math.min(ROSTER.length + 1, (state.slot && state.slot.count) || 4));
+    state.participants = [{ name: '김대리(나)', initial: '김', cls: 'a0' }];
+    setStage('recruit', '모집 공고가 올라갔습니다. 72시간 타임어택 안에 정원이 차면 확정 — 참여자는 디파짓 500P를 걸고, 확정 시 전액 환급됩니다.');
+
+    botSayCard(buildRecruitCard()).then(function (row) {
+      state._recruitCardRow = row;
+      var ffBtn = row.querySelector('#btnFastForward');
+      var dissolveBtn = row.querySelector('#btnForceDissolve');
+      if (ffBtn) ffBtn.addEventListener('click', fastForwardTimeAttack);
+      if (dissolveBtn) dissolveBtn.addEventListener('click', forceDissolveDemo);
+      startTimeAttack();
+      scheduleJoins();
+      var guestCutsceneTimer = setTimeout(runGuestCutscene, reduceMotion ? 0 : 900);
+      state.demoTimers.push(guestCutsceneTimer);
+    });
+  }
+
+  function disableTaControls() {
+    var controls = document.getElementById('taControls');
+    if (controls) {
+      controls.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
+    }
+  }
+
+  function buildRecruitCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.id = 'recruitCard';
+    wrap.innerHTML =
+      '<div class="card-title">' + (state.slot.emoji || '🍽️') + ' ' + fmtSlotTitle(state.slot) + '</div>' +
+      '<span class="tag brand">모집중</span>' +
+      '<div class="ta-row" id="taRow">⏳ <span class="ta-clock" id="taClock">72:00:00</span> 남음 · 72시간 타임어택</div>' +
+      '<div class="ta-controls" id="taControls">' +
+        '<button class="ta-btn" id="btnFastForward" type="button">⏩ 빨리 감기(시연)</button>' +
+        '<button class="ta-btn danger" id="btnForceDissolve" type="button">💥 인원 미달로 마감(시연)</button>' +
+      '</div>' +
+      '<div class="avatar-stack" id="avatarStack">' + renderAvatars() + '</div>' +
+      '<div class="chip-row">' + state.profileTags.slice(0, 3).map(function (t) { return '<span class="chip-sm">#' + t + '</span>'; }).join('') + (state.slot.menuLabel ? '<span class="chip-sm">#' + state.slot.menuLabel + '</span>' : '') + '</div>' +
+      '<div class="gauge">' +
+        '<div class="gauge-track"><div class="gauge-fill" id="recruitGaugeFill" style="width:' + (100 / state.capacity) + '%"></div></div>' +
+        '<div class="gauge-label"><span id="recruitGaugeLabel">1/' + state.capacity + '명 참여중</span><span>정원 ' + state.capacity + '명</span></div>' +
+      '</div>' +
+      '<div class="deposit-row">🪙 참여 디파짓 <b>500P</b> · 정상 참석 시 전액 환급 <b>+50P</b> 보너스</div>';
+    return wrap;
+  }
+
+  function fmtSlotTitle(slot) {
+    return (slot.dateLabel || '') + ' ' + (slot.timeLabel || '') + ' · ' + (slot.menuLabel || '모임');
+  }
+
+  function renderAvatars() {
+    var html = '';
+    state.participants.forEach(function (p) {
+      html += '<span class="avatar ' + p.cls + '">' + p.initial + '</span>';
+    });
+    for (var i = state.participants.length; i < state.capacity; i++) {
+      html += '<span class="avatar empty">?</span>';
+    }
+    return html;
+  }
+
+  function updateRecruitCard() {
+    var stack = document.getElementById('avatarStack');
+    var fill = document.getElementById('recruitGaugeFill');
+    var label = document.getElementById('recruitGaugeLabel');
+    if (stack) stack.innerHTML = renderAvatars();
+    if (fill) fill.style.width = (state.participants.length / state.capacity * 100) + '%';
+    if (label) label.textContent = state.participants.length + '/' + state.capacity + '명 참여중';
+    if (state.participants.length >= state.capacity && fill) fill.classList.add('good');
+  }
+
+  function scheduleJoins() {
+    var needed = state.capacity - state.participants.length;
+    state.pendingJoins = ROSTER.slice(0, needed);
+    scheduleNextJoin(false);
+  }
+
+  function scheduleNextJoin(fast) {
+    if (!state.pendingJoins || !state.pendingJoins.length) return;
+    if (state.fsm !== 'RECRUITING') return;
+    var gap = fast ? (150 + Math.random() * 200) : (2000 + Math.random() * 3000);
+    state.joinTimer = setTimeout(function () {
+      state.joinTimer = null;
+      if (state.fsm !== 'RECRUITING') return;
+      var person = state.pendingJoins.shift();
+      state.participants.push(person);
+      addGuestBubble(person, pickJoinPhrase(person));
+      logMatchScore(person);
+      updateRecruitCard();
+      if (state.participants.length >= state.capacity) {
+        disableTaControls();
+        setTimeout(onCapacityFull, reduceMotion || fast ? 100 : 700);
+      } else {
+        scheduleNextJoin(fast);
+      }
+    }, reduceMotion ? 0 : gap);
+    state.demoTimers.push(state.joinTimer);
+  }
+
+  function fastForwardTimeAttack() {
+    if (state.fsm !== 'RECRUITING') return;
+    disableTaControls();
+    stopTimeAttack();
+    // bug fix: the join pool (ROSTER) is always sized to exactly fill the
+    // remaining capacity, so participants finish joining in a few hundred ms —
+    // long before a 72h countdown could ever tick down to the 40%/15%
+    // thresholds below, even with fast-forward's -900s/60ms rate. That left
+    // the reminder + 병합 제안 (merge-suggestion) branch unreachable. Jumping
+    // the clock near the deadline here guarantees the very first tick fires it.
+    if (state.participants.length < state.capacity) {
+      state.taRemaining = Math.min(state.taRemaining, Math.floor(TA_TOTAL_SEC * 0.15) - 1);
+      var clockEl = document.getElementById('taClock');
+      if (clockEl) clockEl.textContent = fmtTaClock(state.taRemaining);
+    }
+    state.taFastTimer = setInterval(function () {
+      if (state.fsm !== 'RECRUITING') { clearInterval(state.taFastTimer); state.taFastTimer = null; return; }
+      state.taRemaining = Math.max(state.taRemaining - 900, 30);
+      var clock = document.getElementById('taClock');
+      if (clock) clock.textContent = fmtTaClock(state.taRemaining);
+      checkDeadlineTriggers();
+    }, 60);
+    state.demoTimers.push(state.taFastTimer);
+    if (state.joinTimer) { clearTimeout(state.joinTimer); state.joinTimer = null; }
+    scheduleNextJoin(true);
+  }
+
+  /* ================= deadline reminder / auto merge (⑤⑥) ================= */
+  function checkDeadlineTriggers() {
+    if (state.fsm !== 'RECRUITING') return;
+    if (!state.deadlineReminded && state.taRemaining <= TA_TOTAL_SEC * 0.4 && state.participants.length < state.capacity) {
+      state.deadlineReminded = true;
+      botSay('⏰ 마감이 얼마 남지 않았어요! 정원이 아직 다 안 찼어요.');
+    }
+    if (!state.mergeOffered && state.taRemaining <= TA_TOTAL_SEC * 0.15 && state.participants.length < state.capacity) {
+      state.mergeOffered = true;
+      if (state.joinTimer) { clearTimeout(state.joinTimer); state.joinTimer = null; }
+      showAutoMergeSuggestion();
+    }
+  }
+
+  function adjacentTimeLabel(slot) {
+    if (!slot || !slot.time) return '비슷한 시간';
+    var h = slot.time.h, m = slot.time.m + 30;
+    if (m >= 60) { m -= 60; h += 1; }
+    return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+  }
+
+  function showAutoMergeSuggestion() {
+    markFeature('merge');
+    inspectorLog('RULE', '마감임박 · 정원미달 → 인접슬롯 병합 제안');
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">🔀 인접 슬롯 병합 제안</div>' +
+      '<div class="note-inline">' + adjacentTimeLabel(state.slot) + ' 대에 비슷한 모임이 모집 중이에요. 병합하면 정원을 더 빨리 채울 수 있어요.</div>' +
+      '<div class="card-btn-row">' +
+        '<button class="card-btn primary" data-act="auto-merge-yes" type="button">병합 수락</button>' +
+        '<button class="card-btn ghost" data-act="auto-merge-no" type="button">거절</button>' +
+      '</div>';
+    botSayCard(wrap).then(function (row) {
+      var yesBtn = row.querySelector('[data-act="auto-merge-yes"]');
+      var noBtn = row.querySelector('[data-act="auto-merge-no"]');
+      yesBtn.addEventListener('click', function () {
+        disableCardButtons(row);
+        botSay('인접 슬롯과 병합했어요! 참여자를 더 모아볼게요 🙌').then(function () {
+          if (state.fsm !== 'RECRUITING') return;
+          state.pendingJoins = ROSTER.filter(function (p) { return state.participants.indexOf(p) === -1; });
+          if (!state.joinTimer) scheduleNextJoin(true);
+        });
+      });
+      noBtn.addEventListener('click', function () {
+        disableCardButtons(row);
+        botSay('알겠어요, 병합하지 않고 마감할게요.').then(function () {
+          onTimeAttackFail();
+        });
+      });
+    });
+  }
+
+  function forceDissolveDemo() {
+    if (state.fsm !== 'RECRUITING') return;
+    if (state.participants.length >= state.capacity) return;
+    disableTaControls();
+    if (state.joinTimer) { clearTimeout(state.joinTimer); state.joinTimer = null; }
+    state.pendingJoins = [];
+    stopTimeAttack();
+    state.taRemaining = 0;
+    var clock = document.getElementById('taClock');
+    if (clock) clock.textContent = fmtTaClock(0);
+    onTimeAttackFail();
+  }
+
+  function onTimeAttackFail() {
+    if (state.fsm !== 'RECRUITING') return;
+    markFeature('merge');
+    inspectorLog('REFUND', state.participants.length + '명 × 500P 전액 환급 (정원 미달 · 방폭)');
+    state.fsm = 'DISSOLVED';
+    setStage('recruit', '72시간 타임어택 안에 정원을 채우지 못해 모임이 자동으로 방폭(해산)됩니다. 디파짓은 참여자 전원에게 전액 환급됩니다.');
+    var tag = document.querySelector('#recruitCard .tag');
+    if (tag) { tag.textContent = '방폭'; tag.className = 'tag danger'; }
+    var row = document.getElementById('taRow');
+    if (row) {
+      row.style.color = 'var(--danger-text)';
+      row.innerHTML = '💥 타임어택 실패 — 정원 미달로 모집 자동 종료';
+    }
+    botSay('😥 72시간 안에 정원을 채우지 못했어요. 노쇼 페널티 없이 모임을 자동 해산할게요 (방폭)').then(function () {
+      return botSayCard(buildDissolveRefundCard());
+    }).then(function () {
+      appendToast('💥 모임 방폭 · 디파짓 500P 전액 환급 완료');
+      return wait(reduceMotion ? 0 : 500);
+    }).then(function () {
+      return botSay('참여자 전원에게 디파짓 500P를 전액 환급 처리했어요. 인원을 조금 낮춰서 다시 모집해볼까요? 🙌');
+    }).then(function () {
+      state.fsm = 'IDLE';
+      state.slot = null;
+      state.participants = [];
+      state.pendingJoins = [];
+    });
+  }
+
+  function buildDissolveRefundCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">💥 모임 방폭 · 디파짓 환급</div>' +
+      '<div class="settle-line"><span class="amt plus">' + state.participants.length + '명 × 500P</span><span>전원 전액 환급 완료</span></div>' +
+      '<span class="tag danger">정원 미달로 자동 해산</span>' +
+      '<div class="note-inline">72시간 타임어택 안에 정원(' + state.capacity + '명)을 채우지 못해 모임이 자동 해산되었습니다. 페널티 없이 디파짓 전액이 환급됩니다.</div>';
+    return wrap;
+  }
+
+  function pickJoinPhrase(person) {
+    var phrases = ['저요! 참여할게요 🙋', '좋아요, 낄게요!', '오 저도 갈래요', '참여합니다 👍'];
+    return phrases[Math.floor(Math.random() * phrases.length)];
+  }
+
+  function onCapacityFull() {
+    if (state.fsm !== 'RECRUITING') return;
+    markFeature('confirm');
+    state.fsm = 'FULL';
+    setStage('full', '타임어택 안에 정원이 찼습니다. 디파짓이 확정 상태로 잠기고, 봇이 그룹 대화방을 자동으로 만듭니다.');
+    var tag = document.querySelector('#recruitCard .tag');
+    if (tag) { tag.textContent = '마감'; tag.className = 'tag good'; }
+    finishTimeAttack();
+
+    botSay('🎉 매칭 완료! 대화방을 만들었어요').then(function () {
+      return botSayCard(buildDepositSettleCard());
+    }).then(function () {
+      return wait(reduceMotion ? 0 : 500);
+    }).then(function () {
+      return botSay('🧊 AI 아이스브레이커: "다들 오늘 모임 기대하고 계셨죠? 서로 어떤 팀인지부터 소개해볼까요?"');
+    }).then(function () {
+      return wait(reduceMotion ? 0 : 700);
+    }).then(function () {
+      transitionRoom();
+    });
+  }
+
+  function buildDepositSettleCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">🪙 디파짓 확정</div>' +
+      '<div class="settle-line"><span class="amt">' + state.capacity + '명 × 500P</span><span>모임 확정으로 잠금 완료</span></div>' +
+      '<div class="settle-line"><span class="amt plus">+50P</span><span>정상 참석 시 전액 환급과 함께 적립</span></div>' +
+      '<span class="tag good">노쇼 방지 장치 작동중</span>' +
+      '<div class="note-inline">노쇼 시 디파짓은 참석자에게 분배, 모임이 무산(방폭)되면 전원 전액 환급됩니다.</div>';
+    return wrap;
+  }
+
+  /* ================= onboarding / trust ring ================= */
+  function buildTrustRingNode(label) {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    var pct = Math.max(0, Math.min(100, state.trustScore)) / 100;
+    var offset = (TRUST_C * (1 - pct)).toFixed(2);
+    wrap.innerHTML =
+      '<div class="card-title">🪪 ' + (label || '내 프로필') + '</div>' +
+      '<div class="trust-ring-wrap">' +
+        '<svg class="trust-ring" viewBox="0 0 44 44">' +
+          '<circle class="track" cx="22" cy="22" r="' + TRUST_R + '"></circle>' +
+          '<circle class="fill" cx="22" cy="22" r="' + TRUST_R + '" stroke-dasharray="' + TRUST_C.toFixed(2) + '" stroke-dashoffset="' + offset + '" data-trust-fill></circle>' +
+        '</svg>' +
+        '<div class="trust-num-box"><span class="tn-val" data-trust-num>' + Math.round(state.trustScore) + '</span><span class="tn-label">신뢰도 점수</span></div>' +
+      '</div>' +
+      '<div class="profile-tags">' + state.profileTags.map(function (t) { return '<span class="tag brand">#' + t + '</span>'; }).join('') + '</div>' +
+      '<div class="note-inline">체크인 이력·탐색 피드 참여가 쌓일수록 신뢰도가 올라가고 매칭 우선순위가 높아져요.</div>';
+    return wrap;
+  }
+
+  function bumpTrust(delta) {
+    state.trustScore = Math.max(0, Math.min(100, state.trustScore + delta));
+    var fillEl = document.querySelector('[data-trust-fill]');
+    var numEl = document.querySelector('[data-trust-num]');
+    if (fillEl) {
+      var pct = state.trustScore / 100;
+      fillEl.setAttribute('stroke-dashoffset', (TRUST_C * (1 - pct)).toFixed(2));
+    }
+    if (numEl) numEl.textContent = Math.round(state.trustScore);
+  }
+
+  function buildExploreFeedCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    var items = [
+      { key: 'sponsored1', title: '신메뉴 카페 원정단', meta: '스폰서드 · 참여 시 아메리카노 쿠폰 자동 적용', sponsored: true, emoji: '☕' },
+      { key: 'feed1', title: '목요일 점심 · 라멘 탐방대', meta: '2명 모집중 · 신뢰도 70+ 추천', emoji: '🍜' },
+      { key: 'feed2', title: '금요일 오후 · 신메뉴 카페 원정', meta: '3명 모집중 · 온라인 15분', emoji: '☕' }
+    ];
+    wrap.innerHTML =
+      '<div class="card-title">🔎 탐색 피드</div>' +
+      items.map(function (it) {
+        return '<div class="settle-line" data-feed-row="' + it.key + '">' +
+          '<span>' + (it.sponsored ? '<span class="tag warn">스폰서드</span> ' : '') + it.emoji + ' ' + it.title + '</span>' +
+          '<button class="card-btn ghost" style="flex:none;padding:5px 10px;" data-feed-join="' + it.key + '" data-sponsored="' + (it.sponsored ? '1' : '0') + '">참여 신청</button>' +
+          '</div><div class="note-inline">' + it.meta + '</div>';
+      }).join('') +
+      '<div class="note-inline">참여 신청만으로도 신뢰도 +2점이 즉시 반영됩니다 (SIMULATED 매칭).</div>' +
+      '<div class="card-btn-row"><button class="card-btn primary" data-act="feed-new-room" type="button">＋ 새 모임 만들기</button></div>';
+    return wrap;
+  }
+
+  function wireExploreFeedCard(node) {
+    var btns = node.querySelectorAll('[data-feed-join]');
+    btns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (btn.disabled) return;
+        btn.disabled = true;
+        btn.textContent = '신청 완료 ✓';
+        bumpTrust(2);
+        var key = btn.getAttribute('data-feed-join');
+        if (btn.getAttribute('data-sponsored') === '1') {
+          appendToast('🎟️ 쿠폰이 자동 적용됐어요 — 아메리카노 무료');
+        }
+        // cross-tab flow: joining the 라멘 탐방대 feed opens its room in the 채팅 탭
+        if (key === 'feed1') {
+          joinFeedRoom('🍜 라멘 탐방대');
+        }
+      });
+    });
+    var newRoomBtn = node.querySelector('[data-act="feed-new-room"]');
+    if (newRoomBtn) newRoomBtn.addEventListener('click', function () {
+      if (newRoomBtn.disabled) return;
+      newRoomBtn.disabled = true;
+      botSay('네! 왼쪽 예시 버튼처럼 문장을 입력하거나 "슬롯 직접 선택으로 열기"를 눌러 새 모임을 열어보세요 🙂');
+    });
+  }
+
+  /* ================= 마이페이지 (여정④) ================= */
+  function buildMyPageEmptyCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">🪪 마이페이지</div>' +
+      '<span class="tag warn">프로필 미작성</span>' +
+      '<div class="note-inline">아직 프로필이 없어요. 프로필을 만들면 신뢰도 링·포인트 지갑·부서 다양성 통계가 채워져요.</div>' +
+      '<div class="credit-balance"><span class="cb-num">' + state.credit.toLocaleString() + '</span><span class="cb-unit">P 보유중</span></div>' +
+      '<div class="note-inline">채팅 탭에서 첫 모임을 진행하면 프로필 만들기가 자연스럽게 이어져요.</div>';
+    return wrap;
+  }
+
+  function buildMyPageCard() {
+    if (!state.onboarded) return buildMyPageEmptyCard();
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    var deptPct = 62;
+    var newColleagueCount = Object.keys(state.newColleagues || {}).length;
+    wrap.innerHTML =
+      '<div class="card-title">🪪 마이페이지</div>' +
+      '<div class="trust-ring-wrap">' +
+        '<svg class="trust-ring" viewBox="0 0 44 44">' +
+          '<circle class="track" cx="22" cy="22" r="' + TRUST_R + '"></circle>' +
+          '<circle class="fill" cx="22" cy="22" r="' + TRUST_R + '" stroke-dasharray="' + TRUST_C.toFixed(2) + '" stroke-dashoffset="' + (TRUST_C * (1 - state.trustScore / 100)).toFixed(2) + '"></circle>' +
+        '</svg>' +
+        '<div class="trust-num-box"><span class="tn-val">' + Math.round(state.trustScore) + '</span><span class="tn-label">신뢰도 점수</span></div>' +
+        '<div class="credit-balance" style="margin-left:auto;"><span class="cb-num">' + state.credit.toLocaleString() + '</span><span class="cb-unit">P</span></div>' +
+      '</div>' +
+      '<div class="field-row">' +
+        '<div class="field-line"><span class="k">부서다양성</span><span class="v">' + deptPct + '%</span></div>' +
+        '<div class="field-line"><span class="k">이번달</span><span class="v">모임 ' + (state.meetingsCount || 0) + '회 · 노쇼 ' + (state.noShowCount || 0) + '회</span></div>' +
+        '<div class="field-line"><span class="k">새동료</span><span class="v">' + newColleagueCount + '명</span></div>' +
+      '</div>' +
+      '<div class="donut" style="background: conic-gradient(var(--brand) 0% ' + deptPct + '%, var(--paper) ' + deptPct + '% 100%);"><div class="donut-center">' + deptPct + '%</div></div>' +
+      '<div class="note-inline">서로 다른 부서 동료와 만날수록 다양성 지수가 올라가요.</div>';
+    return wrap;
+  }
+
+  function buildOnboardingCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">👋 처음이시네요 — 프로필을 만들어주세요</div>' +
+      '<div class="profile-tags">' +
+        ['점심러버', '마라탕고수', '커피매니아', '헬스러', '와인러'].map(function (t) {
+          var picked = state.profileTags.indexOf(t) !== -1;
+          return '<button class="card-btn ' + (picked ? 'primary' : 'ghost') + '" style="flex:none;padding:5px 10px;" data-onb-tag="' + t + '">' + (picked ? '✓ ' : '#') + t + '</button>';
+        }).join('') +
+      '</div>' +
+      '<input class="msg-input" type="text" style="width:100%;" maxlength="40" placeholder="한 줄 소개를 적어주세요 (예: 등산과 마라탕을 좋아해요)" data-onb-intro value="' + (state.profileIntro || '') + '" />' +
+      '<div class="note-inline">식사 취향</div>' +
+      '<div class="profile-tags">' +
+        ['한식', '중식', '일식', '양식', '비건'].map(function (m) {
+          var picked = state.mealPref === m;
+          return '<button class="card-btn ' + (picked ? 'primary' : 'ghost') + '" style="flex:none;padding:5px 10px;" data-onb-meal="' + m + '">' + m + '</button>';
+        }).join('') +
+      '</div>' +
+      '<div class="note-inline">근무형태</div>' +
+      '<div class="profile-tags">' +
+        ['출근', '재택', '하이브리드'].map(function (w) {
+          var picked = state.workMode === w;
+          return '<button class="card-btn ' + (picked ? 'primary' : 'ghost') + '" style="flex:none;padding:5px 10px;" data-onb-work="' + w + '">' + w + '</button>';
+        }).join('') +
+      '</div>' +
+      '<button class="card-btn ghost" style="align-self:flex-start;" data-onb-privacy>' + (state.privacyAgreed ? '✓ ' : '🔒 ') + '사적 대화는 분석하지 않아요 — 동의합니다</button>' +
+      '<div class="card-btn-row"><button class="card-btn good" data-act="save-onboarding"' + (state.privacyAgreed ? '' : ' disabled') + '>시작하기 (+5 신뢰도)</button></div>';
+    return wrap;
+  }
+
+  function wireOnboardingCard(node) {
+    var tagBtns = node.querySelectorAll('[data-onb-tag]');
+    tagBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var tag = btn.getAttribute('data-onb-tag');
+        var idx = state.profileTags.indexOf(tag);
+        if (idx === -1) {
+          state.profileTags.push(tag);
+          btn.classList.remove('ghost'); btn.classList.add('primary');
+          btn.textContent = '✓ ' + tag;
+        } else {
+          state.profileTags.splice(idx, 1);
+          btn.classList.remove('primary'); btn.classList.add('ghost');
+          btn.textContent = '#' + tag;
+        }
+      });
+    });
+
+    var introInput = node.querySelector('[data-onb-intro]');
+    introInput.addEventListener('input', function () { state.profileIntro = introInput.value; });
+
+    var mealBtns = node.querySelectorAll('[data-onb-meal]');
+    mealBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        mealBtns.forEach(function (b) { b.classList.remove('primary'); b.classList.add('ghost'); });
+        btn.classList.remove('ghost'); btn.classList.add('primary');
+        state.mealPref = btn.getAttribute('data-onb-meal');
+      });
+    });
+
+    var workBtns = node.querySelectorAll('[data-onb-work]');
+    workBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        workBtns.forEach(function (b) { b.classList.remove('primary'); b.classList.add('ghost'); });
+        btn.classList.remove('ghost'); btn.classList.add('primary');
+        state.workMode = btn.getAttribute('data-onb-work');
+      });
+    });
+
+    var privacyBtn = node.querySelector('[data-onb-privacy]');
+    var saveBtn = node.querySelector('[data-act="save-onboarding"]');
+    privacyBtn.addEventListener('click', function () {
+      state.privacyAgreed = !state.privacyAgreed;
+      privacyBtn.classList.toggle('primary', state.privacyAgreed);
+      privacyBtn.classList.toggle('ghost', !state.privacyAgreed);
+      privacyBtn.textContent = (state.privacyAgreed ? '✓ ' : '🔒 ') + '사적 대화는 분석하지 않아요 — 동의합니다';
+      saveBtn.disabled = !state.privacyAgreed;
+    });
+
+    saveBtn.addEventListener('click', function () {
+      if (saveBtn.disabled) return;
+      disableCardButtons(node);
+      if (!state.onboarded) {
+        state.onboarded = true;
+        bumpTrust(5);
+      }
+      botSay('프로필 저장 완료! 신뢰도 링과 탐색 피드를 바로 보여드릴게요 🪪').then(function () {
+        return botSayCard(buildTrustRingNode());
+      }).then(function () {
+        return wait(reduceMotion ? 0 : 400);
+      }).then(function () {
+        return botSayCard(buildExploreFeedCard());
+      }).then(function (row) {
+        wireExploreFeedCard(row.querySelector('.card') || row);
+      });
+    });
+  }
+
+  /* ================= check-in / QR ================= */
+  function detectCheckinMode() {
+    if (state.forcedOnlineMode) return state.forcedOnlineMode;
+    var menu = (state.slot && (state.slot.menu || state.slot.menuLabel)) || '';
+    return /커피/.test(menu) ? 'online' : 'offline';
+  }
+
+  function buildCheckinCard() {
+    state.onlineMode = detectCheckinMode();
+    markFeature('onoff');
+    inspectorLog('RULE', state.onlineMode === 'online' ? 'slot≤30min → ONLINE · Meet 링크 생성' : '오프라인 판별 → QR 체크인 방식');
+    state.checkedIn = [];
+    state.checkinDone = false;
+    var isOnline = state.onlineMode === 'online';
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    var peopleRows = state.participants.map(function (p, idx) {
+      return '<div class="checkin-person" data-checkin-person="' + idx + '"><span class="avatar a' + (idx % 4) + '" style="width:20px;height:20px;font-size:9px;margin-left:0;">' + p.initial + '</span><span>' + p.name + '</span><span class="ci-state">대기중</span></div>';
+    }).join('');
+    wrap.innerHTML =
+      '<div class="card-title">📍 도착 체크인</div>' +
+      '<div class="checkin-mode-row"><span class="checkin-mode-badge ' + (isOnline ? 'online' : 'offline') + '">' + (isOnline ? '온라인 자동판별' : '오프라인 자동판별') + '</span><span class="note-inline">' + (isOnline ? '30분 내 온라인 슬롯은 자동으로 화상 모임으로 전환됩니다.' : '매장 도착 후 QR을 스캔하면 체크인됩니다.') + '</span></div>' +
+      (isOnline ? '' : '<div class="qr-box"></div>') +
+      '<div class="checkin-list">' + peopleRows + '</div>' +
+      '<div class="card-btn-row"><button class="card-btn primary" data-checkin-me>' + (isOnline ? '입장 확인' : 'QR 스캔 체크인') + '</button></div>';
+    return wrap;
+  }
+
+  function markCheckedIn(node, idx) {
+    var row = node.querySelector('[data-checkin-person="' + idx + '"]');
+    if (!row || row.classList.contains('done')) return;
+    row.classList.add('done');
+    row.querySelector('.ci-state').textContent = '체크인 완료 ✓';
+    if (state.checkedIn.indexOf(idx) === -1) state.checkedIn.push(idx);
+    checkAllCheckedIn(node);
+  }
+
+  function scheduleOtherCheckins(node) {
+    state.participants.forEach(function (p, idx) {
+      if (idx === 0) return;
+      var delay = reduceMotion ? 50 : (700 + idx * 500 + Math.random() * 300);
+      var t = setTimeout(function () { markCheckedIn(node, idx); }, delay);
+      state.demoTimers.push(t);
+    });
+  }
+
+  function checkAllCheckedIn(node) {
+    if (state.checkinDone) return;
+    if (state.checkedIn.length >= state.participants.length) {
+      state.checkinDone = true;
+      state.meetingsCount = (state.meetingsCount || 0) + 1;
+      state.participants.forEach(function (p) {
+        if (p.name.indexOf('나') === -1) state.newColleagues[p.name] = true;
+      });
+      bumpTrust(3);
+      setStage('checkin', '전원 체크인이 완료되면 디파짓이 자동으로 환급되고 참석 보너스가 적립됩니다.');
+      botSay('전원 체크인 완료! 디파짓 환급과 참석 보너스를 바로 적립할게요 🎉').then(function () {
+        addCreditTx('디파짓 환급 + 정상 참석 적립', 550);
+        appendToast('✅ +500P 환급 · +50P 적립 · 신뢰도 +3');
+        return botSayCard(buildCreditCard());
+      }).then(function () {
+        return wait(reduceMotion ? 0 : 400);
+      }).then(function () {
+        setStage('settle', '더치페이(n-빵) 정산과 크레딧 충전까지 한 화면에서 끝냅니다.');
+        return botSay('마지막으로 이번 모임 정산을 도와드릴게요 💰');
+      }).then(function () {
+        return botSayCard(buildSplitCard());
+      }).then(function (row) {
+        wireSplitCard(row.querySelector('.card') || row);
+        return wait(reduceMotion ? 0 : 400);
+      }).then(function () {
+        return botSayCard(buildPaymentCard());
+      }).then(function (row) {
+        wirePaymentCard(row.querySelector('.card') || row);
+      });
+    }
+  }
+
+  function wireCheckinCard(node) {
+    var btn = node.querySelector('[data-checkin-me]');
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+      markFeature('checkin');
+      btn.disabled = true;
+      btn.textContent = '체크인 완료 ✓';
+      markCheckedIn(node, 0);
+      scheduleOtherCheckins(node);
+    });
+  }
+
+  /* ================= credit ledger ================= */
+  function addCreditTx(label, amount) {
+    state.credit += amount;
+    state.creditLedger.push({ label: label, amount: amount });
+    inspectorLog('LEDGER', (amount >= 0 ? '+' : '') + amount + 'P ' + label + ' (잔액 ' + state.credit.toLocaleString() + 'P)');
+  }
+
+  function buildCreditCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    var rows = state.creditLedger.length
+      ? state.creditLedger.slice().reverse().map(function (tx) {
+          var cls = tx.amount >= 0 ? 'plus' : 'minus';
+          var sign = tx.amount >= 0 ? '+' : '';
+          return '<div class="credit-tx"><span>' + tx.label + '</span><span class="tx-amt ' + cls + '">' + sign + tx.amount.toLocaleString() + 'P</span></div>';
+        }).join('')
+      : '<div class="note-inline">아직 거래 내역이 없어요.</div>';
+    wrap.innerHTML =
+      '<div class="card-title">💰 가상 크레딧 원장</div>' +
+      '<div class="credit-balance"><span class="cb-num">' + state.credit.toLocaleString() + '</span><span class="cb-unit">P 보유중</span></div>' +
+      '<div class="credit-tx-list">' + rows + '</div>' +
+      '<div class="card-btn-row"><button class="card-btn ghost" data-act="topup">＋ 충전하기</button></div>' +
+      '<div class="pay-method-row" data-pay-row style="display:none;">' +
+        '<button class="pay-method-btn" data-pay="네이버페이" data-amount="10000">🟢 네이버페이 1만P</button>' +
+        '<button class="pay-method-btn" data-pay="카카오페이" data-amount="10000">🟡 카카오페이 1만P</button>' +
+        '<button class="pay-method-btn" data-pay="카드" data-amount="10000">💳 카드 1만P</button>' +
+      '</div>';
+    return wrap;
+  }
+
+  function wireCreditCard(node) {
+    var topupBtn = node.querySelector('[data-act="topup"]');
+    var payRow = node.querySelector('[data-pay-row]');
+    topupBtn.addEventListener('click', function () {
+      payRow.style.display = payRow.style.display === 'none' ? 'flex' : 'none';
+    });
+    node.querySelectorAll('[data-pay]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var label = btn.getAttribute('data-pay');
+        var amount = parseInt(btn.getAttribute('data-amount'), 10);
+        addCreditTx(label + ' 충전', amount);
+        payRow.style.display = 'none';
+        var fresh = buildCreditCard();
+        node.replaceWith(fresh);
+        wireCreditCard(fresh);
+      });
+    });
+  }
+
+  /* ================= payment (post-settle) ================= */
+  function buildPaymentCard() {
+    var amount = state.splitPerPerson || 0;
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">💳 결제 수단 선택</div>' +
+      '<div class="note-inline">내 정산 금액 <b>' + amount.toLocaleString() + 'P</b>를 아래 수단 중 하나로 즉시 결제할 수 있어요.</div>' +
+      '<div class="pay-method-row">' +
+        '<button class="pay-method-btn" data-paysim="네이버페이">🟢 네이버페이</button>' +
+        '<button class="pay-method-btn" data-paysim="카카오페이">🟡 카카오페이</button>' +
+        '<button class="pay-method-btn" data-paysim="카드">💳 카드</button>' +
+      '</div>' +
+      '<div class="note-inline" data-pay-result></div>' +
+      '<span class="sim-badge">SIMULATED</span>';
+    return wrap;
+  }
+
+  function wirePaymentCard(node) {
+    var resultEl = node.querySelector('[data-pay-result]');
+    node.querySelectorAll('[data-paysim]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        node.querySelectorAll('[data-paysim]').forEach(function (b) { b.disabled = true; });
+        resultEl.textContent = '✅ ' + btn.getAttribute('data-paysim') + '로 ' + (state.splitPerPerson || 0).toLocaleString() + 'P 결제 완료';
+      });
+    });
+  }
+
+  /* ================= n-bbang split settle ================= */
+  function buildSplitCard() {
+    var count = state.participants.length || state.capacity;
+    var total = count * 12000;
+    var perPerson = Math.round(total / count);
+    state.splitPerPerson = perPerson;
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    var rows = state.participants.map(function (p, idx) {
+      return '<div class="split-person-row" data-split-person="' + idx + '"><span class="avatar a' + (idx % 4) + '" style="width:20px;height:20px;font-size:9px;margin-left:0;">' + p.initial + '</span><span>' + p.name + '</span><span class="sp-amt">' + perPerson.toLocaleString() + 'P</span></div>';
+    }).join('');
+    wrap.innerHTML =
+      '<div class="card-title">🧾 n-빵 정산</div>' +
+      '<div class="settle-line"><span>총 결제 금액</span><span class="amt">' + total.toLocaleString() + 'P</span></div>' +
+      '<div class="split-list">' + rows + '</div>' +
+      '<div class="card-btn-row"><button class="card-btn primary" data-act="send-split-request">정산 요청 보내기</button></div>' +
+      '<span class="sim-badge">SIMULATED</span>';
+    return wrap;
+  }
+
+  function wireSplitCard(node) {
+    var btn = node.querySelector('[data-act="send-split-request"]');
+    btn.addEventListener('click', function () {
+      if (btn.disabled) return;
+      node.querySelectorAll('.split-person-row').forEach(function (row) {
+        if (!row.querySelector('.split-req-badge')) {
+          var badge = document.createElement('span');
+          badge.className = 'split-req-badge';
+          badge.textContent = '요청됨';
+          row.appendChild(badge);
+        }
+      });
+      btn.disabled = true;
+      btn.textContent = '정산 요청 완료';
+    });
+  }
+
+  function transitionRoom() {
+    state.fsm = 'ROOM_CREATED';
+    state.roomActive = true;
+    setStage('room', '대화방이 새로 생성되고 앱바 제목이 모임명으로 바뀝니다. 이제 장소 추천이 이어집니다.');
+
+    var newTitle = state.slot.emoji + ' ' + (state.slot.dateLabel || '') + ' ' + (state.slot.timeLabel ? state.slot.timeLabel.split(' ')[0] : '') + ' · ' + state.slot.menuLabel + ' (' + state.capacity + ')';
+    appHeader.classList.add('pulse');
+    roomTitle.textContent = newTitle;
+    roomSubtitle.textContent = state.participants.map(function (p) { return p.initial + (p.name.indexOf('나') !== -1 ? '(나)' : ''); }).join(', ') + ' 참여중';
+    botAvatar.textContent = state.slot.emoji || '🍱';
+    setTimeout(function () { appHeader.classList.remove('pulse'); }, 900);
+
+    addDayDivider('그룹 대화방이 생성되었습니다');
+
+    botSay('모두 반가워요! 먼저 공통점부터 살펴볼게요 🤝').then(function () {
+      return botSayCard(buildCommonGroundCard());
+    }).then(function () {
+      return wait(reduceMotion ? 0 : 400);
+    }).then(function () {
+      setStage('place', '메뉴에 맞는 주변 가게를 거리·평점 기준으로 추천합니다. 리마인드까지 봇이 챙깁니다.');
+      return botSayCard(buildPlaceCard());
+    }).then(function (row) {
+      wirePlaceCard(row.querySelector('.card') || row);
+      return wait(reduceMotion ? 0 : 500);
+    }).then(function () {
+      appendToast('📅 캘린더에 모임 일정을 등록했어요');
+      return wait(reduceMotion ? 0 : 500);
+    }).then(function () {
+      return botSayCard(buildOneHourReminderCard());
+    }).then(function (row) {
+      wireOneHourReminderCard(row.querySelector('.card') || row);
+    });
+  }
+
+  function proceedToCheckinFlow() {
+    Promise.resolve().then(function () {
+      if (!state.onboarded) {
+        return botSay('아 참, 처음이시니 프로필부터 간단히 만들어봐요 🪪').then(function () {
+          return botSayCard(buildOnboardingCard());
+        }).then(function (row) {
+          wireOnboardingCard(row.querySelector('.card') || row);
+        });
+      }
+      return null;
+    }).then(function () {
+      return wait(reduceMotion ? 0 : 600);
+    }).then(function () {
+      return botSay('당일이 되어 체크인을 시작할게요. 자동판별 결과부터 확인해주세요 📍');
+    }).then(function () {
+      return botSayCard(buildCheckinCard());
+    }).then(function (row) {
+      wireCheckinCard(row.querySelector('.card') || row);
+    });
+  }
+
+  /* ================= 확정 그룹방: 공통점 브리핑 (여정②) ================= */
+  function buildCommonGroundCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    var tags = state.profileTags.slice(0, 3);
+    wrap.innerHTML =
+      '<div class="card-title">🤝 공통점 브리핑</div>' +
+      '<div class="chip-row">' + tags.map(function (t) { return '<span class="chip-sm">#' + t + '</span>'; }).join('') + (state.slot.menuLabel ? '<span class="chip-sm">#' + state.slot.menuLabel + '</span>' : '') + '</div>' +
+      '<div class="note-inline">부서는 전부 달라요 — 개발·영업·인사가 한 테이블에 모였어요. 새로운 대화가 기대되네요!</div>' +
+      '<span class="tag brand">AI 대화 스타터</span>' +
+      '<div class="note-inline">"오늘 다들 ' + (state.slot.menuLabel || '이 모임') + ' 좋아하시는 이유가 뭐예요?"</div>';
+    return wrap;
+  }
+
+  /* ================= 리마인더 · 사전취소 · 대기 승급 (여정③) ================= */
+  function buildOneHourReminderCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">⏰ 모임 1시간 전</div>' +
+      '<div class="note-inline">' + fmtSlotTitle(state.slot) + ' 모임이 곧 시작돼요. 참석하실 건가요?</div>' +
+      '<div class="card-btn-row">' +
+        '<button class="card-btn good" data-act="reminder-attend" type="button">참석할게요</button>' +
+        '<button class="card-btn ghost" data-act="reminder-cancel" type="button">취소할게요</button>' +
+      '</div>';
+    return wrap;
+  }
+
+  function wireOneHourReminderCard(node) {
+    var attendBtn = node.querySelector('[data-act="reminder-attend"]');
+    var cancelBtn = node.querySelector('[data-act="reminder-cancel"]');
+    attendBtn.addEventListener('click', function () {
+      if (attendBtn.disabled) return;
+      markFeature('reminder');
+      disableCardButtons(node);
+      botSay('좋아요, 이따 뵐게요! 😊').then(function () {
+        proceedToCheckinFlow();
+      });
+    });
+    cancelBtn.addEventListener('click', function () {
+      if (cancelBtn.disabled) return;
+      markFeature('reminder');
+      disableCardButtons(node);
+      var removeIdx = -1;
+      for (var i = state.participants.length - 1; i >= 0; i--) {
+        if (state.participants[i].name.indexOf('나') === -1) { removeIdx = i; break; }
+      }
+      var removed = removeIdx !== -1 ? state.participants.splice(removeIdx, 1)[0] : null;
+      var promoted = WAITLIST_ROSTER[0];
+      if (removed && promoted) state.participants.push(promoted);
+      botSay((removed ? removed.name + '님이 취소했어요.' : '취소를 처리했어요.')).then(function () {
+        return botSayCard(buildWaitlistPromotionCard(removed, promoted));
+      }).then(function () {
+        return wait(reduceMotion ? 0 : 400);
+      }).then(function () {
+        proceedToCheckinFlow();
+      });
+    });
+  }
+
+  function buildWaitlistPromotionCard(removed, promoted) {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">🔁 대기자 자동 승급</div>' +
+      '<div class="note-inline">' + (removed ? removed.name : '참여자') + '님 취소로 빈 자리에 대기 1번 ' + (promoted ? promoted.name : '대기자') + '님이 자동으로 채워졌어요. 정원은 그대로 유지됩니다.</div>' +
+      '<span class="tag good">정원 유지 · ' + state.participants.length + '/' + state.capacity + '명</span>';
+    return wrap;
+  }
+
+  function buildPlaceCard() {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    var places = pickPlacesFor(state.slot.menu);
+    var html = '<div class="card-title">📍 근처 추천 장소</div>';
+    places.forEach(function (p) {
+      html +=
+        '<div class="place-card">' +
+          '<svg class="place-map" viewBox="0 0 54 54" aria-hidden="true">' +
+            '<rect width="54" height="54" fill="#EEF0F3"/>' +
+            '<path d="M4 40 L18 24 L28 32 L40 14 L50 22" stroke="#A9BAD9" stroke-width="2" fill="none"/>' +
+            '<circle cx="' + p.x + '" cy="' + p.y + '" r="4" fill="#33549C"/>' +
+          '</svg>' +
+          '<div class="place-info">' +
+            '<div class="pn">' + p.name + '</div>' +
+            '<div class="pm">' + p.dist + ' · <span class="stars">' + '★'.repeat(p.stars) + '☆'.repeat(5 - p.stars) + '</span> ' + p.rating + ' · ' + p.seat + ' · ' + p.price + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="note-inline">' + p.reason + '</div>' +
+        '<button class="card-btn ghost" style="align-self:flex-start;padding:4px 10px;font-size:10.5px;" data-book="' + p.name + '">예약 링크 열기</button>';
+    });
+    wrap.innerHTML = html;
+    return wrap;
+  }
+
+  function wirePlaceCard(node) {
+    node.querySelectorAll('[data-book]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (btn.disabled) return;
+        btn.disabled = true;
+        btn.textContent = '예약 링크 열림 (SIMULATED) ✓';
+      });
+    });
+  }
+
+  function pickPlacesFor(menu) {
+    var base = menu || '맛집';
+    var names = {
+      '마라탕': ['마라공방 본점', '탕화쿵푸 역삼점', '이연 마라탕'],
+      '삼겹살': ['옛날 그 삼겹살', '연탄집 본점', '숯불애 삼겹살'],
+      '커피챗': ['카페 어라운드', '블랙워터 로스터스', '카페 결'],
+      '초밥': ['스시효', '초밥한잔', '스시노']
+    };
+    var list = names[base] || ['사내 근처 맛집 A', '사내 근처 맛집 B', '사내 근처 맛집 C'];
+    var seat = ['4인석 여유', '4인석 가능', '2~4인석'];
+    var price = ['₩₩', '₩₩', '₩₩₩'];
+    var reason = [
+      '단체석이 넉넉해 대기 없이 바로 입장 가능해요',
+      '평점 대비 가성비가 좋아 팀 점심에 자주 쓰여요',
+      '조용한 룸이 있어 대화하기 좋아요'
+    ];
+    return [
+      { name: list[0], dist: '도보 3분', stars: 5, rating: '4.6', x: 30, y: 20, seat: seat[0], price: price[0], reason: reason[0] },
+      { name: list[1], dist: '도보 6분', stars: 4, rating: '4.3', x: 20, y: 34, seat: seat[1], price: price[1], reason: reason[1] },
+      { name: list[2] || list[0], dist: '도보 8분', stars: 4, rating: '4.1', x: 42, y: 28, seat: seat[2], price: price[2], reason: reason[2] }
+    ];
+  }
+
+  /* ================= merge-suggestion side scenario ================= */
+  function maybeSuggestMerge(newSlot) {
+    if (!state.roomActive && state.fsm === 'RECRUITING' && state.slot && sameDaypart(state.slot, newSlot) && similarMenu(state.slot, newSlot)) {
+      return true;
+    }
+    return false;
+  }
+  function sameDaypart(a, b) { return a.daypart && b.daypart && a.daypart === b.daypart; }
+  function similarMenu(a, b) { return a.menu && b.menu && a.menu === b.menu; }
+
+  function showMergeSuggestion(existingSlot, incomingSlot) {
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">🔀 비슷한 모임 발견</div>' +
+      '<div class="note-inline">30분 전 <b>' + fmtSlotTitle(existingSlot) + '</b> 모임이 이미 모집 중이에요. 합칠까요?</div>' +
+      '<div class="card-btn-row">' +
+        '<button class="card-btn primary" data-act="merge-yes" type="button">합치기</button>' +
+        '<button class="card-btn ghost" data-act="merge-no" type="button">따로 만들기</button>' +
+      '</div>';
+    botSayCard(wrap).then(function (row) {
+      var yesBtn = row.querySelector('[data-act="merge-yes"]');
+      var noBtn = row.querySelector('[data-act="merge-no"]');
+      yesBtn.addEventListener('click', function () {
+        disableCardButtons(row);
+        botSay('두 모임을 합쳐 새 방을 만들었어요. (네이버웍스 실연동은 베타 이후 지원 예정이라, 지금은 이 화면에서 합치는 과정만 시뮬레이션할게요)').then(function () {
+          var mergedCount = Math.max(existingSlot.count || 0, incomingSlot.count || 0) || state.capacity;
+          state.capacity = Math.max(2, Math.min(ROSTER.length + 1, mergedCount));
+          updateRecruitCard();
+        });
+      });
+      noBtn.addEventListener('click', function () {
+        disableCardButtons(row);
+        botSay('알겠어요, 별도로 모집을 시작할게요.').then(function () {
+          startRecruiting();
+        });
+      });
+    });
+  }
+
+  /* ================= slot-filling / question loop ================= */
+  var MISSING_QUESTIONS = {
+    count: '몇 분이서 가실까요? 🙂',
+    menu: '무엇을 함께 하고 싶으세요? (메뉴나 활동을 알려주세요)',
+    time: '몇 시쯤이 좋을까요?',
+    date: '언제로 잡을까요? (오늘/내일/모레 또는 요일로 말씀해주세요)'
+  };
+
+  function nextMissingField(slot) {
+    if (!slot.date) return 'date';
+    if (!slot.time) return 'time';
+    if (!slot.menu) return 'menu';
+    if (!slot.count) return 'count';
+    return null;
+  }
+
+  function mergeFollowUp(slot, text) {
+    // try to fill just the pending field from a short follow-up reply
+    var parsed = parseSentence(text);
+    if (state.pendingField === 'count') {
+      var mNum = text.match(/(\d+)\s*(명|인)?/);
+      if (mNum) { slot.count = parseInt(mNum[1], 10); return true; }
+      for (var w in NUM_WORDS) {
+        if (text.indexOf(w) !== -1) { slot.count = NUM_WORDS[w]; return true; }
+      }
+    }
+    if (state.pendingField === 'menu' && parsed.menu) { slot.menu = parsed.menu; slot.menuLabel = parsed.menuLabel; slot.emoji = parsed.emoji; return true; }
+    if (state.pendingField === 'time' && parsed.time) { slot.time = parsed.time; slot.timeLabel = parsed.timeLabel; return true; }
+    if (state.pendingField === 'date' && parsed.date) { slot.date = parsed.date; slot.dateLabel = parsed.dateLabel; return true; }
+    // fallback: merge in whatever the parser found regardless of which field we asked for
+    var merged = false;
+    ['date', 'time', 'menu', 'count'].forEach(function (f) {
+      if (!slot[f] && parsed[f]) { slot[f] = parsed[f]; merged = true; }
+    });
+    if (parsed.dateLabel && !slot.dateLabel) slot.dateLabel = parsed.dateLabel;
+    if (parsed.timeLabel && !slot.timeLabel) slot.timeLabel = parsed.timeLabel;
+    if (parsed.menuLabel && !slot.menuLabel) { slot.menuLabel = parsed.menuLabel; slot.emoji = parsed.emoji; }
+    return merged;
+  }
+
+  /* ================= main input handler ================= */
+  function handleUserInput(rawText) {
+    var text = rawText.trim();
+    if (!text) return;
+    addUserBubble(text);
+    chatInput.value = '';
+
+    if (state.persona === 'guest') {
+      handleGuestInput(text);
+      return;
+    }
+
+    if (state.fsm === 'IDLE' || state.fsm === 'CONFIRM' && !state.slot) {
+      tryParseFresh(text);
+      return;
+    }
+
+    if (state.fsm === 'PARSING') {
+      if (!state.slot) { tryParseFresh(text); return; }
+      var filled = mergeFollowUp(state.slot, text);
+      proceedAfterFill();
+      return;
+    }
+
+    if (state.fsm === 'CONFIRM') {
+      // user typed something instead of pressing a button — treat as edit request, re-parse over existing slot
+      var parsedEdit = parseSentence(text);
+      var changed = false;
+      ['date', 'time', 'menu', 'count'].forEach(function (f) {
+        if (parsedEdit[f]) { state.slot[f] = parsedEdit[f]; changed = true; }
+      });
+      if (parsedEdit.dateLabel) state.slot.dateLabel = parsedEdit.dateLabel;
+      if (parsedEdit.timeLabel) state.slot.timeLabel = parsedEdit.timeLabel;
+      if (parsedEdit.menuLabel) { state.slot.menuLabel = parsedEdit.menuLabel; state.slot.emoji = parsedEdit.emoji; }
+      if (changed) {
+        botSayCard(buildConfirmCard(state.slot)).then(wireConfirmCard);
+      } else {
+        botSay('네, 알겠어요! 위 카드의 [모집 시작] 또는 [수정] 버튼을 눌러주세요.');
+      }
+      return;
+    }
+
+    if (state.fsm === 'RECRUITING' || state.fsm === 'FULL') {
+      // check merge scenario trigger
+      var maybeSlot = parseSentence(text);
+      if (maybeSlot.anySignal && maybeSuggestMerge(maybeSlot)) {
+        showMergeSuggestion(state.slot, maybeSlot);
+        return;
+      }
+      botSay('지금 다른 모임이 모집 중이에요. 새 모임은 이번 모집이 끝난 뒤 만들어주세요 🙏');
+      return;
+    }
+
+    if (state.fsm === 'ROOM_CREATED') {
+      botSay('네! 방금 만든 방에서 편하게 이야기 나눠주세요 😊');
+      return;
+    }
+
+    // fallback
+    tryParseFresh(text);
+  }
+
+  function tryParseFresh(text) {
+    var parsed = parseSentence(text);
+    if (!parsed.anySignal) {
+      state.fsm = 'PARSING';
+      botSay('음, 이해하지 못했어요. 예: "내일 점심 마라탕 3명" 처럼 말씀해주세요 🙂');
+      return;
+    }
+    state.slot = parsed;
+    setStage('parse', '문장에서 날짜·시간·메뉴·인원을 추출했습니다. 빠진 항목은 봇이 되물어 채웁니다.');
+    markFeature('nlp');
+    proceedAfterFill();
+  }
+
+  function proceedAfterFill() {
+    var missing = nextMissingField(state.slot);
+    if (missing) {
+      state.fsm = 'PARSING';
+      state.pendingField = missing;
+      botSay(MISSING_QUESTIONS[missing]);
+      return;
+    }
+    state.pendingField = null;
+    state.fsm = 'CONFIRM';
+    logParse(state.slot);
+    botSayCard(buildConfirmCard(state.slot)).then(wireConfirmCard);
+  }
+
+  /* ================= guest persona ================= */
+  function handleGuestInput(text) {
+    if (!state.slot || (state.fsm !== 'RECRUITING' && state.fsm !== 'FULL' && state.fsm !== 'ROOM_CREATED')) {
+      botSay('아직 모집 중인 모임에만 반응할 수 있어요. 상단 [개설자 김대리] 탭에서 먼저 모임을 만들어보세요!');
+      return;
+    }
+
+    var alreadyIn = state.participants.some(function (p) { return p.name === '박주임'; });
+
+    if (/참여|낄게|갈래|할게|신청|끼워|저요/.test(text)) {
+      if (alreadyIn) {
+        botSay('이미 참여 확정된 모임이에요! 대화방에서 만나요 🙌');
+      } else if (state.fsm === 'RECRUITING') {
+        sendGuestInvite();
+      } else {
+        botSay('앗, 이미 정원이 마감된 모임이에요. 다음 모집을 기다려주세요!');
+      }
+      return;
+    }
+    if (/시간|몇\s*시|언제/.test(text)) {
+      botSay((state.slot.dateLabel || '날짜 미정') + ' ' + (state.slot.timeLabel || '시간 미정') + '이에요.');
+      return;
+    }
+    if (/메뉴|뭐\s*먹|무슨\s*음식/.test(text)) {
+      botSay((state.slot.emoji || '🍽️') + ' ' + (state.slot.menuLabel || '메뉴 미정') + ' 모임이에요.');
+      return;
+    }
+    if (/인원|몇\s*명|정원/.test(text)) {
+      botSay('정원 ' + state.capacity + '명 중 ' + state.participants.length + '명 참여중이에요.');
+      return;
+    }
+    if (/디파짓|보증금|환불|포인트/.test(text)) {
+      botSay('참여 디파짓은 500P예요. 정상 참석하면 +50P와 함께 전액 환급돼요. 노쇼 시엔 환급되지 않아요.');
+      return;
+    }
+    if (/취소|안\s*갈래|빠질게/.test(text)) {
+      if (alreadyIn) {
+        botSay('참여를 취소할까요? 지금은 데모에서 취소 기능은 준비 중이에요 — 실제 서비스에선 디파짓 규정에 따라 환급돼요.');
+      } else {
+        botSay('아직 참여 신청 전이에요. 참여하시려면 "참여할게요"라고 말해보세요!');
+      }
+      return;
+    }
+
+    botSay('음, 이해하지 못했어요. "참여할게요", "시간 언제예요?", "메뉴 뭐예요?" 처럼 물어봐 주세요!');
+  }
+
+  function sendGuestInvite() {
+    if (!state.slot) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML =
+      '<div class="card-title">' + (state.slot.emoji || '🍽️') + ' 참여 제안</div>' +
+      '<div class="note-inline">' + fmtSlotTitle(state.slot) + ' 모임에 자리가 있어요, 참여하실래요?</div>' +
+      '<div class="deposit-row">🪙 참여 시 디파짓 <b>500P</b> · 정상 참석하면 전액 환급 <b>+50P</b></div>' +
+      '<div class="card-btn-row">' +
+        '<button class="card-btn good" data-act="join-yes" type="button">500P 걸고 참여</button>' +
+        '<button class="card-btn ghost" data-act="join-no" type="button">다음에요</button>' +
+      '</div>';
+    botSayCard(wrap).then(function (row) {
+      var yesBtn = row.querySelector('[data-act="join-yes"]');
+      var noBtn = row.querySelector('[data-act="join-no"]');
+      yesBtn.addEventListener('click', function () {
+        disableCardButtons(row);
+        botSay('참여 확정! 개설자에게도 알렸어요 🙌').then(function () {
+          // guard: skip if 박주임 already joined via the regular ROSTER queue in the
+          // meantime — prevents a double-count now that this scene runs automatically.
+          var already = state.participants.some(function (p) { return p.name === '박주임'; });
+          if (state.fsm === 'RECRUITING' && !state.guestJoinedFromDM && !already) {
+            state.guestJoinedFromDM = true;
+            state.participants.push({ name: '박주임', initial: '박', cls: 'a1' });
+            // reflect on host card too (shared state / same card in DOM if host view active)
+            updateRecruitCard();
+            if (state.participants.length >= state.capacity) setTimeout(onCapacityFull, 700);
+          }
+        });
+      });
+      noBtn.addEventListener('click', function () {
+        disableCardButtons(row);
+        botSay('알겠어요, 다음 기회에 함께해요!');
+      });
+    });
+  }
+
+  /* ================= automatic guest-viewpoint cutscene (replaces manual persona tabs) ================= */
+  function showPersonaBanner(text) {
+    var el = document.getElementById('personaBanner');
+    if (!el) return;
+    el.textContent = text;
+    el.hidden = false;
+  }
+
+  function hidePersonaBanner() {
+    var el = document.getElementById('personaBanner');
+    if (el) el.hidden = true;
+  }
+
+  function forceHostPersona() {
+    state.persona = 'host';
+    roomSubtitle.textContent = state.roomActive
+      ? state.participants.map(function (p) { return p.initial; }).join(', ') + ' 참여중'
+      : '개설자 김대리 · 항상 대기중';
+  }
+
+  // fires automatically partway through recruiting — no manual tab needed.
+  // Skips silently if the room already filled up before the timer landed.
+  function runGuestCutscene() {
+    if (state.guestCutsceneDone) return;
+    if (state.fsm !== 'RECRUITING' || !state.slot || state.guestJoinedFromDM) return;
+    var already = state.participants.some(function (p) { return p.name === '박주임'; });
+    if (already) return;
+    state.guestCutsceneDone = true;
+    // claim 박주임's turn from the ROSTER queue so the regular join scheduler
+    // can't also add them independently while this DM-invite cutscene plays out.
+    state.pendingJoins = (state.pendingJoins || []).filter(function (p) { return p.name !== '박주임'; });
+    state.persona = 'guest';
+    showPersonaBanner('👀 지금은 박주임(초대받은 동료) 시점이에요');
+    roomSubtitle.textContent = '참여자 박주임 시점';
+    sendGuestInvite();
+    var t = setTimeout(function () {
+      if (state.fsm !== 'RECRUITING') { returnToHostPersona(); return; }
+      var joinBtn = document.querySelector('[data-act="join-yes"]');
+      if (joinBtn && !joinBtn.disabled) joinBtn.click();
+      var t2 = setTimeout(returnToHostPersona, reduceMotion ? 0 : 1400);
+      state.demoTimers.push(t2);
+    }, reduceMotion ? 0 : 1500);
+    state.demoTimers.push(t);
+  }
+
+  function returnToHostPersona() {
+    if (state.persona !== 'guest') return;
+    forceHostPersona();
+    botSay('다시 김대리(개설자) 시점으로 돌아갈게요 🔁').then(function () {
+      hidePersonaBanner();
+    });
+  }
+
+  /* ================= example buttons ================= */
+  exampleBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      if (btn.getAttribute('data-special') === 'slot-picker') {
+        if (state.persona !== 'host') forceHostPersona();
+        if (!state.roomEntered) { state.roomEntered = true; showRoomView(); beginRoomFlow(); }
+        else if (state.view !== 'room') { showRoomView(); }
+        if (state.fsm === 'IDLE') {
+          state.fsm = 'PARSING';
+          botSay('슬롯 선택 카드를 보여드릴게요 🗓️').then(function () {
+            return botSayCard(buildSlotPickerCard());
+          }).then(function (row) {
+            wireSlotPickerCard(row.querySelector('.card') || row);
+          });
+        } else {
+          botSay('지금 다른 모임이 진행 중이에요. [↺ 처음부터] 버튼으로 초기화한 뒤 다시 시도해주세요.');
+        }
+        return;
+      }
+      var text = btn.getAttribute('data-example');
+      if (state.persona !== 'host') {
+        forceHostPersona();
+      }
+      // bug fix: example buttons only fill #chatInput, which lives inside the
+      // room view — without this, clicking an example while still on the room
+      // list does nothing visible (input is hidden, nothing to focus/send).
+      if (!state.roomEntered) { state.roomEntered = true; showRoomView(); beginRoomFlow(); }
+      else if (state.view !== 'room') { showRoomView(); }
+      chatInput.value = text;
+      chatInput.focus();
+    });
+  });
+
+  /* ================= send handlers ================= */
+  function doSend() {
+    var v = chatInput.value;
+    if (!v.trim()) return;
+    handleUserInput(v);
+  }
+  sendBtn.addEventListener('click', doSend);
+  chatInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); doSend(); }
+  });
+
+  /* ================= reset ================= */
+  /* ================= view: list / room ================= */
+  var DECORATIVE_ROOMS = [
+    { name: '점심조 3반', preview: '내일도 마라탕 콜?', time: '어제', unread: 2, avatars: ['이', '정', '최'] },
+    { name: '커피챗 소모임', preview: '다음 주에 또 뭉쳐요', time: '월', unread: 0, avatars: ['박', '나'] }
+  ];
+
+  /* ================= free navigation: bottom tab bar ================= */
+  function hideAllPanes() {
+    viewList.hidden = true;
+    viewRoom.hidden = true;
+    viewExplore.hidden = true;
+    viewMy.hidden = true;
+  }
+
+  function setActiveTabBtn(tab) {
+    demoTabBtns.forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-tab') === tab); });
+  }
+
+  // switchTab only changes which pane is visible within the current chat sub-state
+  // (list vs room) — it never touches chat history, so mid-scenario conversations
+  // are preserved when the judge browses away and comes back.
+  function switchTab(tab) {
+    state.activeTab = tab;
+    setActiveTabBtn(tab);
+    hideAllPanes();
+    if (tab === 'chat') {
+      if (state.view === 'room') { viewRoom.hidden = false; } else { viewList.hidden = false; renderRoomList(); }
+      roomTitle.textContent = 'OfficeMate';
+      roomSubtitle.textContent = state.view === 'room'
+        ? (state.persona === 'guest' ? '참여자 박주임 시점' : '개설자 김대리 · 항상 대기중')
+        : '대화방 목록';
+    } else if (tab === 'explore') {
+      markFeature('explore');
+      viewExplore.hidden = false;
+      renderExploreView();
+      roomTitle.textContent = 'OfficeMate';
+      roomSubtitle.textContent = '탐색 피드';
+    } else if (tab === 'my') {
+      markFeature('mypage');
+      viewMy.hidden = false;
+      renderMyView();
+      roomTitle.textContent = 'OfficeMate';
+      roomSubtitle.textContent = '마이페이지';
+    }
+  }
+
+  function renderExploreView() {
+    if (!exploreBody) return;
+    exploreBody.innerHTML = '';
+    var card = buildExploreFeedCard();
+    exploreBody.appendChild(card);
+    wireExploreFeedCard(card);
+  }
+
+  function renderMyView() {
+    if (!myBody) return;
+    myBody.innerHTML = '';
+    var card = buildMyPageCard();
+    myBody.appendChild(card);
+  }
+
+  // cross-tab flow: joining a feed room from 탐색 switches to 채팅 and opens the room
+  function joinFeedRoom(title) {
+    var firstEntry = !state.roomEntered;
+    state.roomEntered = true;
+    showRoomView();
+    if (firstEntry) beginRoomFlow();
+    addDayDivider(title + ' 참여');
+    addGuestBubble({ name: '유대리', cls: 'a2' }, '어서오세요! ' + title + ' 모임에 참여하신 걸 환영해요 🙌');
+  }
+
+  demoTabBtns.forEach(function (btn) {
+    btn.addEventListener('click', function () { switchTab(btn.getAttribute('data-tab')); });
+  });
+
+  /* ================= feature checklist triggers ================= */
+  document.querySelectorAll('.feat-item').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var key = btn.getAttribute('data-feat');
+      if (key === 'nlp') {
+        var ex1 = document.querySelector('.example-btn[data-example="내일 점심 마라탕 3명"]');
+        if (ex1) ex1.click();
+      } else if (key === 'slotpicker') {
+        var ex4 = document.querySelector('.example-btn[data-special="slot-picker"]');
+        if (ex4) ex4.click();
+      } else if (key === 'mypage') {
+        switchTab('my');
+      } else if (key === 'explore') {
+        switchTab('explore');
+      }
+      // remaining keys have no standalone trigger (they only make sense mid-scenario) —
+      // their `title` attribute already guides the user to where they appear.
+    });
+  });
+
+  function showListView() {
+    state.view = 'list';
+    switchTab('chat');
+  }
+
+  function showRoomView() {
+    state.view = 'room';
+    state.roomListUnread = false;
+    switchTab('chat');
+  }
+
+  function renderRoomList() {
+    if (!roomListEl) return;
+    roomListEl.innerHTML = '';
+    var activeRow = document.createElement('div');
+    activeRow.className = 'room-list-item';
+    activeRow.setAttribute('data-room', 'active');
+    var activeLastMsg = state.roomActive ? '모임방이 활성화되어 있어요' : '"내일 점심 마라탕 3명"처럼 말해보세요';
+    activeRow.innerHTML =
+      '<div class="rli-avatar-wrap">' +
+        '<div class="rli-avatars"><span class="avatar">🍱</span></div>' +
+        (state.roomListUnread ? '<span class="rli-unread-dot"></span>' : '') +
+      '</div>' +
+      '<div class="rli-body">' +
+        '<div class="rli-top-row"><span class="rli-name">OfficeMate 모임방</span><span class="rli-time">지금</span></div>' +
+        '<div class="rli-bottom-row"><span class="rli-preview"></span>' + (state.roomListUnread ? '<span class="rli-badge">N</span>' : '') + '</div>' +
+      '</div>';
+    activeRow.querySelector('.rli-preview').textContent = activeLastMsg;
+    activeRow.addEventListener('click', function () {
+      showRoomView();
+      if (!state.roomEntered) {
+        state.roomEntered = true;
+        beginRoomFlow();
+      }
+    });
+    roomListEl.appendChild(activeRow);
+
+    DECORATIVE_ROOMS.forEach(function (r) {
+      var row = document.createElement('div');
+      row.className = 'room-list-item';
+      var avatarsHtml = r.avatars.map(function (a) { return '<span class="avatar">' + a + '</span>'; }).join('');
+      row.innerHTML =
+        '<div class="rli-avatar-wrap">' +
+          '<div class="rli-avatars">' + avatarsHtml + '</div>' +
+          (r.unread ? '<span class="rli-unread-dot"></span>' : '') +
+        '</div>' +
+        '<div class="rli-body">' +
+          '<div class="rli-top-row"><span class="rli-name">' + r.name + '</span><span class="rli-time">' + r.time + '</span></div>' +
+          '<div class="rli-bottom-row"><span class="rli-preview"></span>' + (r.unread ? '<span class="rli-badge">' + r.unread + '</span>' : '') + '</div>' +
+        '</div>';
+      row.querySelector('.rli-preview').textContent = r.preview;
+      row.addEventListener('click', function () {
+        botSay('(데모용 방입니다 — 실제 대화는 상단 OfficeMate 모임방에서 진행돼요.)');
+      });
+      roomListEl.appendChild(row);
+    });
+  }
+
+  function beginRoomFlow() {
+    addDayDivider('대화 시작');
+    botSay('안녕하세요! 저는 OfficeMate예요. "내일 점심 마라탕 3명"처럼 한 줄만 말씀해주시면 모집부터 방 생성까지 제가 처리할게요 🍱');
+  }
+
+  appBackBtn.addEventListener('click', function () {
+    showListView();
+  });
+
+  btnNewRoom.addEventListener('click', function () {
+    showRoomView();
+    if (!state.roomEntered) {
+      state.roomEntered = true;
+      beginRoomFlow();
+    }
+    if (state.fsm !== 'IDLE') {
+      botSay('지금 진행 중인 모임이 있어요. 이 방에서 이어서 진행해주세요.');
+    }
+  });
+
+  function resetAll() {
+    stopDemo();
+    stopTimeAttack();
+    state.fsm = 'IDLE';
+    state.slot = null;
+    state.pendingField = null;
+    state.participants = [];
+    state.capacity = 4;
+    state.roomActive = false;
+    state.guestJoinedFromDM = false;
+    state.pendingJoins = [];
+    state.joinTimer = null;
+    state.taFastTimer = null;
+    state.credit = 1200;
+    state.creditLedger = [];
+    state.checkedIn = [];
+    state.checkinDone = false;
+    state.onlineMode = null;
+    state.forcedOnlineMode = null;
+    state.slotPicks = [];
+    state.mergeOffered = false;
+    state.deadlineReminded = false;
+    state.inspVirtualSec = 0;
+    resetInspectorLog();
+    resetFeatureChecklist();
+    state.persona = 'host';
+    state.guestCutsceneDone = false;
+    hidePersonaBanner();
+    chatBody.innerHTML = '';
+    botAvatar.textContent = '🍱';
+    setStage('parse', '입력창에 자연어 한 줄을 입력하면 파서가 날짜·시간·메뉴·인원을 추출합니다. 예시 버튼을 눌러 시작해보세요.');
+    stageItems.forEach(function (el) { el.classList.remove('active', 'done'); });
+    state.roomListUnread = true;
+    state.roomEntered = false;
+    showListView();
+  }
+
+  /* ================= auto demo ================= */
+  function typeIntoInput(text) {
+    return new Promise(function (resolve) {
+      if (reduceMotion) { chatInput.value = text; resolve(); return; }
+      var i = 0;
+      chatInput.value = '';
+      var iv = setInterval(function () {
+        if (!state.demoRunning) { clearInterval(iv); resolve(); return; }
+        i++;
+        chatInput.value = text.slice(0, i);
+        if (i >= text.length) {
+          clearInterval(iv);
+          resolve();
+        }
+      }, 55);
+    });
+  }
+
+  function autoWait(ms) {
+    return new Promise(function (resolve) {
+      var t = setTimeout(resolve, ms);
+      state.demoTimers.push(t);
+    });
+  }
+
+  function waitForFsm(target, timeoutMs) {
+    return new Promise(function (resolve) {
+      var start = Date.now();
+      var iv = setInterval(function () {
+        if (!state.demoRunning) { clearInterval(iv); resolve(); return; }
+        if (state.fsm === target || Date.now() - start > timeoutMs) {
+          clearInterval(iv);
+          resolve();
+        }
+      }, 150);
+      state.demoTimers.push(iv);
+    });
+  }
+
+  function waitForSelector(sel, timeoutMs) {
+    return new Promise(function (resolve) {
+      var start = Date.now();
+      var iv = setInterval(function () {
+        if (!state.demoRunning) { clearInterval(iv); resolve(null); return; }
+        var el = document.querySelector(sel);
+        if (el || Date.now() - start > timeoutMs) { clearInterval(iv); resolve(el); }
+      }, 150);
+      state.demoTimers.push(iv);
+    });
+  }
+
+  function waitForStage(target, timeoutMs) {
+    return new Promise(function (resolve) {
+      var start = Date.now();
+      var iv = setInterval(function () {
+        if (!state.demoRunning) { clearInterval(iv); resolve(); return; }
+        var el = document.querySelector('.stage-item[data-stage="' + target + '"]');
+        if ((el && el.classList.contains('done')) || Date.now() - start > timeoutMs) {
+          clearInterval(iv);
+          resolve();
+        }
+      }, 150);
+      state.demoTimers.push(iv);
+    });
+  }
+
+  function runAutoDemo() {
+    resetAll();
+    state.demoRunning = true;
+    btnAutoDemo.disabled = true;
+    btnStopDemo.disabled = false;
+    chatInput.disabled = true;
+    sendBtn.disabled = true;
+
+    Promise.resolve()
+      .then(function () { return autoWait(400); })
+      .then(function () {
+        state.roomEntered = true;
+        showRoomView();
+        beginRoomFlow();
+      })
+      .then(function () { return autoWait(900); })
+      .then(function () { return typeIntoInput('내일 점심 마라탕 3명'); })
+      .then(function () {
+        if (!state.demoRunning) return;
+        handleUserInput('내일 점심 마라탕 3명');
+        return waitForFsm('CONFIRM', 6000);
+      })
+      .then(function () { return autoWait(1200); })
+      .then(function () {
+        if (!state.demoRunning) return;
+        var startBtn = document.querySelector('#chatBody [data-act="start-recruit"]');
+        if (startBtn) startBtn.click();
+        return waitForSelector('[data-act="deposit-confirm"]', 6000);
+      })
+      .then(function (depositBtn) {
+        if (!state.demoRunning) return;
+        if (depositBtn) depositBtn.click();
+        return waitForStage('room', 22000);
+      })
+      .then(function () { return autoWait(600); })
+      .then(function () {
+        if (!state.demoRunning) return;
+        // guest-viewpoint cutscene fires on its own timer inside startRecruiting();
+        // just give it a window to show its banner and auto-revert before moving on.
+        return waitForSelector('#personaBanner:not([hidden])', 6000);
+      })
+      .then(function () {
+        if (!state.demoRunning) return;
+        return waitForSelector('#personaBanner[hidden]', 8000);
+      })
+      .then(function () { return waitForStage('place', 12000); })
+      .then(function () { return autoWait(2000); })
+      .then(function () { return waitForSelector('[data-act="reminder-attend"]', 8000); })
+      .then(function (attendBtn) {
+        if (!state.demoRunning) return;
+        if (attendBtn) attendBtn.click();
+        return autoWait(500);
+      })
+      .then(function () {
+        if (!state.demoRunning) return;
+        return new Promise(function (resolve) {
+          var start = Date.now();
+          var iv = setInterval(function () {
+            if (!state.demoRunning) { clearInterval(iv); resolve(); return; }
+            var btn = document.querySelector('[data-checkin-me]');
+            if (btn || Date.now() - start > 8000) { clearInterval(iv); resolve(); }
+          }, 150);
+          state.demoTimers.push(iv);
+        });
+      })
+      .then(function () { return autoWait(700); })
+      .then(function () {
+        if (!state.demoRunning) return;
+        var checkinBtn = document.querySelector('[data-checkin-me]');
+        if (checkinBtn) checkinBtn.click();
+        return waitForStage('settle', 14000);
+      })
+      .then(function () { return autoWait(1500); })
+      .then(function () {
+        finishDemo();
+      });
+  }
+
+  function finishDemo() {
+    state.demoRunning = false;
+    btnAutoDemo.disabled = false;
+    btnStopDemo.disabled = true;
+    chatInput.disabled = false;
+    sendBtn.disabled = false;
+  }
+
+  function stopDemo() {
+    state.demoTimers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
+    state.demoTimers = [];
+    state.demoRunning = false;
+    btnAutoDemo.disabled = false;
+    btnStopDemo.disabled = true;
+    chatInput.disabled = false;
+    sendBtn.disabled = false;
+  }
+
+  btnAutoDemo.addEventListener('click', runAutoDemo);
+  btnStopDemo.addEventListener('click', function () {
+    stopDemo();
+    addBotBubble('(자동 데모를 중지했어요. 직접 입력해보세요.)');
+  });
+  btnReset.addEventListener('click', resetAll);
+
+  /* ================= clock ================= */
+  function tickClock() {
+    var now = new Date();
+    var hh = now.getHours().toString().padStart(2, '0');
+    var mm = now.getMinutes().toString().padStart(2, '0');
+    clockTime.textContent = hh + ':' + mm;
+  }
+  tickClock();
+  setInterval(tickClock, 15000);
+
+  /* ================= init ================= */
+  resetAll();
+
+})();
+</script>
+
+<!-- 히어로 자동 재생 미니 폰: #om-demo 엔진과 완전히 독립된 경량 스크립트 -->
+<script>
+(function () {
+  "use strict";
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var heroBody = document.getElementById('heroBody');
+  var heroClock = document.getElementById('heroClock');
+  var heroPhone = document.getElementById('heroPhone');
+  if (!heroBody) return;
+
+  function goToDemo() {
+    var target = document.getElementById('demo');
+    if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  if (heroPhone) {
+    heroPhone.addEventListener('click', goToDemo);
+    heroPhone.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goToDemo(); }
+    });
+  }
+
+  function tickHeroClock() {
+    if (!heroClock) return;
+    var now = new Date();
+    var hh = now.getHours().toString().padStart(2, '0');
+    var mm = now.getMinutes().toString().padStart(2, '0');
+    heroClock.textContent = hh + ':' + mm;
+  }
+  tickHeroClock();
+  setInterval(tickHeroClock, 15000);
+
+  function el(html) {
+    var d = document.createElement('div');
+    d.innerHTML = html;
+    return d.firstElementChild;
+  }
+
+  function appendMsg(node) {
+    node.style.opacity = '0';
+    node.style.animation = 'msgIn 0.35s ease forwards';
+    heroBody.appendChild(node);
+    heroBody.scrollTop = heroBody.scrollHeight;
+    return node;
+  }
+
+  var timers = [];
+  function wait(ms) {
+    return new Promise(function (resolve) {
+      var t = setTimeout(resolve, ms);
+      timers.push(t);
+    });
+  }
+
+  function renderFinalStatic() {
+    heroBody.innerHTML =
+      '<div class="bubble">오늘 12:00 점심 함께할 네 분이 모였어요 🎉</div>' +
+      '<div class="m-card">' +
+        '<div class="avatar-stack">' +
+          '<span style="background:var(--morning)">김</span>' +
+          '<span style="background:var(--lunch)">박</span>' +
+          '<span style="background:var(--dinner)">정</span>' +
+          '<span style="background:var(--good)">나</span>' +
+        '</div>' +
+        '<div class="chip-row"><span class="chip-sm">#등산</span><span class="chip-sm">#보드게임</span></div>' +
+        '<div class="gauge"><div class="gauge-track"><div class="gauge-fill good" style="width:100%"></div></div><div class="gauge-label">4/4명 확정</div></div>' +
+      '</div>' +
+      '<div class="m-card"><span class="tag good">장소 추천 완료</span><div style="font-weight:700;">🍲 광화문 김치찌개</div></div>' +
+      '<div class="toast">✅ 체크인 완료 · +550P 적립</div>';
+  }
+
+  function typeUserBubble(text) {
+    return new Promise(function (resolve) {
+      var bubble = el('<div class="bubble" style="align-self:flex-end;background:var(--brand);color:#fff;"></div>');
+      appendMsg(bubble);
+      var i = 0;
+      var iv = setInterval(function () {
+        i++;
+        bubble.textContent = text.slice(0, i);
+        heroBody.scrollTop = heroBody.scrollHeight;
+        if (i >= text.length) { clearInterval(iv); resolve(); }
+      }, 45);
+      timers.push(iv);
+    });
+  }
+
+  function showHeroTyping() {
+    var row = el('<div class="bubble" style="display:inline-flex;gap:4px;padding:11px 14px;">' +
+      '<span class="hero-dot" style="animation-delay:0s"></span>' +
+      '<span class="hero-dot" style="animation-delay:0.15s"></span>' +
+      '<span class="hero-dot" style="animation-delay:0.3s"></span>' +
+    '</div>');
+    appendMsg(row);
+    return row;
+  }
+
+  function heroBotText(text) {
+    var b = el('<div class="bubble"></div>');
+    b.textContent = text;
+    appendMsg(b);
+    return b;
+  }
+
+  var avatarColors = ['var(--morning)', 'var(--lunch)', 'var(--dinner)', 'var(--good)'];
+  var avatarInitials = ['김', '박', '정', '나'];
+
+  function fillHeroGauge(card) {
+    return new Promise(function (resolve) {
+      var stack = card.querySelector('[data-hero-avatars]');
+      var fill = card.querySelector('[data-hero-gauge-fill]');
+      var label = card.querySelector('[data-hero-gauge-label]');
+      var n = 1;
+      function step() {
+        if (stack && stack.children[n]) {
+          stack.children[n].outerHTML = '<span style="background:' + avatarColors[n] + '">' + avatarInitials[n] + '</span>';
+        }
+        n++;
+        if (fill) fill.style.width = (n * 25) + '%';
+        if (label) label.textContent = Math.min(n, 4) + '/4명 참여중';
+        if (n >= 4) { if (fill) fill.classList.add('good'); resolve(); return; }
+        var t = setTimeout(step, 1000);
+        timers.push(t);
+      }
+      var t0 = setTimeout(step, 1000);
+      timers.push(t0);
+    });
+  }
+
+  function runHeroLoop() {
+    heroBody.innerHTML = '';
+    Promise.resolve()
+      .then(function () { return typeUserBubble('목요일 점심에 매운 거 먹을 사람 3명 구해줘'); })
+      .then(function () { return wait(450); })
+      .then(function () {
+        var t = showHeroTyping();
+        return wait(1500).then(function () { t.remove(); });
+      })
+      .then(function () { return heroBotText('파싱 완료! 모집을 시작할게요 🍜'); })
+      .then(function () { return wait(1500); })
+      .then(function () {
+        var card = el('<div class="m-card">' +
+          '<div class="avatar-stack" data-hero-avatars>' +
+            '<span style="background:' + avatarColors[0] + '">' + avatarInitials[0] + '</span>' +
+            '<span style="background:var(--paper);color:var(--muted);border:1.5px dashed var(--line);">?</span>' +
+            '<span style="background:var(--paper);color:var(--muted);border:1.5px dashed var(--line);">?</span>' +
+            '<span style="background:var(--paper);color:var(--muted);border:1.5px dashed var(--line);">?</span>' +
+          '</div>' +
+          '<div class="gauge"><div class="gauge-track"><div class="gauge-fill" data-hero-gauge-fill style="width:25%"></div></div><div class="gauge-label" data-hero-gauge-label>1/4명 참여중</div></div>' +
+        '</div>');
+        appendMsg(card);
+        return fillHeroGauge(card);
+      })
+      .then(function () { return wait(1000); })
+      .then(function () { return heroBotText('🎉 확정! 대화방을 만들었어요'); })
+      .then(function () { return wait(1000); })
+      .then(function () {
+        appendMsg(el('<div class="m-card"><span class="tag good">장소 추천</span><div style="font-weight:700;">🍲 마라공방 본점</div><div class="chip-sm">도보 3분 · 4.6★</div></div>'));
+      })
+      .then(function () { return wait(3000); })
+      .then(function () {
+        appendMsg(el('<div class="toast">✅ 체크인 완료 · +550P 적립</div>'));
+      })
+      .then(function () { return wait(2000); })
+      .then(function () {
+        if (!reduceMotion) runHeroLoop();
+      });
+  }
+
+  if (reduceMotion) {
+    renderFinalStatic();
+  } else {
+    var startTimer = setTimeout(runHeroLoop, 1000);
+    timers.push(startTimer);
+  }
+})();
+</script>
+
+<!-- 프리미엄 표현 레이어: 배경 오로라 패럴럭스 + 스크롤 리빌. 기능/구조/카피 로직과 완전히 독립. -->
+<script>
+(function () {
+  "use strict";
+
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- aurora background parallax (mouse-follow, lerped) ---- */
+  function setupAuroraParallax() {
+    var wraps = document.querySelectorAll('.blob-wrap');
+    if (!wraps.length || reduceMotion) return;
+    var mx = 0, my = 0, cx = 0, cy = 0;
+    window.addEventListener('mousemove', function (e) {
+      mx = (e.clientX / window.innerWidth - 0.5) * 2;
+      my = (e.clientY / window.innerHeight - 0.5) * 2;
+    }, { passive: true });
+    function tick() {
+      cx += (mx - cx) * 0.05;
+      cy += (my - cy) * 0.05;
+      wraps.forEach(function (w, i) {
+        var amp = 8 + i * 3; // ~ +-10px per spec, staggered per blob
+        w.style.setProperty('--px', (cx * amp).toFixed(2) + 'px');
+        w.style.setProperty('--py', (cy * amp).toFixed(2) + 'px');
+      });
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  /* ---- scroll reveal: fade + translateY(16px->0), staggered, once ---- */
+  function setupScrollReveal() {
+    if (reduceMotion) return;
+
+    var groups = document.querySelectorAll('.meet-grid, .how-row, .noshow-row, .co-row');
+    groups.forEach(function (grp) {
+      Array.prototype.forEach.call(grp.children, function (child, i) {
+        child.classList.add('reveal-pending');
+        child.style.transitionDelay = (i * 60) + 'ms';
+      });
+    });
+
+    var sections = document.querySelectorAll('.page > section');
+    sections.forEach(function (sec) { sec.classList.add('reveal-pending'); });
+
+    var omCards = document.querySelectorAll('#om-demo .side-card, #om-demo .phone-col');
+    omCards.forEach(function (el, i) {
+      el.classList.add('reveal-pending');
+      el.style.transitionDelay = (i * 60) + 'ms';
+    });
+
+    var targets = document.querySelectorAll('.reveal-pending');
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach(function (el) { el.classList.add('reveal-in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal-in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    targets.forEach(function (el) { io.observe(el); });
+  }
+
+  setupAuroraParallax();
+  setupScrollReveal();
+})();
+</script>

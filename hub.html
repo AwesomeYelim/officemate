@@ -1,0 +1,154 @@
+<title>OfficeMate — 제출물 허브</title>
+<style>
+  :root {
+    --ink: #1D1B24;
+    --ink-soft: #4A4959;
+    --paper: #EEF0F3;
+    --paper-raised: #FFFFFF;
+    --line: #D8DAE1;
+    --brand: #33549C;
+    --brand-deep: #24397A;
+    --brand-text: #2A4784;
+    --brand-soft: #A9BAD9;
+    --morning: #6F92C4;
+    --lunch: #C99334;
+    --dinner: #7A4F76;
+    --muted: #6B6A78;
+    --btn-ink: #FFFFFF;
+    --font-body: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+      "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --font-serif: Georgia, "Iowan Old Style", "Noto Serif KR", serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #ECEAF2;
+      --ink-soft: #B9B7C6;
+      --paper: #16151D;
+      --paper-raised: #1F1E29;
+      --line: #2C2B36;
+      --brand: #6F92C4;
+      --brand-deep: #A9BAD9;
+      --brand-text: #A9BAD9;
+      --brand-soft: #3E5A94;
+      --muted: #8B8A99;
+      --btn-ink: #10101A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ECEAF2;
+    --ink-soft: #B9B7C6;
+    --paper: #16151D;
+    --paper-raised: #1F1E29;
+    --line: #2C2B36;
+    --brand: #6F92C4;
+    --brand-deep: #A9BAD9;
+    --brand-text: #A9BAD9;
+    --brand-soft: #3E5A94;
+    --muted: #8B8A99;
+    --btn-ink: #10101A;
+  }
+  :root[data-theme="light"] {
+    --ink: #1D1B24;
+    --ink-soft: #4A4959;
+    --paper: #EEF0F3;
+    --paper-raised: #FFFFFF;
+    --line: #D8DAE1;
+    --brand: #33549C;
+    --brand-deep: #24397A;
+    --brand-text: #2A4784;
+    --brand-soft: #A9BAD9;
+    --muted: #6B6A78;
+    --btn-ink: #FFFFFF;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--font-body); -webkit-font-smoothing: antialiased; margin: 0; }
+  .page { max-width: 760px; margin: 0 auto; padding: 56px 24px 56px; display: flex; flex-direction: column; gap: 36px; }
+
+  .masthead { display: flex; flex-direction: column; gap: 14px; }
+  .wordmark { font-family: var(--font-serif); font-style: italic; font-size: 15px; letter-spacing: 0.02em; color: var(--brand-text); }
+  .eyebrow { font-family: var(--font-mono); text-transform: uppercase; font-size: 11.5px; letter-spacing: 0.12em; color: var(--muted); }
+  h1 { margin: 0; font-size: clamp(24px, 3.2vw, 34px); line-height: 1.26; font-weight: 800; letter-spacing: -0.01em; text-wrap: balance; }
+  .lede { margin: 0; max-width: 60ch; font-size: 14.5px; line-height: 1.7; color: var(--ink-soft); }
+  .lede b { color: var(--ink); }
+  .day-arc { height: 8px; border-radius: 999px; max-width: 480px;
+    background: linear-gradient(90deg, var(--morning) 0%, var(--morning) 33%, var(--lunch) 33%, var(--lunch) 66%, var(--dinner) 66%, var(--dinner) 100%); }
+
+  .cards { display: flex; flex-direction: column; gap: 14px; }
+  .card {
+    background: var(--paper-raised); border: 1px solid var(--line); border-radius: 18px;
+    padding: 22px 24px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .card h2 { margin: 0; font-size: 17px; font-weight: 800; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .role {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--brand-text); background: color-mix(in srgb, var(--brand) 12%, transparent);
+    border-radius: 999px; padding: 3px 10px; font-weight: 700;
+  }
+  .card p { margin: 0; font-size: 13.5px; line-height: 1.65; color: var(--ink-soft); }
+  .card p b { color: var(--ink); }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .go {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--brand); color: var(--btn-ink); text-decoration: none;
+    font-size: 13px; font-weight: 700; padding: 10px 18px; border-radius: 999px;
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }
+  .go:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .go:focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 2px; }
+  .go.ghost { background: transparent; color: var(--brand-text); border: 1.5px solid var(--brand-soft); }
+  .go.ghost:hover { border-color: var(--brand); }
+
+  .popup-note {
+    font-size: 12px; line-height: 1.6; color: var(--muted);
+    border-top: 1px solid var(--line); padding-top: 16px;
+  }
+  .popup-note b { color: var(--ink-soft); }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="wordmark">OfficeMate</div>
+    <div class="eyebrow">지란지교 해커톤 2026 · 제출물 허브</div>
+    <h1>밥 한 끼로 동료를 잇고,<br>조직의 연결을 수익으로 바꾼다</h1>
+    <p class="lede">OfficeMate는 오피스챗에 붙는 <b>AI 매칭 어시스턴트</b>입니다. 제출물은 세 가지 — 직접 만져보는 데모, 사업 논리, 화면 상세입니다.</p>
+    <div class="day-arc" role="presentation"></div>
+  </header>
+
+  <section class="cards">
+
+    <article class="card">
+      <h2>🤝 랜딩페이지 + 라이브 데모 <span class="role">먼저 체험</span></h2>
+      <p>제품 소개와 <b>실동작 데모</b>가 한 페이지에 있습니다 — 온보딩·슬롯 선택·디파짓·매칭·확정/방폭·체크인·정산까지 전부 동작하고, 하단 탭(채팅·탐색·마이)으로 <b>자유롭게 돌아다닐 수 있습니다</b>.</p>
+      <div class="btn-row">
+        <a class="go" href="https://claude.ai/code/artifact/47fecea5-b34d-4f3e-8efc-6107475c7729" target="_blank" rel="noopener">랜딩 + 라이브 데모 열기 ↗</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>🍱 사업계획서 <span class="role">사업 논리</span></h2>
+      <p>3층 수익구조와 <b>리텐션 가설(Go/Fix 지표)</b>, SOM 숫자 모델, 경쟁 우위, 미구현 항목 실현 계획까지 — 검증된 것과 남은 것을 분리해 담았습니다.</p>
+      <div class="btn-row">
+        <a class="go" href="https://claude.ai/code/artifact/0c5eaf40-9897-4499-b147-2d4be3e156c7" target="_blank" rel="noopener">사업계획서 열기 ↗</a>
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>📱 제품 화면 상세 <span class="role">목업 · HR 콘솔</span></h2>
+      <p>매칭 루프 7화면, 온보딩~탐색 여정 5화면, 그리고 Enterprise 수익의 실체인 <b>HR 콘솔 시뮬레이터</b>(8페이지 인터랙티브 — 대시보드·ONA·시그널·예산·스폰서·리포트·정책)입니다.</p>
+      <div class="btn-row">
+        <a class="go ghost" href="https://claude.ai/code/artifact/a896878a-83b0-4531-a658-173b06bdf7ce" target="_blank" rel="noopener">핵심 플로우 7화면 ↗</a>
+        <a class="go ghost" href="https://claude.ai/code/artifact/34a115eb-e649-48ca-b3a2-6d091d1f7563" target="_blank" rel="noopener">사용자 여정 5화면 ↗</a>
+        <a class="go ghost" href="https://claude.ai/code/artifact/618d50f4-7887-470c-bb4c-c255c50301d4" target="_blank" rel="noopener">HR 콘솔 시뮬레이터 ↗</a>
+      </div>
+    </article>
+
+  </section>
+
+  <p class="popup-note"><b>열람 안내</b> — 링크 클릭 시 claude.ai가 "Open external link" 확인창을 한 번 띄웁니다. Open link를 누르면 새 탭에서 열립니다.</p>
+
+</div>
