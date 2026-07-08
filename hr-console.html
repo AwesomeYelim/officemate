@@ -1025,12 +1025,23 @@ const onaMatrix=[
   [3,6,9,5,0,2],
   [22,3,4,18,2,0],
 ];
-let onaPts=[]; // 매 프레임 갱신되는 현재 렌더 좌표 (hit-test용)
-let onaCustomPos={}; // 드래그로 고정된 좌표 {name:{x,y}}
+// 상위 5개 엣지(모임 수 기준) — 상시 라벨 표시 대상, 정적 데이터 기준 1회 계산
+function computeOnaTop5EdgeKeys(){
+  const edges=[];
+  for(let i=0;i<onaDepts.length;i++)for(let j=i+1;j<onaDepts.length;j++){
+    const v=onaMatrix[i][j];if(v>0)edges.push({i,j,v});
+  }
+  edges.sort((a,b)=>b.v-a.v);
+  return new Set(edges.slice(0,5).map(e=>`${e.i}-${e.j}`));
+}
+const ONA_TOP5_EDGES=computeOnaTop5EdgeKeys();
+let onaPts=[]; // 매 프레임 갱신되는 현재 렌더 좌표 (hit-test용, 논리(CSS) 픽셀 단위)
+let onaCustomPos={}; // 드래그로 고정된 좌표 {name:{x,y}} — 논리 픽셀 단위
 let onaSelectedNode=null, onaSelectedEdge=null; // 클릭으로 고정된 선택 상태
 let onaHoverNode=null, onaHoverEdge=null; // 마우스오버 중인 임시 상태
 let onaDragName=null, onaDragPos=null, onaDragStart=null, onaDragMoved=false;
 let onaAnimStart=null, onaRafId=null, onaEventsBound=false;
+let onaLogicalW=640, onaLogicalH=440, onaDpr=1; // 캔버스의 "논리(CSS) 픽셀" 표시 크기 — 항상 실제 표시 종횡비와 일치
 const ONA_ENTRY_DURATION=700, ONA_STAGGER=45, ONA_EDGE_FADE=300, ONA_MIN_DIST=72;
 
 function renderOnaLegend(){
@@ -1038,11 +1049,41 @@ function renderOnaLegend(){
   el.innerHTML=onaDepts.map((d,i)=>`<span class="ona-legend-item"><span class="ona-legend-dot" style="background:${onaColors[i]}"></span>${d}팀</span>`).join('');
 }
 
-// 노드의 "정착 목표" 좌표 — 드래그로 고정된 위치가 있으면 그것, 없으면 원형 배치
+// 캔버스 내부 해상도(backing store)를 실제 표시 크기(CSS px) × devicePixelRatio로 동기화.
+// 이렇게 하면 (a) 종횡비 왜곡(원→타원)이 사라지고 (b) 고DPI에서도 선명해진다.
+// 드래그로 고정해둔 커스텀 좌표는 이전 논리 크기 대비 비율로 재매핑한다.
+function resizeOnaCanvas(){
+  const cv=document.getElementById('onaCanvas');if(!cv)return false;
+  const rect=cv.getBoundingClientRect();
+  const w=Math.max(1,Math.round(rect.width)), h=Math.max(1,Math.round(rect.height));
+  const dpr=window.devicePixelRatio||1;
+  const targetW=Math.round(w*dpr), targetH=Math.round(h*dpr);
+  if(cv.width===targetW&&cv.height===targetH&&onaLogicalW===w&&onaLogicalH===h&&onaDpr===dpr)return false;
+  if(onaLogicalW>0&&onaLogicalH>0&&(w!==onaLogicalW||h!==onaLogicalH)){
+    const rx=w/onaLogicalW, ry=h/onaLogicalH;
+    Object.keys(onaCustomPos).forEach(name=>{
+      onaCustomPos[name]={x:onaCustomPos[name].x*rx,y:onaCustomPos[name].y*ry};
+    });
+  }
+  cv.width=targetW;cv.height=targetH;
+  onaLogicalW=w;onaLogicalH=h;onaDpr=dpr;
+  const ctx=cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0); // 이후 모든 그리기 좌표는 "논리(CSS) 픽셀" 단위로 취급
+  return true;
+}
+function initOnaResizeObserver(){
+  const cv=document.getElementById('onaCanvas');if(!cv||cv._roBound)return;
+  cv._roBound=true;
+  if(window.ResizeObserver){
+    new ResizeObserver(()=>resizeOnaCanvas()).observe(cv);
+  }
+  window.addEventListener('resize',()=>resizeOnaCanvas());
+}
+
+// 노드의 "정착 목표" 좌표 — 드래그로 고정된 위치가 있으면 그것, 없으면 원형 배치 (논리 픽셀 기준)
 function getOnaTargets(){
-  const cv=document.getElementById('onaCanvas');
-  const W=cv?cv.width:640,H=cv?cv.height:440;
-  const cx=W/2,cy=H/2,r=Math.min(W,H)/2-70;
+  const W=onaLogicalW,H=onaLogicalH;
+  const cx=W/2,cy=H/2,r=Math.max(40,Math.min(W,H)/2-70);
   return onaDepts.map((d,i)=>{
     const custom=onaCustomPos[d];
     let tx,ty;
@@ -1054,9 +1095,7 @@ function getOnaTargets(){
 // elapsed(ms) 기준으로 진입 애니메이션(중심→목표, ease-out, 노드별 스태거) + idle 부유 모션 계산 (결정적, Math.random 없음)
 function computeOnaPositions(elapsed){
   const targets=getOnaTargets();
-  const cv=document.getElementById('onaCanvas');
-  const W=cv?cv.width:640,H=cv?cv.height:440;
-  const cx=W/2,cy=H/2;
+  const cx=onaLogicalW/2,cy=onaLogicalH/2;
   const settledAt=(onaDepts.length-1)*ONA_STAGGER+ONA_ENTRY_DURATION;
   const idleStart=settledAt+ONA_EDGE_FADE;
   const edgeAlpha=reducedMotion?1:Math.max(0,Math.min(1,(elapsed-settledAt)/ONA_EDGE_FADE));
@@ -1106,11 +1145,62 @@ function isOnaNodeHighlighted(i,focus){
   }
   return i===focus.i||i===focus.j;
 }
+// 단일 hue(브랜드 블루) 시퀀셜 램프 — 연결 강도가 셀수록 짙어짐 (색+굵기 이중 인코딩, 무지개 금지)
+function onaEdgeColor(v){
+  const t=Math.max(0,Math.min(1,v/22));
+  const r=Math.round(210-(210-36)*t), g=Math.round(217-(217-57)*t), b=Math.round(230-(230-122)*t);
+  return `rgb(${r},${g},${b})`;
+}
+function roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+// 상위5 엣지는 상시 라벨, 노드 hover 중이면 그 노드의 연결 엣지만, 그 외엔 hover 중인 엣지만 추가로 표시
+function drawOnaEdgeLabels(ctx,pts,focus,edgeAlpha){
+  for(let i=0;i<onaDepts.length;i++){
+    for(let j=i+1;j<onaDepts.length;j++){
+      const v=onaMatrix[i][j];if(v<=0)continue;
+      const top5=ONA_TOP5_EDGES.has(`${i}-${j}`);
+      const emph=!!(onaHoverEdge&&onaHoverEdge.i===i&&onaHoverEdge.j===j);
+      let show;
+      if(focus&&focus.type==='node'){
+        show=onaDepts[i]===focus.name||onaDepts[j]===focus.name;
+      }else{
+        show=top5||emph;
+      }
+      if(!show)continue;
+      const dimAlpha=(focus&&focus.type==='edge'&&!isOnaEdgeHighlighted(i,j,focus))?0.5:1;
+      const t=0.42+((i*3+j*7)%7)*0.02; // 엣지 방향을 따라 살짝 오프셋 — 라벨 겹침 완화(결정적)
+      const mx=pts[i].x+(pts[j].x-pts[i].x)*t;
+      const my=pts[i].y+(pts[j].y-pts[i].y)*t;
+      const label=`${v}건`;
+      const fontSize=emph?12:10.5;
+      ctx.font=`${emph?'700':'600'} ${fontSize}px "Pretendard Variable",Pretendard,sans-serif`;
+      const textW=ctx.measureText(label).width;
+      const padX=7,boxH=fontSize+7;
+      const boxW=textW+padX*2;
+      ctx.globalAlpha=edgeAlpha*dimAlpha;
+      ctx.fillStyle='#ffffff';
+      ctx.strokeStyle=emph?'#33549C':'#D8DAE1';
+      ctx.lineWidth=emph?1.6:1;
+      roundRectPath(ctx,mx-boxW/2,my-boxH/2,boxW,boxH,boxH/2);
+      ctx.fill();ctx.stroke();
+      ctx.fillStyle='#1D1B24';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(label,mx,my);
+      ctx.globalAlpha=1;
+    }
+  }
+}
 function drawOnaFrame(elapsed){
   const cv=document.getElementById('onaCanvas');if(!cv)return;
   const ctx=cv.getContext('2d');
-  const W=cv.width,H=cv.height;
-  ctx.clearRect(0,0,W,H);
+  ctx.clearRect(0,0,onaLogicalW,onaLogicalH);
   const {pts,edgeAlpha}=computeOnaPositions(elapsed);
   onaPts=pts;
   const focus=getOnaFocus();
@@ -1118,11 +1208,12 @@ function drawOnaFrame(elapsed){
     for(let j=i+1;j<onaDepts.length;j++){
       const v=onaMatrix[i][j];if(v<=0)continue;
       const hl=isOnaEdgeHighlighted(i,j,focus);
-      ctx.globalAlpha=(focus&&!hl?0.15:1)*edgeAlpha;
+      ctx.globalAlpha=(focus&&!hl?0.18:1)*edgeAlpha;
       ctx.beginPath();
       ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);
-      ctx.strokeStyle=hl&&focus?'rgba(74,84,110,'+Math.min(.4+v/22,.95)+')':'rgba(120,128,150,'+Math.min(.14+v/30,.55)+')';
-      ctx.lineWidth=hl&&focus?Math.max(1.5,v/2.4):Math.max(1,v/3.2);
+      ctx.strokeStyle=onaEdgeColor(v);
+      const baseWidth=1.4+(v/22)*5;
+      ctx.lineWidth=hl&&focus?baseWidth+1.5:baseWidth;
       ctx.stroke();
     }
   }
@@ -1134,10 +1225,11 @@ function drawOnaFrame(elapsed){
     ctx.beginPath();ctx.arc(p.x,p.y,sel?30:26,0,Math.PI*2);
     ctx.fillStyle=sel?shadeColor(p.color,-30):p.color;ctx.fill();
     if(sel){ctx.lineWidth=3;ctx.strokeStyle='#A9BAD9';ctx.stroke();}
-    ctx.font='bold 13px sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='bold 13px "Pretendard Variable",Pretendard,sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(p.name,p.x,p.y);
     ctx.globalAlpha=1;
   });
+  drawOnaEdgeLabels(ctx,pts,focus,edgeAlpha);
 }
 function onaTick(now){
   if(onaAnimStart===null)onaAnimStart=now;
@@ -1150,8 +1242,9 @@ function stopOnaLoop(){ if(onaRafId!==null){cancelAnimationFrame(onaRafId);onaRa
 function canvasCoordsFromEvent(ev){
   const cv=document.getElementById('onaCanvas');
   const rect=cv.getBoundingClientRect();
-  const scaleX=cv.width/rect.width,scaleY=cv.height/rect.height;
-  return {x:(ev.clientX-rect.left)*scaleX,y:(ev.clientY-rect.top)*scaleY};
+  // resizeOnaCanvas()가 backing store를 rect 크기×dpr로, ctx transform을 dpr로 맞춰두므로
+  // 논리 좌표계는 rect(CSS px)와 1:1 — 별도 스케일 보정 불필요
+  return {x:ev.clientX-rect.left,y:ev.clientY-rect.top};
 }
 function hitTestOnaNode(x,y){ return onaPts.find(p=>Math.hypot(p.x-x,p.y-y)<=28)||null; }
 function distToSegment(px,py,x1,y1,x2,y2){
@@ -1216,6 +1309,7 @@ function onaRowClick(i,j){ selectOnaPair(i,j); }
 function initOnaCanvasEvents(){
   const cv=document.getElementById('onaCanvas');if(!cv||onaEventsBound)return;
   onaEventsBound=true;
+  initOnaResizeObserver();
   cv.addEventListener('mousedown',ev=>{
     const {x,y}=canvasCoordsFromEvent(ev);
     const hit=hitTestOnaNode(x,y);
@@ -1241,9 +1335,10 @@ function initOnaCanvasEvents(){
     }
     const edge=hitTestOnaEdge(x,y);
     if(edge){
+      // 엣지 hover 시 그래프 위 라벨이 굵게/크게 강조되어 수치를 보여주므로 별도 커서 툴팁은 띄우지 않음(중복 제거)
       if(!onaHoverEdge||onaHoverEdge.i!==edge.i||onaHoverEdge.j!==edge.j){onaHoverEdge=edge;onaHoverNode=null;syncOnaRowHighlight();}
       cv.style.cursor='pointer';
-      showTip(ev.clientX,ev.clientY,`${onaDepts[edge.i]} ↔ ${onaDepts[edge.j]} · ${onaMatrix[edge.i][edge.j]}건`);
+      hideTip();
       return;
     }
     if(onaHoverNode||onaHoverEdge){onaHoverNode=null;onaHoverEdge=null;syncOnaRowHighlight();}
@@ -1279,9 +1374,8 @@ function initOnaCanvasEvents(){
       }
     });
     const cv2=document.getElementById('onaCanvas');
-    const W=cv2?cv2.width:640,H=cv2?cv2.height:440;
-    pos.x=Math.max(30,Math.min(W-30,pos.x));
-    pos.y=Math.max(30,Math.min(H-30,pos.y));
+    pos.x=Math.max(30,Math.min(onaLogicalW-30,pos.x));
+    pos.y=Math.max(30,Math.min(onaLogicalH-30,pos.y));
     onaCustomPos[name]={x:pos.x,y:pos.y};
     onaDragName=null;onaDragPos=null;
     if(cv2)cv2.style.cursor='grab';
@@ -1307,6 +1401,7 @@ function renderOnaPairs(){
 let onaRendered=false;
 function renderOna(){
   initOnaCanvasEvents();
+  resizeOnaCanvas(); // 페이지 진입 시 표시 크기 기준으로 즉시 동기화 (왜곡/블러 방지)
   renderOnaLegend();
   if(!onaRendered){renderOnaPairs();onaRendered=true;}
   startOnaLoop();
