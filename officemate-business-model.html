@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OfficeMate — 사내 모임 활성화 플랫폼 · 비즈니스 모델</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  @font-face {
+    font-family: 'GmarketSans';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+    font-weight: 700; font-display: swap;
+  }
+  @font-face {
+    font-family: 'GmarketSans';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+    font-weight: 500; font-display: swap;
+  }
+
+  :root {
+    --ink: #10192E;
+    --ink-soft: #4A5670;
+    --paper: #F4F7FC;
+    --card: #FFFFFF;
+    --volt: #2B5BFF;       /* 전기 블루 — 주 색 */
+    --volt-deep: #1638B8;
+    --bolt: #FFCB2E;       /* 번개 옐로 — 포인트/보상 */
+    --spark-red: #FF4D5E;  /* 경고/노쇼 */
+    --line: #DCE4F2;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  .display { font-family: 'GmarketSans', Pretendard, sans-serif; font-weight: 700; letter-spacing: -0.01em; }
+
+  /* ── Hero ─────────────────────────────── */
+  header {
+    background:
+      radial-gradient(900px 420px at 85% -10%, rgba(43,91,255,0.14), transparent 65%),
+      radial-gradient(600px 300px at 5% 110%, rgba(255,203,46,0.18), transparent 60%),
+      #FFFFFF;
+    border-bottom: 1px solid var(--line);
+    padding: 64px 0 56px;
+  }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--volt-deep); background: rgba(43,91,255,0.08);
+    border: 1px solid rgba(43,91,255,0.25);
+    padding: 6px 14px; border-radius: 999px; margin-bottom: 24px;
+  }
+  h1 {
+    font-size: clamp(34px, 5.4vw, 54px);
+    line-height: 1.22;
+  }
+  h1 .zap { color: var(--volt); }
+  h1 .point-mark {
+    background: linear-gradient(transparent 62%, var(--bolt) 62%);
+    padding: 0 2px;
+  }
+  .hero-sub { margin-top: 20px; font-size: 18px; color: var(--ink-soft); max-width: 640px; }
+  .hero-sub strong { color: var(--ink); }
+
+  .problem-solution {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 36px;
+  }
+  .ps-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 22px 24px;
+  }
+  .ps-card .tag {
+    font-family: 'GmarketSans', sans-serif; font-weight: 700; font-size: 12px;
+    letter-spacing: 0.1em; margin-bottom: 10px;
+  }
+  .ps-problem .tag { color: var(--spark-red); }
+  .ps-solution .tag { color: var(--volt); }
+  .ps-card p { font-size: 16.5px; font-weight: 600; line-height: 1.55; }
+
+  /* ── Sections ─────────────────────────── */
+  section { padding: 56px 0; }
+  section + section { border-top: 1px solid var(--line); }
+  .sec-head { margin-bottom: 28px; }
+  .sec-label {
+    font-family: 'GmarketSans', sans-serif; font-weight: 700;
+    font-size: 12px; letter-spacing: 0.14em; color: var(--volt);
+    margin-bottom: 8px;
+  }
+  h2 { font-family: 'GmarketSans', sans-serif; font-size: clamp(22px, 3vw, 28px); font-weight: 700; }
+  .sec-desc { margin-top: 8px; color: var(--ink-soft); max-width: 620px; }
+
+  /* 대상 고객 */
+  .customer {
+    display: flex; align-items: center; gap: 20px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 26px 28px;
+  }
+  .customer .icon {
+    flex: none; width: 56px; height: 56px; border-radius: 14px;
+    background: rgba(43,91,255,0.1); display: grid; place-items: center;
+    font-size: 26px;
+  }
+  .customer h3 { font-size: 18px; margin-bottom: 4px; }
+  .customer p { color: var(--ink-soft); font-size: 15px; }
+
+  /* ── 돈의 사이클 (signature) ───────────── */
+  .cycle-board {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 20px; padding: 36px 28px;
+  }
+  .cycle-svg { display: block; width: 100%; height: auto; }
+
+  .cycle-note {
+    margin-top: 20px; font-size: 14px; color: var(--ink-soft);
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .cycle-note .bolt-dot { flex: none; color: var(--bolt); font-size: 15px; line-height: 1.4; }
+
+  /* 수익 모델 */
+  .rev-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .rev-card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 28px; position: relative;
+    border-top: 4px solid var(--volt);
+  }
+  .rev-card.alt { border-top-color: var(--bolt); }
+  .rev-num {
+    font-family: 'GmarketSans', sans-serif; font-weight: 700;
+    font-size: 13px; color: var(--volt-deep); letter-spacing: 0.08em; margin-bottom: 10px;
+  }
+  .rev-card.alt .rev-num { color: #A87A00; }
+  .rev-card h3 { font-size: 19px; margin-bottom: 12px; line-height: 1.4; }
+  .rev-card ul { list-style: none; }
+  .rev-card li {
+    font-size: 14.5px; color: var(--ink-soft); padding-left: 18px; position: relative;
+    margin-bottom: 8px;
+  }
+  .rev-card li::before {
+    content: "⚡"; position: absolute; left: 0; top: 0; font-size: 11px;
+  }
+
+  /* 노쇼 방지 */
+  .noshow {
+    display: flex; gap: 20px; align-items: center;
+    background: #FFF6F7; border: 1px solid rgba(255,77,94,0.3);
+    border-radius: var(--radius); padding: 24px 28px;
+  }
+  .noshow .icon {
+    flex: none; width: 52px; height: 52px; border-radius: 14px;
+    background: rgba(255,77,94,0.12); display: grid; place-items: center; font-size: 24px;
+  }
+  .noshow h3 { font-size: 17px; margin-bottom: 4px; }
+  .noshow p { font-size: 14.5px; color: var(--ink-soft); }
+
+  /* 로드맵: 등급제 */
+  .tiers { display: flex; gap: 0; align-items: stretch; }
+  .tier {
+    flex: 1; text-align: center; padding: 20px 10px; position: relative;
+  }
+  .tier + .tier::before {
+    content: ""; position: absolute; left: 0; top: 30%; bottom: 30%;
+    width: 1px; background: var(--line);
+  }
+  .tier .badge {
+    width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 24px;
+    border: 2px solid var(--line); background: var(--card);
+  }
+  .tier:nth-child(1) .badge { border-color: #C9D4E8; }
+  .tier:nth-child(2) .badge { border-color: var(--volt); background: rgba(43,91,255,0.07); }
+  .tier:nth-child(3) .badge { border-color: var(--spark-red); background: rgba(255,77,94,0.07); }
+  .tier:nth-child(4) .badge { border-color: var(--bolt); background: rgba(255,203,46,0.12); }
+  .tier h4 { font-family: 'GmarketSans', sans-serif; font-size: 14.5px; font-weight: 700; }
+  .tier p { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+  .roadmap-box {
+    background: var(--card); border: 1px dashed #B9C6DE; border-radius: var(--radius);
+    padding: 24px;
+  }
+  .roadmap-tag {
+    display: inline-block; font-size: 12px; font-weight: 700; color: var(--ink-soft);
+    background: var(--paper); border: 1px solid var(--line);
+    padding: 3px 10px; border-radius: 999px; margin-bottom: 14px; letter-spacing: 0.06em;
+  }
+
+  footer {
+    border-top: 1px solid var(--line); padding: 28px 0 48px;
+    font-size: 13px; color: var(--ink-soft);
+  }
+
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--volt); outline-offset: 2px; }
+
+  @media (max-width: 720px) {
+    .problem-solution, .rev-grid { grid-template-columns: 1fr; }
+    .tiers { flex-wrap: wrap; }
+    .tier { flex: 1 1 45%; }
+    .tier + .tier::before { display: none; }
+    header { padding: 48px 0 40px; }
+    section { padding: 44px 0; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .cycle-flow { stroke-dasharray: 6 7; animation: flow 1.6s linear infinite; }
+    @keyframes flow { to { stroke-dashoffset: -13; } }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">🤝 OfficeNext 플러그인 · 사내 모임 활성화 플랫폼 「OfficeMate」</span>
+    <h1 class="display">동료가 <span class="point-mark">메이트</span>가 되는<br>가장 쉬운 방법<span class="zap">, 모임.</span></h1>
+    <p class="hero-sub">OfficeMate에서 동료와 모임을 만들면 <strong>포인트 보상</strong>이 쌓이고, 그 포인트는 다음 회식 자리에서 <strong>바로 결제</strong>에 쓰입니다. 모임이 모임을 부르는 선순환을 만듭니다.</p>
+
+    <div class="problem-solution">
+      <div class="ps-card ps-problem">
+        <div class="tag">PROBLEM</div>
+        <p>"동료들끼리의 모임, 어떻게 독려하지?" — HR이 아무리 권해도, 자발적 교류는 좀처럼 일어나지 않습니다.</p>
+      </div>
+      <div class="ps-card ps-solution">
+        <div class="tag">SOLUTION</div>
+        <p>모임을 생성하거나 참여하면 포인트를 지급합니다. 보상이 있으면, 모임은 스스로 굴러갑니다.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">01 · TARGET</div>
+      <h2 class="display">누구를 위한 서비스인가</h2>
+    </div>
+    <div class="customer">
+      <div class="icon">🏢</div>
+      <div>
+        <h3>기업 HR 부서</h3>
+        <p>임직원 간 모임과 교류를 활성화하고 싶지만, 마땅한 수단이 없는 HR 담당자. OfficeMate로 조직문화 예산을 "실제 일어난 모임"에만 정확히 집행할 수 있습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">02 · MONEY CYCLE</div>
+      <h2 class="display">돈은 이렇게 돕니다</h2>
+      <p class="sec-desc">HR이 충전한 포인트가 임직원의 모임 보상이 되고, 그 포인트가 다시 회식·모임 장소 결제로 흘러가는 하나의 사이클입니다.</p>
+    </div>
+
+    <div class="cycle-board">
+      <svg class="cycle-svg" viewBox="0 0 900 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="돈의 사이클: HR 포인트 구매 → 임직원 모임 생성·참여 → 포인트 적립 → 회식·모임 장소 결제, 그리고 포인트 판매 수수료가 서비스 수익이 되는 순환 구조">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#2B5BFF"/>
+          </marker>
+          <marker id="arrowY" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#D9A400"/>
+          </marker>
+        </defs>
+
+        <!-- 순환 화살표 -->
+        <path class="cycle-flow" d="M 205 90 H 335" fill="none" stroke="#2B5BFF" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <path class="cycle-flow" d="M 565 90 H 695" fill="none" stroke="#2B5BFF" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <path class="cycle-flow" d="M 790 130 V 210" fill="none" stroke="#2B5BFF" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <path class="cycle-flow" d="M 695 250 H 205" fill="none" stroke="#2B5BFF" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <path class="cycle-flow" d="M 110 210 V 130" fill="none" stroke="#2B5BFF" stroke-width="2.5" marker-end="url(#arrow)"/>
+        <!-- 수수료 화살표 -->
+        <path class="cycle-flow" d="M 110 60 C 110 20, 430 8, 448 44" fill="none" stroke="#D9A400" stroke-width="2.5" marker-end="url(#arrowY)"/>
+        <text x="255" y="26" font-size="13" font-weight="700" fill="#A87A00" font-family="Pretendard, sans-serif">판매 수수료 = 우리의 수익 💰</text>
+
+        <!-- 노드: HR -->
+        <g>
+          <rect x="15" y="60" width="190" height="66" rx="14" fill="#EEF3FF" stroke="#2B5BFF" stroke-width="1.5"/>
+          <text x="110" y="88" text-anchor="middle" font-size="15" font-weight="800" fill="#10192E" font-family="Pretendard, sans-serif">① HR 부서</text>
+          <text x="110" y="110" text-anchor="middle" font-size="12.5" fill="#4A5670" font-family="Pretendard, sans-serif">포인트 구매·충전</text>
+        </g>
+        <!-- 노드: 임직원 -->
+        <g>
+          <rect x="345" y="60" width="210" height="66" rx="14" fill="#FFFFFF" stroke="#DCE4F2" stroke-width="1.5"/>
+          <text x="450" y="88" text-anchor="middle" font-size="15" font-weight="800" fill="#10192E" font-family="Pretendard, sans-serif">② 임직원</text>
+          <text x="450" y="110" text-anchor="middle" font-size="12.5" fill="#4A5670" font-family="Pretendard, sans-serif">모임 생성 · 참여</text>
+        </g>
+        <!-- 노드: 포인트 적립 -->
+        <g>
+          <rect x="705" y="60" width="180" height="66" rx="14" fill="#FFF8E1" stroke="#FFCB2E" stroke-width="1.5"/>
+          <text x="795" y="88" text-anchor="middle" font-size="15" font-weight="800" fill="#10192E" font-family="Pretendard, sans-serif">③ 포인트 적립 ⚡</text>
+          <text x="795" y="110" text-anchor="middle" font-size="12.5" fill="#4A5670" font-family="Pretendard, sans-serif">모임 등급 따라 보너스</text>
+        </g>
+        <!-- 노드: 장소 결제 -->
+        <g>
+          <rect x="705" y="215" width="180" height="66" rx="14" fill="#FFFFFF" stroke="#DCE4F2" stroke-width="1.5"/>
+          <text x="795" y="243" text-anchor="middle" font-size="15" font-weight="800" fill="#10192E" font-family="Pretendard, sans-serif">④ 장소에서 사용</text>
+          <text x="795" y="265" text-anchor="middle" font-size="12.5" fill="#4A5670" font-family="Pretendard, sans-serif">음식점 · 모임 공간 결제</text>
+        </g>
+        <!-- 하단 라벨 -->
+        <text x="450" y="242" text-anchor="middle" font-size="13" font-weight="700" fill="#2B5BFF" font-family="Pretendard, sans-serif">모임이 늘수록 포인트 수요 증가 → HR 재충전</text>
+        <!-- 좌하단 되돌아가는 노드 -->
+        <g>
+          <rect x="15" y="215" width="190" height="66" rx="14" fill="#FFFFFF" stroke="#DCE4F2" stroke-width="1.5"/>
+          <text x="110" y="243" text-anchor="middle" font-size="15" font-weight="800" fill="#10192E" font-family="Pretendard, sans-serif">⑤ 재충전</text>
+          <text x="110" y="265" text-anchor="middle" font-size="12.5" fill="#4A5670" font-family="Pretendard, sans-serif">활성화 성과 확인 후 추가 구매</text>
+        </g>
+      </svg>
+
+      <p class="cycle-note"><span class="bolt-dot">⚡</span>HR이 확보한 가용 포인트 안에서만 지급되므로, 예산이 통제된 상태로 모임 활성화가 이뤄집니다.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">03 · REVENUE</div>
+      <h2 class="display">두 갈래의 수익 모델</h2>
+      <p class="sec-desc">제품은 OfficeNext에 플러그인으로 연동되는 고정 구조이며, 그 위에서 두 가지 방식으로 수익을 만듭니다.</p>
+    </div>
+    <div class="rev-grid">
+      <div class="rev-card">
+        <div class="rev-num">MODEL A</div>
+        <h3>포인트 판매 수수료</h3>
+        <ul>
+          <li>HR 부서가 포인트를 구매하면 일부 수수료가 수익으로 발생</li>
+          <li>제품 도입 시 100만 포인트 무료 제공 또는 판매 수수료 일부를 포인트로 환원하여 초기 진입 장벽 제거</li>
+          <li>모임이 활발할수록 포인트 소진 → 재구매로 이어지는 반복 매출</li>
+        </ul>
+      </div>
+      <div class="rev-card alt">
+        <div class="rev-num">MODEL B</div>
+        <h3>개인 카드 연동 페이백</h3>
+        <ul>
+          <li>임직원이 개인 카드를 등록하고 모임 장소에서 결제</li>
+          <li>영수증이 자동 연동되어 HR 구매 포인트에서 일부를 차감해 페이백</li>
+          <li>임직원은 할인 혜택, HR은 실사용 기반의 투명한 예산 집행</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">04 · TRUST</div>
+      <h2 class="display">노쇼 방지 장치</h2>
+    </div>
+    <div class="noshow">
+      <div class="icon">🚫</div>
+      <div>
+        <h3>노쇼하면, 포인트는 없다</h3>
+        <p>모임에 참여 신청 후 나타나지 않으면 포인트를 지급하지 않습니다. 보상이 실제 참석과 연결되어 있어, 모임이 "파토" 나는 일을 구조적으로 막습니다.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-label">05 · ROADMAP</div>
+      <h2 class="display">향후 계획 — 모임 등급제</h2>
+      <p class="sec-desc">모임을 자주 할수록 등급이 오르고 더 많은 포인트를 벌 수 있는 "메이트 등급제"를 도입해 참여를 한층 더 독려할 예정입니다.</p>
+    </div>
+    <div class="roadmap-box">
+      <span class="roadmap-tag">COMING SOON</span>
+      <div class="tiers">
+        <div class="tier">
+          <div class="badge">⚡</div>
+          <h4>번개</h4>
+          <p>누적 3회</p>
+        </div>
+        <div class="tier">
+          <div class="badge">🔵</div>
+          <h4>푸른 번개</h4>
+          <p>누적 5회</p>
+        </div>
+        <div class="tier">
+          <div class="badge">🔴</div>
+          <h4>레드 번개</h4>
+          <p>누적 10회</p>
+        </div>
+        <div class="tier">
+          <div class="badge">🌩️</div>
+          <h4>자이언트 제트</h4>
+          <p>누적 20회 (최고 등급)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    OfficeMate · OfficeNext 플러그인 · Hackathon Business Model — 2026
+  </div>
+</footer>
+
+</body>
+</html>
