@@ -208,450 +208,201 @@
   @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes typingDot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
 
-  #om-demo {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-5);
+  /* ---------- 스토리보드 플레이어 (scoped: #om-demo) ---------- */
+  @keyframes storyFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-    button { font-family: inherit; }
-    :focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 2px; }
+  #om-demo { display: flex; flex-direction: column; gap: var(--sp-5); }
+  #om-demo :focus-visible { outline: 2px solid var(--brand-soft); outline-offset: 2px; }
 
-    .demo-grid {
-      display: grid;
-      grid-template-columns: 260px minmax(340px, 420px) 260px;
-      gap: var(--sp-6);
-      align-items: start;
-      justify-content: center;
+  #om-demo .story-stage {
+    background: var(--panel);
+    border-radius: 28px;
+    padding: var(--sp-7) var(--sp-6);
+    display: grid;
+    grid-template-columns: 1fr minmax(300px, 600px) 1fr;
+    grid-template-areas: "rail phone info";
+    gap: var(--sp-6);
+    align-items: center;
+    box-shadow: inset 0 0 60px rgba(51,84,156,.12);
+  }
+  @media (max-width: 980px) {
+    #om-demo .story-stage {
+      grid-template-columns: 1fr;
+      grid-template-areas: "info" "phone" "rail";
+      justify-items: center;
+      gap: var(--sp-5);
+      padding: var(--sp-6) var(--sp-4);
     }
-    @media (max-width: 980px) {
-      .demo-grid { grid-template-columns: 1fr; justify-items: center; }
-      .side-panel { width: 100%; max-width: 420px; }
+  }
+
+  /* --- rail: 화살표로 연결된 링크드 리스트 --- */
+  #om-demo .story-rail { grid-area: rail; display: flex; flex-direction: column; align-items: stretch; gap: 0; width: 100%; max-width: 232px; justify-self: end; }
+  @media (max-width: 980px) { #om-demo .story-rail { max-width: 460px; justify-self: center; } }
+  #om-demo .rail-btn {
+    display: flex; align-items: center; gap: 9px; width: 100%; text-align: left;
+    background: transparent; border: 1px solid var(--panel-line); border-radius: 12px;
+    padding: 9px 12px; color: var(--panel-muted); font-family: inherit; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+  #om-demo .rail-btn::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%; flex: none;
+    background: transparent; border: 2px solid var(--panel-muted); transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  #om-demo .rail-btn:hover { border-color: var(--brand-soft); color: #fff; }
+  #om-demo .rail-btn.active { background: rgba(51,84,156,.22); border-color: var(--brand-soft); color: #fff; }
+  #om-demo .rail-btn.active::before { background: var(--morning); border-color: var(--morning); }
+  #om-demo .rail-arrow { display: flex; align-items: center; justify-content: center; height: 15px; color: var(--brand-soft); font-size: 12px; line-height: 1; opacity: 0.6; }
+
+  /* --- phone stage: 폰틀 고정 · 스크린 가로 슬라이드 --- */
+  #om-demo .story-phone-wrap { grid-area: phone; display: flex; justify-content: center; }
+  #om-demo .story-devices { display: flex; justify-content: center; align-items: flex-start; gap: 0; }
+  #om-demo .device-slot { flex: none; display: flex; flex-direction: column; align-items: center; gap: 9px; }
+  #om-demo .device-slot.secondary {
+    width: 0; margin-left: 0; opacity: 0; transform: translateX(-14px) scale(0.97);
+    overflow: hidden; pointer-events: none;
+    transition: width 0.6s cubic-bezier(0.22,0.61,0.36,1), margin-left 0.6s cubic-bezier(0.22,0.61,0.36,1), opacity 0.45s ease, transform 0.5s ease;
+  }
+  #om-demo .story-devices.two-up .device-slot.secondary {
+    width: 270px; margin-left: 18px; opacity: 1; transform: none; pointer-events: auto;
+  }
+  #om-demo .phone-tag {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--panel-muted); display: flex; align-items: center; gap: 5px; height: 15px; opacity: 0;
+    transition: opacity 0.4s ease; white-space: nowrap;
+  }
+  #om-demo .phone-tag b { color: #fff; font-weight: 700; }
+  #om-demo .story-devices.two-up .phone-tag { opacity: 1; }
+  #om-demo .story-phone { width: 270px; max-width: 88vw; }
+  #om-demo .story-phone .phone-screen { height: 552px; }
+
+  /* 스크린 내부 가로 슬라이드 트랙 (폰틀은 고정) */
+  #om-demo .screen-viewport { position: relative; flex: 1; overflow: hidden; }
+  #om-demo .screen-track { display: flex; height: 100%; transition: transform 0.65s cubic-bezier(0.22,0.61,0.36,1); will-change: transform; }
+  #om-demo .screen { flex: 0 0 100%; min-width: 0; display: flex; flex-direction: column; }
+  #om-demo .screen .app-body { flex: 1; }
+
+  /* 모바일: 두 폰 세로 스택 */
+  @media (max-width: 620px) {
+    #om-demo .story-devices { flex-direction: column; align-items: center; }
+    #om-demo .device-slot.secondary {
+      width: auto; max-width: 88vw; margin-left: 0; max-height: 0; margin-top: 0; transform: none;
+      transition: max-height 0.6s cubic-bezier(0.22,0.61,0.36,1), opacity 0.45s ease, margin-top 0.4s ease;
     }
+    #om-demo .story-devices.two-up .device-slot.secondary { width: auto; max-height: 640px; margin-left: 0; margin-top: 16px; }
+  }
 
-    .side-panel { display: flex; flex-direction: column; gap: var(--sp-4); position: sticky; top: var(--sp-5); }
-    /* bug fix: sticky only makes sense next to a taller center column (desktop
-       3-col grid). On the stacked single-column mobile layout it pinned the
-       aside over the phone/controls below it as the page scrolled. This rule
-       must come AFTER the unconditional ".side-panel { position: sticky }"
-       rule above (same specificity) so it actually wins the cascade at
-       narrow widths — a media query placed earlier in source order does not
-       override a later unconditional rule of equal specificity. */
-    @media (max-width: 980px) {
-      .side-panel { position: static; }
-    }
-    .side-card {
-      background: var(--paper-raised); border: 1px solid var(--line); border-radius: 18px;
-      padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3);
-    }
-    .side-card h2 { margin: 0; font-size: 13.5px; font-weight: 800; }
-    .side-card p.hint { margin: 0; font-size: 11.5px; line-height: 1.55; color: var(--ink-soft); }
+  /* --- info + controls --- */
+  #om-demo .story-info { grid-area: info; display: flex; flex-direction: column; gap: var(--sp-4); max-width: 268px; }
+  @media (max-width: 980px) { #om-demo .story-info { align-items: center; text-align: center; max-width: 520px; } }
+  #om-demo .persona-badge {
+    display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    font-weight: 700; padding: 5px 12px; border-radius: 999px;
+  }
+  @media (max-width: 980px) { #om-demo .persona-badge { align-self: center; } }
+  #om-demo .persona-badge.creator { background: rgba(51,84,156,.24); color: #cdd9f2; }
+  #om-demo .persona-badge.participant { background: rgba(111,146,196,.22); color: #dbe6f6; }
+  #om-demo .persona-badge.meeting { background: rgba(63,143,107,.22); color: #c3e5d3; }
+  #om-demo .story-step { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--panel-muted); }
+  #om-demo .story-title { font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 22px; color: #fff; line-height: 1.25; }
+  #om-demo .story-caption { margin: 0; font-size: 13px; line-height: 1.6; color: var(--panel-muted); }
+  #om-demo .story-controls { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+  #om-demo .story-controls .btn-ghost { color: #dbe4f5; border-color: #3a3947; }
+  #om-demo .story-controls .btn-ghost:hover { border-color: var(--brand-soft); }
 
-    .example-btn {
-      text-align: left; background: var(--paper); border: 1px solid var(--line); border-radius: 12px;
-      padding: 10px 12px; font-size: 12px; color: var(--ink); cursor: pointer;
-      transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
-    }
-    .example-btn:hover { background: #fff; border-color: var(--brand-soft); transform: translateY(-1px); }
-    .example-btn .tag-mini { display:block; font-family: var(--font-mono); font-size: 9.5px; color: var(--muted); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+  /* --- 폰 내부 재사용 요소 --- */
+  #om-demo .mini-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 5px; width: 100%;
+    background: var(--brand); color: #fff; border: none; border-radius: 999px; padding: 9px 14px;
+    font-family: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  }
+  #om-demo .mini-btn:hover { background: var(--brand-deep); }
+  #om-demo .mini-btn.ghost { background: transparent; color: var(--brand-text); border: 1px solid var(--brand-soft); }
+  #om-demo .mini-btn.good { background: var(--good); }
+  #om-demo .user-bubble { align-self: flex-end; background: var(--brand); color: #fff; border-radius: 13px 13px 3px 13px; }
 
-    .stage-list { display: flex; flex-direction: column; gap: 2px; }
-    .stage-item {
-      display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-radius: 10px;
-      font-size: 12px; color: var(--muted); transition: background 0.2s ease, color 0.2s ease;
-    }
-    .stage-item .dot {
-      width: 20px; height: 20px; border-radius: 50%; background: var(--paper); border: 1.5px solid var(--line);
-      display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--muted);
-      flex: none; transition: all 0.2s ease;
-    }
-    .stage-item.active { background: rgba(51,84,156,0.09); color: var(--ink); font-weight: 700; }
-    .stage-item.active .dot { background: var(--brand); border-color: var(--brand); color: #fff; }
-    .stage-item.done { color: var(--ink-soft); }
-    .stage-item.done .dot { background: var(--good); border-color: var(--good); color: #fff; }
+  /* 등급 배지 */
+  #om-demo .grade-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+  #om-demo .grade-badge.g-bolt { background: rgba(51,84,156,.14); color: var(--brand-text); }
+  #om-demo .grade-badge.g-blue { background: rgba(111,146,196,.20); color: #3f5f8c; }
+  #om-demo .grade-badge.g-red { background: rgba(180,72,63,.14); color: var(--danger-text); }
+  #om-demo .grade-badge.g-jet { background: rgba(201,147,52,.18); color: var(--warn-text); }
 
-    .badge-row { display: flex; flex-wrap: wrap; gap: 6px; }
-    .badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 700; background: rgba(51,84,156,.12); color: var(--brand-text); }
+  /* 방폭 게이지 색 변형 */
+  #om-demo .gauge-fill.warn { background: var(--warn); }
+  #om-demo .gauge-fill.danger { background: var(--danger); }
 
-    /* feature checklist */
-    .feat-head-row { display: flex; align-items: center; justify-content: space-between; }
-    .feat-counter { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; color: var(--brand-text); }
-    .feat-list { display: flex; flex-direction: column; gap: 1px; }
-    .feat-item {
-      display: flex; align-items: center; gap: 8px; background: transparent; border: none; text-align: left;
-      padding: 6px 4px; font-size: 12px; color: var(--ink-soft); cursor: pointer; border-radius: 8px;
-      font-family: inherit; transition: background 0.15s ease, color 0.15s ease;
-    }
-    .feat-item:hover { background: var(--paper); }
-    .feat-item.done { color: var(--ink); font-weight: 700; }
-    .feat-check {
-      width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line); flex: none;
-      display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--muted);
-      transition: all 0.2s ease;
-    }
-    .feat-item.done .feat-check { background: var(--good); border-color: var(--good); color: #fff; }
+  /* 방 목록 항목 */
+  #om-demo .room-row {
+    display: flex; flex-direction: column; gap: 5px; padding: 8px 9px;
+    border: 1px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  #om-demo .room-row:hover { border-color: var(--brand-soft); box-shadow: 0 6px 16px -10px rgba(51,84,156,.4); }
+  #om-demo .room-row .rr-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  #om-demo .room-row .rr-name { font-size: 12px; font-weight: 800; }
+  #om-demo .room-row .rr-mid { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  #om-demo .room-row .rr-count { font-family: var(--font-mono); font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  #om-demo .room-row .rr-points { font-size: 11px; font-weight: 800; color: var(--warn-text); white-space: nowrap; }
 
-    /* AI engine inspector (terminal log) */
-    .insp-card { background: var(--panel); border: 1px solid var(--panel-line); color: var(--panel-muted); }
-    .insp-card summary { cursor: pointer; list-style: none; }
-    .insp-card summary::-webkit-details-marker { display: none; }
-    .insp-card summary h2 { color: #fff; display: inline; }
-    .insp-card .hint { color: var(--panel-muted); }
-    .insp-log {
-      display: flex; flex-direction: column; gap: 3px; max-height: 220px; overflow-y: auto;
-      font-family: var(--font-mono); font-size: 10.5px; line-height: 1.5; margin-top: var(--sp-2);
-    }
-    .insp-line { opacity: 0; animation: inspIn 0.25s ease forwards; white-space: pre-wrap; word-break: break-word; }
-    @keyframes inspIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-    .insp-time { color: var(--panel-muted); }
-    .insp-tag { font-weight: 700; padding: 0 3px; border-radius: 3px; }
-    .insp-tag.parse { color: var(--brand-soft); }
-    .insp-tag.match { color: #7FD9AE; }
-    .insp-tag.rule { color: #E3B368; }
-    .insp-tag.ledger { color: #8FB0EF; }
-    .insp-tag.refund { color: #E38C82; }
-    .insp-empty { color: var(--panel-muted); font-style: italic; }
-    @media (prefers-reduced-motion: reduce) { .insp-line { opacity: 1 !important; } }
+  /* 알림(푸시) 카드 */
+  #om-demo .push-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px;
+    display: flex; flex-direction: column; gap: 8px; box-shadow: 0 12px 26px -14px rgba(0,0,0,.35);
+    animation: storyFadeIn 0.5s ease;
+  }
+  #om-demo .push-head { display: flex; align-items: center; gap: 7px; }
+  #om-demo .push-head .push-app { font-size: 10px; font-weight: 700; color: var(--brand-text); }
+  #om-demo .push-head .push-time { margin-left: auto; font-family: var(--font-mono); font-size: 9.5px; color: var(--muted); }
+  #om-demo .push-title { font-size: 13px; font-weight: 800; line-height: 1.35; }
+  #om-demo .push-body { font-size: 11px; color: var(--ink-soft); line-height: 1.55; }
 
-    .phone-col { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); width: 100%; }
+  /* 체크인 로스터 */
+  #om-demo .checkin-row { display: flex; align-items: center; gap: 8px; padding: 8px 4px; border-bottom: 1px solid var(--line); }
+  #om-demo .checkin-row:last-child { border-bottom: none; }
+  #om-demo .checkin-row .ci-name { font-size: 11.5px; font-weight: 700; }
+  #om-demo .checkin-row .ci-state { margin-left: auto; font-size: 10px; font-weight: 700; }
+  #om-demo .checkin-row.done .ci-state { color: var(--good-text); }
+  #om-demo .checkin-row.wait .ci-state { color: var(--muted); }
 
-    .demo-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
-    .ctrl-btn {
-      display: inline-flex; align-items: center; gap: 6px; background: var(--paper-raised); border: 1px solid var(--line);
-      border-radius: 999px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer;
-      transition: background 0.15s ease, transform 0.15s ease;
-    }
-    .ctrl-btn:hover { background: #fff; transform: translateY(-1px); }
-    .ctrl-btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); }
-    .ctrl-btn.primary:hover { background: var(--brand-deep); }
-    .ctrl-btn.stop { background: var(--danger); color: #fff; border-color: var(--danger); }
-    .ctrl-btn.stop:hover { background: var(--danger-text); }
-    .ctrl-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+  /* 장소 옵션 */
+  #om-demo .place-opt {
+    border: 1px solid var(--line); border-radius: 12px; padding: 9px 10px; background: #fff;
+    display: flex; flex-direction: column; gap: 5px; cursor: pointer; transition: border-color 0.15s ease;
+  }
+  #om-demo .place-opt:hover { border-color: var(--brand-soft); }
+  #om-demo .place-opt.selected { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+  #om-demo .place-opt .place-name { font-size: 12px; font-weight: 800; }
 
-    .persona-tabs { display: flex; gap: 6px; background: var(--paper-raised); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
-    .persona-tab {
-      border: none; background: transparent; border-radius: 999px; padding: 7px 14px; font-size: 11.5px; font-weight: 700;
-      color: var(--muted); cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
-    }
-    .persona-tab.active { background: var(--brand); color: #fff; }
+  /* 영수증 */
+  #om-demo .receipt { background: var(--paper); border: 1px dashed var(--line); border-radius: 10px; padding: 10px 11px; display: flex; flex-direction: column; gap: 4px; }
+  #om-demo .receipt-line { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--ink-soft); }
+  #om-demo .receipt-line .rc-k { color: var(--muted); }
+  #om-demo .receipt-line.total { border-top: 1px solid var(--line); margin-top: 3px; padding-top: 5px; font-weight: 800; color: var(--ink); }
 
-    .phone { width: 390px; max-width: 100%; flex: none; }
-    .phone-bezel {
-      background: linear-gradient(160deg, #201f29, #0b0a10);
-      border-radius: 40px;
-      padding: 10px;
-      box-shadow: 0 28px 60px -18px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.05);
-      position: relative;
-    }
-    .phone-screen {
-      background: var(--paper);
-      border-radius: 32px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      height: 760px;
-      max-height: 82vh;
-      position: relative;
-    }
-    @media (max-width: 980px) {
-      .phone { width: min(390px, 92vw); }
-      .phone-screen { height: 640px; max-height: 72vh; }
-    }
+  /* 포인트 지갑 */
+  #om-demo .wallet { display: flex; align-items: baseline; gap: 7px; font-family: var(--font-mono); }
+  #om-demo .wallet .w-amt { font-size: 20px; font-weight: 800; color: var(--brand-text); }
+  #om-demo .wallet .w-plus { font-size: 12px; font-weight: 800; color: var(--good-text); }
 
-    .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px 4px; background: var(--paper-raised); flex: none; }
-    .status-time { font-family: var(--font-mono); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
-    .status-icons { display: flex; align-items: center; gap: 5px; }
-    .signal-bars { display: flex; align-items: flex-end; gap: 2px; height: 9px; }
-    .signal-bars span { width: 3px; background: var(--ink); border-radius: 1px; }
-    .signal-bars span:nth-child(1) { height: 3px; }
-    .signal-bars span:nth-child(2) { height: 5px; }
-    .signal-bars span:nth-child(3) { height: 7px; }
-    .signal-bars span:nth-child(4) { height: 9px; }
-    .battery { width: 19px; height: 10px; border: 1px solid var(--ink); border-radius: 2px; padding: 1px; position: relative; }
-    .battery::after { content: ""; position: absolute; right: -3px; top: 3px; width: 2px; height: 4px; background: var(--ink); border-radius: 0 1px 1px 0; }
-    .battery-fill { height: 100%; width: 82%; background: var(--ink); border-radius: 1px; }
+  /* 채팅 생동감: 메시지 순차 등장 + 타이핑 인디케이터 */
+  @keyframes chatIn { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+  @keyframes cueBounce { 0%, 60%, 100% { transform: translateY(0); opacity: 0.45; } 30% { transform: translateY(-4px); opacity: 1; } }
+  @keyframes urgentPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+  #om-demo .app-body .chat-item:not(.show) { display: none; }
+  #om-demo .app-body .chat-item.show { animation: chatIn 0.34s ease both; }
+  #om-demo .typing-cue { align-self: flex-start; background: var(--paper); border-radius: 13px 13px 13px 3px; padding: 9px 12px; display: flex; gap: 4px; animation: chatIn 0.22s ease both; }
+  #om-demo .typing-cue span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: cueBounce 1.1s ease infinite; }
+  #om-demo .typing-cue span:nth-child(2) { animation-delay: 0.15s; }
+  #om-demo .typing-cue span:nth-child(3) { animation-delay: 0.3s; }
 
-    .app-header {
-      display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--paper-raised);
-      border-bottom: 1px solid var(--line); flex: none; transition: background 0.4s ease;
-    }
-    .app-header.pulse { animation: headerPulse 0.9s ease; }
-    .app-back { font-size: 16px; color: var(--muted); flex: none; }
-    .bot-avatar {
-      width: 34px; height: 34px; border-radius: 10px; background: var(--brand); color: #fff;
-      display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; flex: none;
-    }
-    .app-header-text { flex: 1; min-width: 0; }
-    .app-header-text .name { font-size: 13.5px; font-weight: 800; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .app-header-text .subtitle { font-size: 10.5px; color: var(--muted); }
-    .app-header-icons { display: flex; gap: 10px; color: var(--muted); font-size: 15px; flex: none; }
+  /* 방폭 실시간 카운트다운 */
+  #om-demo .room-row .gauge-fill { transition: width 1s linear; }
+  #om-demo .room-row.urgent .gauge-label { color: var(--danger-text); font-weight: 700; animation: urgentPulse 1.5s ease infinite; }
 
-    /* 방 생성 진입 프롬프트 — 봇 방 전환 직후 예시 칩 + 슬롯피커 버튼 (채팅 카드 형태, 별도 폼/시트 없음) */
-    .entry-chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
-    .entry-chip {
-      border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft);
-      border-radius: 999px; padding: 5px 10px; font-size: 10.5px; cursor: pointer; font-family: inherit;
-      transition: border-color 0.12s ease;
-    }
-    .entry-chip:hover { border-color: var(--brand-soft); }
-
-    .app-body {
-      flex: 1; padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 10px;
-      overflow-y: auto; overflow-x: hidden; font-size: 13px; line-height: 1.5; background: var(--paper);
-      scroll-behavior: smooth;
-    }
-    .app-body::-webkit-scrollbar { width: 6px; }
-    .app-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 999px; }
-
-    .view-pane { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-    .view-pane[hidden] { display: none; }
-
-    .ai-status-chip {
-      display: flex; align-items: center; gap: 8px; margin: 10px 12px 4px; padding: 8px 12px;
-      background: rgba(51,84,156,.09); border: 1px solid rgba(51,84,156,.18); border-radius: 12px;
-      font-size: 11px; color: var(--brand-text); font-weight: 700; flex: none;
-    }
-    .ai-status-chip .asc-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); flex: none; animation: ascPulse 1.6s ease infinite; }
-    @keyframes ascPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-
-    .room-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 0 10px; }
-    .room-list-item {
-      display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer;
-      border-bottom: 1px solid var(--line); position: relative; transition: background 0.15s ease;
-    }
-    .room-list-item:hover { background: rgba(0,0,0,0.02); }
-    .rli-avatar-wrap { position: relative; flex: none; }
-    .rli-unread-dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--danger); border: 2px solid var(--paper-raised); }
-    .rli-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-    .rli-top-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-    .rli-name { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rli-time { font-size: 10px; color: var(--muted); flex: none; }
-    .rli-bottom-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-    .rli-preview { font-size: 11.5px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .rli-badge { flex: none; min-width: 17px; height: 17px; border-radius: 999px; background: var(--danger); color: #fff; font-size: 9.5px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 4px; }
-    .rli-avatars { display: flex; align-items: center; }
-    .rli-avatars .avatar { width: 30px; height: 30px; font-size: 11px; }
-
-    .room-list-newbtn {
-      margin: 8px 12px 2px; border: none; border-radius: 12px; background: var(--brand); color: #fff;
-      font-size: 12.5px; font-weight: 800; padding: 11px; cursor: pointer; font-family: inherit;
-      display: flex; align-items: center; justify-content: center; gap: 6px; flex: none;
-      transition: background 0.15s ease, transform 0.15s ease;
-    }
-    .room-list-newbtn:hover { background: var(--brand-deep); transform: translateY(-1px); }
-
-    .day-divider { align-self: center; font-family: var(--font-mono); font-size: 10px; color: var(--muted); background: rgba(0,0,0,0.05); padding: 3px 10px; border-radius: 999px; margin: 2px 0; }
-
-    .msg-row { display: flex; gap: 7px; max-width: 92%; opacity: 0; animation: msgIn 0.32s ease forwards; }
-    .msg-row.bot { align-self: flex-start; }
-    .msg-row.user { align-self: flex-end; flex-direction: row-reverse; }
-
-    .msg-avatar { width: 24px; height: 24px; border-radius: 7px; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; flex: none; }
-    .msg-col { display: flex; flex-direction: column; gap: 3px; max-width: 100%; }
-    .msg-name { font-size: 10px; color: var(--muted); font-weight: 700; }
-    .msg-row.user .msg-col { align-items: flex-end; }
-
-    .bubble { align-self: auto; background: var(--paper-raised); border-radius: 14px 14px 14px 3px; padding: 9px 12px; max-width: 100%; box-shadow: 0 1px 0 rgba(0,0,0,0.03); white-space: pre-wrap; word-break: break-word; }
-    .msg-row.user .bubble { background: var(--brand); color: #fff; border-radius: 14px 14px 3px 14px; }
-    .msg-time { font-size: 9px; color: var(--muted); padding: 0 2px; }
-
-    .typing-bubble { background: var(--paper-raised); border-radius: 14px 14px 14px 3px; padding: 10px 14px; display: inline-flex; gap: 4px; align-self: flex-start; }
-    .typing-bubble span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typingDot 1.1s ease infinite; }
-    .typing-bubble span:nth-child(2) { animation-delay: 0.15s; }
-    .typing-bubble span:nth-child(3) { animation-delay: 0.3s; }
-
-    .card {
-      background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: flex;
-      flex-direction: column; gap: 8px; max-width: 280px; box-shadow: 0 1px 0 rgba(0,0,0,0.03);
-    }
-    .card-title { font-size: 12.5px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
-    .field-row { display: flex; flex-direction: column; gap: 4px; }
-    .field-line { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-    .field-line .k { color: var(--muted); width: 44px; flex: none; font-size: 10.5px; }
-    .field-line .v { font-weight: 700; }
-    .field-line .v.missing { color: var(--warn-text); font-weight: 400; font-style: italic; }
-
-    .tag { display: inline-flex; align-self: flex-start; padding: 2.5px 8px; border-radius: 999px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.01em; }
-    .tag.good { background: rgba(63,143,107,.13); color: var(--good-text); }
-    .tag.warn { background: rgba(201,122,46,.13); color: var(--warn-text); }
-    .tag.danger { background: rgba(180,72,63,.13); color: var(--danger-text); }
-    .tag.brand { background: rgba(51,84,156,.13); color: var(--brand-text); }
-
-    .card-btn-row { display: flex; gap: 6px; }
-    .card-btn {
-      flex: 1; border: none; border-radius: 10px; padding: 8px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer;
-      transition: transform 0.12s ease, filter 0.12s ease; font-family: inherit;
-    }
-    .card-btn.primary { background: var(--brand); color: #fff; }
-    .card-btn.ghost { background: var(--paper); color: var(--ink); }
-    .card-btn.good { background: var(--good); color: #fff; }
-    .card-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
-    .card-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
-
-    .gauge { display: flex; flex-direction: column; gap: 5px; }
-    .gauge-track { height: 8px; border-radius: 999px; background: var(--paper); overflow: hidden; }
-    .gauge-fill { height: 100%; border-radius: 999px; background: var(--brand); transition: width 0.5s ease; }
-    .gauge-fill.good { background: var(--good); }
-    .gauge-label { font-size: 10px; color: var(--muted); font-variant-numeric: tabular-nums; display: flex; justify-content: space-between; }
-
-    .avatar-stack { display: flex; align-items: center; }
-    .avatar { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #fff; margin-left: -9px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex: none; }
-    .avatar:first-child { margin-left: 0; }
-    .avatar.a0 { background: var(--brand); }
-    .avatar.a1 { background: var(--lunch); }
-    .avatar.a2 { background: var(--dinner); }
-    .avatar.a3 { background: var(--morning); }
-    .avatar.empty { background: #fff; border: 1.5px dashed var(--line); color: var(--muted); font-weight: 600; }
-
-    .place-card { display: flex; gap: 10px; align-items: center; }
-    .place-map { width: 54px; height: 54px; border-radius: 10px; background: var(--paper); flex: none; }
-    .place-info { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-    .place-info .pn { font-size: 12px; font-weight: 800; }
-    .place-info .pm { font-size: 10.5px; color: var(--muted); }
-    .stars { color: var(--lunch); font-size: 10.5px; }
-
-    .note-inline { font-size: 10px; color: var(--muted); font-style: italic; line-height: 1.4; }
-
-    .ta-row {
-      display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700;
-      color: var(--warn-text); font-variant-numeric: tabular-nums;
-    }
-    .ta-row .ta-clock { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.02em; }
-    .ta-row.ta-done { color: var(--good-text); }
-    .ta-controls { display: flex; gap: 6px; margin-top: 2px; }
-    .ta-btn {
-      border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft); border-radius: 999px;
-      padding: 4px 10px; font-size: 10px; font-weight: 700; cursor: pointer; font-family: inherit;
-    }
-    .ta-btn:hover { background: #fff; transform: translateY(-1px); }
-    .ta-btn.danger { color: var(--danger-text); border-color: rgba(180,72,63,.35); }
-    .ta-btn.danger:hover { background: rgba(180,72,63,.08); }
-    .ta-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
-
-    .deposit-row {
-      display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--ink-soft);
-      background: rgba(201,147,52,.10); border-radius: 8px; padding: 5px 8px;
-    }
-    .deposit-row b { color: var(--warn-text); }
-    .settle-line { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
-    .settle-line .amt { font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; }
-    .settle-line .amt.plus { color: var(--good-text); }
-
-    .sim-badge {
-      display: inline-flex; align-self: flex-start; border: 1px dashed var(--line); color: var(--muted);
-      border-radius: 999px; padding: 2px 8px; font-size: 9px; font-weight: 700; letter-spacing: 0.03em;
-    }
-
-    /* trust ring / onboarding */
-    .trust-ring-wrap { display: flex; align-items: center; gap: 10px; }
-    .trust-ring { width: 44px; height: 44px; flex: none; transform: rotate(-90deg); }
-    .trust-ring circle.track { fill: none; stroke: var(--paper); stroke-width: 5; }
-    .trust-ring circle.fill { fill: none; stroke: var(--brand); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
-    .trust-ring-num { position: relative; }
-    .trust-num-box { display: flex; flex-direction: column; }
-    .trust-num-box .tn-val { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .trust-num-box .tn-label { font-size: 9.5px; color: var(--muted); }
-    .profile-tags { display: flex; flex-wrap: wrap; gap: 4px; }
-
-    /* check-in / QR */
-    .checkin-mode-row { display: flex; align-items: center; gap: 6px; }
-    .checkin-mode-badge { font-size: 9.5px; font-weight: 700; padding: 2.5px 8px; border-radius: 999px; }
-    .checkin-mode-badge.online { background: rgba(63,143,107,.13); color: var(--good-text); }
-    .checkin-mode-badge.offline { background: rgba(51,84,156,.13); color: var(--brand-text); }
-    .qr-box {
-      width: 84px; height: 84px; margin: 4px auto; border-radius: 8px; background: #fff; border: 1px solid var(--line);
-      background-image: repeating-linear-gradient(0deg, var(--ink) 0 3px, transparent 3px 6px),
-        repeating-linear-gradient(90deg, var(--ink) 0 3px, transparent 3px 6px);
-      background-blend-mode: multiply; opacity: 0.82;
-    }
-    .checkin-list { display: flex; flex-direction: column; gap: 4px; }
-    .checkin-person { display: flex; align-items: center; gap: 6px; font-size: 11px; }
-    .checkin-person .ci-state { margin-left: auto; font-size: 10px; color: var(--muted); }
-    .checkin-person.done .ci-state { color: var(--good-text); font-weight: 700; }
-    .checkin-person.noshow { opacity: .78; }
-    .checkin-person.noshow .ci-state { color: var(--danger-text); font-weight: 700; }
-    .card-btn.danger { background: var(--paper); color: var(--danger-text); border: 1px solid rgba(180,72,63,.35); }
-
-    /* slot-picker: capacity stepper (①②) */
-    .capacity-stepper { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 6px 0 2px; }
-    .cap-btn {
-      width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper);
-      color: var(--ink); font-size: 17px; font-weight: 700; cursor: pointer; font-family: inherit;
-      display: flex; align-items: center; justify-content: center; transition: transform 0.12s ease;
-    }
-    .cap-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .cap-btn:not(:disabled):hover { transform: translateY(-1px); border-color: var(--brand-soft); }
-    .cap-num { font-size: 22px; font-weight: 800; color: var(--ink); min-width: 32px; text-align: center; }
-    .cap-num small { font-size: 12px; color: var(--muted); font-weight: 600; margin-left: 2px; }
-
-    /* credit ledger */
-    .credit-balance { display: flex; align-items: baseline; gap: 4px; }
-    .credit-balance .cb-num { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
-    .credit-balance .cb-unit { font-size: 11px; color: var(--muted); }
-    .credit-tx-list { display: flex; flex-direction: column; gap: 5px; max-height: 130px; overflow-y: auto; }
-    .credit-tx { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--ink-soft); }
-    .credit-tx .tx-amt { margin-left: auto; font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; flex: none; }
-    .credit-tx .tx-amt.plus { color: var(--good-text); }
-    .credit-tx .tx-amt.minus { color: var(--danger-text); }
-
-    /* payment / topup */
-    .pay-method-row { display: flex; gap: 6px; flex-wrap: wrap; }
-    .pay-method-btn {
-      border: 1px solid var(--line); background: var(--paper); color: var(--ink); border-radius: 10px;
-      padding: 7px 9px; font-size: 10.5px; font-weight: 700; cursor: pointer; font-family: inherit;
-    }
-    .pay-method-btn:hover { background: #fff; border-color: var(--brand-soft); }
-
-    /* n-bbang split */
-    .split-list { display: flex; flex-direction: column; gap: 4px; }
-    .split-person-row { display: flex; align-items: center; gap: 6px; font-size: 11px; }
-    .split-person-row .sp-amt { margin-left: auto; font-family: var(--font-mono); font-weight: 700; font-variant-numeric: tabular-nums; }
-    .split-req-badge { font-size: 9px; font-weight: 700; color: var(--brand-text); background: rgba(51,84,156,.13); border-radius: 999px; padding: 1.5px 6px; }
-    .split-req-badge.paid { color: var(--good-text); background: rgba(63,143,107,.13); }
-
-    /* friend suggestion */
-    .rf-person-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; }
-    .rf-person-row .rf-meta { margin-left: auto; font-size: 10px; color: var(--muted); }
-
-    /* mypage donut (department diversity) */
-    .donut { width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center; align-self: center; }
-    .donut-center { width: 42px; height: 42px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: var(--ink); }
-
-    .input-bar {
-      display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--paper-raised);
-      border-top: 1px solid var(--line); flex: none;
-    }
-    .input-plus { width: 30px; height: 30px; border-radius: 50%; background: var(--paper); color: var(--muted); display: flex; align-items: center; justify-content: center; flex: none; font-size: 16px; }
-    .msg-input {
-      flex: 1; border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; font-size: 13px;
-      font-family: inherit; background: var(--paper); color: var(--ink); min-width: 0;
-    }
-    .msg-input:focus { outline: none; border-color: var(--brand); background: #fff; }
-    .send-btn {
-      width: 34px; height: 34px; border-radius: 50%; border: none; background: var(--brand); color: #fff;
-      display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none; font-size: 15px;
-      transition: background 0.15s ease, transform 0.15s ease;
-    }
-    .send-btn:hover { background: var(--brand-deep); transform: scale(1.05); }
-    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-    .autotype-cursor { display: inline-block; width: 1px; }
-
-    /* bottom tab bar (free navigation) */
-    .demo-tabbar {
-      display: flex; align-items: stretch; justify-content: space-around; flex: none;
-      background: var(--paper-raised); border-top: 1px solid var(--line); padding-bottom: 2px;
-    }
-    .demo-tab {
-      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-      background: transparent; border: none; padding: 8px 4px 6px; font-family: inherit; font-size: 9.5px;
-      font-weight: 700; color: var(--muted); cursor: pointer; transition: color 0.15s ease;
-    }
-    .demo-tab .dt-icon { font-size: 18px; line-height: 1; }
-    .demo-tab.active { color: var(--brand); }
-
-    @media (prefers-reduced-motion: reduce) {
-      .msg-row { opacity: 1 !important; }
-    }
+  @media (prefers-reduced-motion: reduce) {
+    #om-demo .screen-track, #om-demo .device-slot.secondary, #om-demo .room-row .gauge-fill { transition: none; }
+    #om-demo .push-card, #om-demo .app-body .chat-item.show, #om-demo .typing-cue, #om-demo .typing-cue span, #om-demo .room-row.urgent .gauge-label { animation: none; }
   }
 
   /* =========================================================
@@ -727,10 +478,9 @@
   .meet-card:hover, .how-card:hover, .ns-card:hover, .co-card:hover {
     transform: translateY(-3px); box-shadow: 0 14px 32px -14px rgba(51,84,156,.32);
   }
-  #om-demo .side-card { transition: transform 0.25s cubic-bezier(.2,.8,.2,1), box-shadow 0.25s cubic-bezier(.2,.8,.2,1); }
-  #om-demo .side-card:hover { transform: translateY(-3px); box-shadow: 0 14px 32px -14px rgba(51,84,156,.32); }
+  #om-demo .rail-btn { transition: transform 0.25s cubic-bezier(.2,.8,.2,1), background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
 
-  .btn-primary:hover, .card-btn:hover, .ctrl-btn:hover, .example-btn:hover, .demo-tab:hover {
+  .btn-primary:hover {
     transform: scale(1.02); filter: brightness(1.03);
   }
   .btn-ghost:hover { transform: scale(1.02); }
@@ -897,154 +647,184 @@
 
   <!-- 라이브 데모 -->
   <section id="demo">
-    <div class="sec-eyebrow">라이브 데모 · 여기서 바로 실행됩니다</div>
-    <h2>말이 아니라 코드로 — 지금 직접 입력해보세요</h2>
-    <p class="sec-lede">이미지가 아니라 <b>실제로 동작하는 데모</b>입니다.</p>
+    <div class="sec-eyebrow">스토리보드 · 번개방 생성부터 정산까지</div>
+    <h2>번개방 한 판, 처음부터 끝까지</h2>
+    <p class="sec-lede"><b>생성자</b>가 AI로 방을 만들고, <b>참여자</b>가 알림·목록으로 합류해 체크인·장소예약·페이백까지 — 폰 화면이 옆으로 흐르며 이어집니다.</p>
     <div id="om-demo">
-      <div class="demo-grid">
+      <div class="story-stage">
 
-        <!-- LEFT: try it yourself -->
-        <aside class="side-panel">
-          <div class="side-card">
-            <h2>💬 직접 해보세요</h2>
-            <p class="hint">아래 문장을 클릭하면 입력창에 자동으로 채워집니다. 직접 타이핑해도 좋아요 — 봇이 실제로 문장을 해석합니다.</p>
-            <button class="example-btn" data-example="내일 점심 마라탕 3명">
-              <span class="tag-mini">예시 1</span>내일 점심 마라탕 3명
-            </button>
-            <button class="example-btn" data-example="금요일 저녁 삼겹살 먹을 사람">
-              <span class="tag-mini">예시 2</span>금요일 저녁 삼겹살 먹을 사람
-            </button>
-            <button class="example-btn" data-example="모레 오후 3시 커피챗 2명">
-              <span class="tag-mini">예시 3</span>모레 오후 3시 커피챗 2명
-            </button>
-            <button class="example-btn" data-special="slot-picker" type="button">
-              <span class="tag-mini">예시 4</span>🗓️ 슬롯 직접 선택으로 열기
-            </button>
-            <p class="hint" style="margin-top:4px;">파서는 날짜·시간대·인원·메뉴 30여 개 사전을 조합해 인식합니다. 슬롯이 빠지면 봇이 되물어요.</p>
-          </div>
-          <div class="side-card">
-            <h2>🧠 파서가 이해하는 표현</h2>
-            <div class="badge-row">
-              <span class="badge">오늘/내일/모레/글피</span>
-              <span class="badge">이번주·다음주 요일</span>
-              <span class="badge">N월 N일</span>
-              <span class="badge">아침/점심/저녁</span>
-              <span class="badge">오전·오후 N시(반)</span>
-              <span class="badge">N명·한두세네다섯 명</span>
-              <span class="badge">메뉴·활동 30+</span>
-            </div>
-          </div>
-        </aside>
+        <!-- RAIL (플로우 · 링크드 리스트) -->
+        <nav class="story-rail" id="storyRail" aria-label="스토리보드 플로우"></nav>
 
-        <!-- CENTER: phone -->
-        <div class="phone-col">
-          <div class="demo-controls">
-            <button class="ctrl-btn primary" id="btnAutoDemo" type="button">▶ 자동 데모</button>
-            <button class="ctrl-btn stop" id="btnStopDemo" type="button" disabled>⏹ 중지</button>
-            <button class="ctrl-btn" id="btnReset" type="button">↺ 처음부터</button>
-          </div>
+        <!-- PHONE STAGE (폰틀 고정) -->
+        <div class="story-phone-wrap">
+          <div class="story-devices" id="storyDevices">
 
-          <div class="phone">
-            <div class="phone-bezel">
-              <div class="phone-screen">
-                <div class="status-bar">
-                  <span class="status-time" id="clockTime">09:12</span>
-                  <span class="status-icons">
-                    <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
-                    <span class="battery"><span class="battery-fill"></span></span>
-                  </span>
-                </div>
-                <div class="app-header" id="appHeader">
-                  <span class="app-back" id="appBackBtn">‹</span>
-                  <div class="bot-avatar" id="botAvatar">🍱</div>
-                  <div class="app-header-text">
-                    <div class="name" id="roomTitle">OfficeMate</div>
-                    <div class="subtitle" id="roomSubtitle">개설자 김대리 · 항상 대기중</div>
+            <!-- PRIMARY: 화면이 가로로 슬라이드 -->
+            <div class="device-slot primary">
+              <div class="phone-tag"><b>①</b> 방 알림</div>
+              <div class="phone story-phone">
+                <div class="phone-bezel"><div class="phone-notch"></div>
+                  <div class="phone-screen">
+                    <div class="status-bar"><span class="status-time">12:00</span><span class="status-icons"><span class="signal-bars"><span></span><span></span><span></span><span></span></span><span class="battery"><span class="battery-fill"></span></span></span></div>
+                    <div class="screen-viewport">
+                      <div class="screen-track" id="screenTrack">
+
+                        <!-- 패널 A) 생성자 대화 — 방 생성 → 방 생성 완료 (아래로 누적) -->
+                        <div class="screen" data-panel="0">
+                          <div class="app-header"><div class="bot-avatar">OM</div><div class="app-header-text"><div class="name">OfficeMate AI</div><div class="subtitle">방 만들기 도우미</div></div><div class="status-dot"></div></div>
+                          <div class="app-body">
+                            <div class="bubble" data-step="0">안녕하세요 김대리님 👋 오늘은 어떤 번개방을 열어볼까요?</div>
+                            <div class="m-card" data-step="0">
+                              <span class="tag brand">취향 기반 추천 모임명</span>
+                              <div class="chip-row"><span class="chip-sm">🍜 매운맛 점심 원정대</span><span class="chip-sm">☕ 오후 커피챗</span><span class="chip-sm">🍲 부서 화합 저녁</span></div>
+                              <div class="note">수집된 취향(#매운맛 #점심)에 맞춘 이름이에요.</div>
+                            </div>
+                            <div class="bubble" data-step="0">지난번에 만든 <b>‘보드게임 번개’</b>처럼 다시 열 수도 있어요.</div>
+                            <div class="bubble user-bubble" data-step="0">“매운거 좋아하는 사람 3명, 오늘 점심”</div>
+                            <div class="m-card" data-step="0">
+                              <span class="tag good">AI 제안 완성</span>
+                              <div style="font-weight:800;">🍜 매운맛 점심 원정대</div>
+                              <div class="chip-row"><span class="chip-sm">오늘 12:00</span><span class="chip-sm">정원 4명</span><span class="chip-sm">#매운맛</span></div>
+                              <button class="mini-btn" type="button" data-advance>이 방으로 만들기</button>
+                            </div>
+                            <div class="toast" data-step="1">⚡ 번개방이 생성됐어요!</div>
+                            <div class="m-card" data-step="1">
+                              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><div style="font-weight:800;">🍜 매운맛 점심 원정대</div><span class="grade-badge g-bolt">⚡ 번개</span></div>
+                              <div class="chip-row"><span class="chip-sm">오늘 12:00</span><span class="chip-sm">정원 4명</span></div>
+                              <div class="avatar-stack"><span style="background:var(--brand)">김</span><span style="background:var(--line);color:var(--muted)">+3</span></div>
+                              <div class="gauge"><div class="gauge-track"><div class="gauge-fill" style="width:25%"></div></div><div class="gauge-label">1/4명 · 참여자 모집 시작</div></div>
+                            </div>
+                            <div class="note" data-step="1">참여자에게 알림이 전송됩니다 — 이제 <b>참여자 시점</b>으로 전환할게요.</div>
+                            <button class="mini-btn" type="button" data-advance data-step="1">🙋 참여자 시점으로 이동하기</button>
+                          </div>
+                        </div>
+
+                        <!-- 패널 B) 참여자 알림 (옆에 방 목록 폰이 펼쳐짐) -->
+                        <div class="screen" data-panel="1">
+                          <div class="app-header"><div class="bot-avatar">OM</div><div class="app-header-text"><div class="name">OfficeMate</div><div class="subtitle">번개방 알림</div></div><div class="status-dot"></div></div>
+                          <div class="app-body">
+                            <div class="push-card" data-step="2">
+                              <div class="push-head"><div class="bot-avatar">OM</div><span class="push-app">OfficeMate 번개방</span><span class="push-time">지금</span></div>
+                              <div class="push-title">⚡ 취향 저격 번개방이 열렸어요</div>
+                              <div class="push-body">회원님이 좋아하는 <b>#매운맛 #점심</b> — ‘매운맛 점심 원정대’에 딱 맞아요. 클릭 한 번으로 참여!</div>
+                              <button class="mini-btn" type="button" data-advance>바로 참여하기</button>
+                            </div>
+                            <div class="toast" data-step="2">✅ 참여 완료 · 오른쪽 목록에서도 골라요</div>
+                            <div class="note" data-step="2">알림으로 바로 참여하거나, 옆의 <b>방 목록</b>에서 방폭 임박순으로 골라요.</div>
+                          </div>
+                        </div>
+
+                        <!-- 패널 C) 모임 진행 대화 — 체크인 → 장소 → 페이백 → 종료 (아래로 누적) -->
+                        <div class="screen" data-panel="2">
+                          <div class="app-header"><div class="bot-avatar">OM</div><div class="app-header-text"><div class="name">🍜 매운맛 점심 원정대</div><div class="subtitle">번개방</div></div><div class="status-dot"></div></div>
+                          <div class="app-body">
+                            <!-- 체크인 -->
+                            <div class="bubble" data-step="3">장소에 도착하면 체크인해 주세요. <b>전원 체크인</b>하면 모임이 시작돼요!</div>
+                            <div class="m-card" data-step="3">
+                              <div class="checkin-row done"><div class="avatar-stack"><span style="background:var(--brand)">김</span></div><span class="ci-name">김대리 (개설자)</span><span class="ci-state">체크인 ✓</span></div>
+                              <div class="checkin-row done"><div class="avatar-stack"><span style="background:var(--lunch)">박</span></div><span class="ci-name">박주임</span><span class="ci-state">체크인 ✓</span></div>
+                              <div class="checkin-row done"><div class="avatar-stack"><span style="background:var(--dinner)">정</span></div><span class="ci-name">정사원</span><span class="ci-state">체크인 ✓</span></div>
+                              <div class="checkin-row wait"><div class="avatar-stack"><span style="background:var(--good)">나</span></div><span class="ci-name">나</span><span class="ci-state">대기 중</span></div>
+                            </div>
+                            <button class="mini-btn" type="button" data-advance data-step="3">QR 스캔하고 체크인하기</button>
+                            <div class="toast" data-step="3">🎉 전원 체크인 완료 · 모임 시작!</div>
+                            <!-- 장소 추천·예약 -->
+                            <div class="bubble" data-step="4"><span class="tag brand">AI 장소 추천</span> ‘매운맛 점심’에 어울리는 곳을 골라봤어요.</div>
+                            <div class="place-opt selected" data-step="4"><div class="place-name">🌶️ 신전 마라탕</div><div class="chip-row"><span class="chip-sm">도보 3분</span><span class="chip-sm">4인석</span><span class="chip-sm">1인 12,000원</span></div></div>
+                            <div class="place-opt" data-step="4"><div class="place-name">🍜 강호동 짬뽕</div><div class="chip-row"><span class="chip-sm">도보 6분</span><span class="chip-sm">매운맛 ★★★</span></div></div>
+                            <button class="mini-btn" type="button" data-advance data-step="4">이 장소로 예약 확정</button>
+                            <div class="m-card" data-step="4"><span class="tag good">네이버 예약 완료 · 오늘 12:00</span></div>
+                            <div class="toast" data-step="4">📅 officeNext 캘린더에 일정 등록 완료 (참여자 전원)</div>
+                            <!-- 페이백 -->
+                            <div class="bubble" data-step="5">오늘 모임 잘 마치셨나요? 영수증으로 <b>인사팀 페이백</b>을 신청할 수 있어요.</div>
+                            <div class="m-card" data-step="5">
+                              <span class="tag good">영수증 불러오기 완료</span>
+                              <div class="receipt">
+                                <div class="receipt-line"><span class="rc-k">신전 마라탕</span><span></span></div>
+                                <div class="receipt-line"><span class="rc-k">마라탕 × 4</span><span>40,000원</span></div>
+                                <div class="receipt-line"><span class="rc-k">음료 × 4</span><span>8,000원</span></div>
+                                <div class="receipt-line total"><span>합계</span><span>48,000원</span></div>
+                              </div>
+                              <button class="mini-btn" type="button" data-advance>인사팀에 페이백 신청</button>
+                            </div>
+                            <div class="toast" data-step="5">✅ 인사팀 페이백 신청 완료 · 검토 중</div>
+                            <!-- 모임 종료 -->
+                            <div class="bubble" data-step="6">모두 참석 완료! 걸어둔 <b>포인트를 정산</b>할게요 🎉</div>
+                            <div class="m-card" data-step="6">
+                              <span class="tag brand">포인트 지급</span>
+                              <div class="checkin-row done"><span class="ci-name">김대리 (개설자)</span><span class="ci-state">+150P</span></div>
+                              <div class="checkin-row done"><span class="ci-name">박주임</span><span class="ci-state">+120P</span></div>
+                              <div class="checkin-row done"><span class="ci-name">정사원</span><span class="ci-state">+120P</span></div>
+                              <div class="checkin-row done"><span class="ci-name">나</span><span class="ci-state">+120P</span></div>
+                            </div>
+                            <div class="toast" data-step="6">💰 참여자·생성자 전원 포인트 지급 완료</div>
+                            <div class="m-card" data-step="6">
+                              <span class="tag brand">내 포인트 지갑</span>
+                              <div class="wallet"><span class="w-amt">1,370P</span><span class="w-plus">+120P</span></div>
+                              <div class="note">벌어둔 포인트는 다음 회식·모임 장소 결제에 바로 쓸 수 있어요.</div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
                   </div>
-                  <div class="app-header-icons">
-                    <span>🔍</span><span>☰</span>
-                  </div>
-                </div>
-
-                <div class="view-pane" id="viewList">
-                  <div class="ai-status-chip"><span class="asc-dot"></span><span>OfficeMate AI가 매칭 중...</span></div>
-                  <button class="room-list-newbtn" id="btnNewRoom" type="button">＋ 새 모임 만들기</button>
-                  <div class="room-list" id="roomList"></div>
-                </div>
-
-                <div class="view-pane" id="viewRoom" hidden>
-                  <div class="app-body" id="chatBody"></div>
-                  <div class="input-bar">
-                    <span class="input-plus">＋</span>
-                    <input class="msg-input" id="chatInput" type="text" placeholder="메시지를 입력하세요" autocomplete="off" />
-                    <button class="send-btn" id="sendBtn" type="button" aria-label="전송">➤</button>
-                  </div>
-                </div>
-
-                <div class="view-pane" id="viewExplore" hidden>
-                  <div class="app-body" id="exploreBody"></div>
-                </div>
-
-                <div class="view-pane" id="viewMy" hidden>
-                  <div class="app-body" id="myBody"></div>
-                </div>
-
-                <div class="demo-tabbar" role="tablist" aria-label="화면 전환">
-                  <button class="demo-tab active" id="tabChat" type="button" data-tab="chat"><span class="dt-icon">💬</span><span>채팅</span></button>
-                  <button class="demo-tab" id="tabExplore" type="button" data-tab="explore"><span class="dt-icon">🔍</span><span>탐색</span></button>
-                  <button class="demo-tab" id="tabMy" type="button" data-tab="my"><span class="dt-icon">🪪</span><span>마이</span></button>
                 </div>
               </div>
             </div>
+
+            <!-- SECONDARY: 방 목록 폰 — 참여자 단계에서 펼쳐짐 -->
+            <div class="device-slot secondary" id="deviceList" aria-hidden="true">
+              <div class="phone-tag"><b>②</b> 방 목록</div>
+              <div class="phone story-phone">
+                <div class="phone-bezel"><div class="phone-notch"></div>
+                  <div class="phone-screen">
+                    <div class="status-bar"><span class="status-time">12:00</span><span class="status-icons"><span class="signal-bars"><span></span><span></span><span></span><span></span></span><span class="battery"><span class="battery-fill"></span></span></span></div>
+                    <div class="app-header"><div class="bot-avatar">OM</div><div class="app-header-text"><div class="name">번개방 탐색</div><div class="subtitle">방폭 임박순 정렬</div></div><div class="status-dot"></div></div>
+                    <div class="app-body">
+                      <div class="room-row urgent" data-advance data-remain="252" data-total="1800">
+                        <div class="rr-top"><span class="rr-name">🔥 마감임박 삼겹살</span><span class="grade-badge g-red">🔴 레드 번개</span></div>
+                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--dinner)">최</span><span style="background:var(--lunch)">한</span><span style="background:var(--morning)">유</span></div><span class="rr-count">3/4명</span><span class="rr-points">💰 +180P</span></div>
+                        <div class="gauge"><div class="gauge-track"><div class="gauge-fill danger" style="width:14%"></div></div><div class="gauge-label">방폭까지 04:12</div></div>
+                      </div>
+                      <div class="room-row" data-advance data-remain="690" data-total="1800">
+                        <div class="rr-top"><span class="rr-name">🍜 매운맛 점심 원정대</span><span class="grade-badge g-bolt">⚡ 번개</span></div>
+                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--brand)">김</span><span style="background:var(--good)">나</span></div><span class="rr-count">2/4명</span><span class="rr-points">💰 +120P</span></div>
+                        <div class="gauge"><div class="gauge-track"><div class="gauge-fill warn" style="width:38%"></div></div><div class="gauge-label">방폭까지 11:30</div></div>
+                      </div>
+                      <div class="room-row" data-advance data-remain="1600" data-total="2400">
+                        <div class="rr-top"><span class="rr-name">☕ 오후 커피챗</span><span class="grade-badge g-blue">🔵 푸른 번개</span></div>
+                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--morning)">서</span><span style="background:var(--lunch)">배</span><span style="background:var(--dinner)">임</span><span style="background:var(--brand)">황</span></div><span class="rr-count">4/6명</span><span class="rr-points">💰 +90P</span></div>
+                        <div class="gauge"><div class="gauge-track"><div class="gauge-fill" style="width:67%"></div></div><div class="gauge-label">방폭까지 26:40</div></div>
+                      </div>
+                      <div class="room-row" data-advance>
+                        <div class="rr-top"><span class="rr-name">🎳 전사 볼링 대회</span><span class="grade-badge g-jet">🌩️ 자이언트 제트</span></div>
+                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--brand)">전</span><span style="background:var(--good)">사</span><span style="background:var(--line);color:var(--muted)">+16</span></div><span class="rr-count">18/40명</span><span class="rr-points">💰 +300P</span></div>
+                        <span class="chip-sm">🔓 상시 · 방폭 없음</span>
+                      </div>
+                      <div class="note">방폭 임박순 정렬. 자이언트 제트는 방폭이 없어요.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
-        <!-- RIGHT: stage progress -->
-        <aside class="side-panel">
-          <div class="side-card">
-            <h2>📍 진행 단계</h2>
-            <div class="stage-list" id="stageList">
-              <div class="stage-item" data-stage="parse"><span class="dot">1</span>자연어 개설</div>
-              <div class="stage-item" data-stage="recruit"><span class="dot">2</span>모집 진행</div>
-              <div class="stage-item" data-stage="full"><span class="dot">3</span>정원 마감</div>
-              <div class="stage-item" data-stage="room"><span class="dot">4</span>방 생성</div>
-              <div class="stage-item" data-stage="place"><span class="dot">5</span>장소 추천</div>
-              <div class="stage-item" data-stage="checkin"><span class="dot">6</span>체크인</div>
-              <div class="stage-item" data-stage="settle"><span class="dot">7</span>정산</div>
-            </div>
+        <!-- INFO + 컨트롤 -->
+        <div class="story-info">
+          <span class="persona-badge" id="storyPersona"></span>
+          <div class="story-step" id="storyStep"></div>
+          <div class="story-title" id="storyTitle"></div>
+          <p class="story-caption" id="storyCaption"></p>
+          <div class="story-controls">
+            <button class="btn-primary btn-sm" id="storyPlay" type="button">⏸ 일시정지</button>
+            <button class="btn-ghost btn-sm" id="storyPrev" type="button">← 이전</button>
+            <button class="btn-ghost btn-sm" id="storyNext" type="button">다음 →</button>
           </div>
-          <div class="side-card">
-            <div class="feat-head-row">
-              <h2>✅ 이 데모의 12개 기능</h2>
-              <span class="feat-counter" id="featCounter">체험 0/12</span>
-            </div>
-            <div class="feat-list" id="featList">
-              <button class="feat-item" data-feat="nlp" type="button" title="예시 1~3 버튼으로 체험"><span class="feat-check">○</span>자연어 개설</button>
-              <button class="feat-item" data-feat="slotpicker" type="button" title="클릭하면 슬롯피커가 바로 열려요 — 슬롯 1개 이상 선택 후 '선택 완료'를 누르면 체크됩니다"><span class="feat-check">○</span>슬롯 직접 선택</button>
-              <button class="feat-item" data-feat="onoff" type="button" title="모집을 진행하면 자동으로 표시돼요"><span class="feat-check">○</span>온·오프 자동판별</button>
-              <button class="feat-item" data-feat="deposit" type="button" title="모집 시작 후 디파짓 카드에서 체험"><span class="feat-check">○</span>디파짓</button>
-              <button class="feat-item" data-feat="gauge" type="button" title="디파짓 확인 후 모집 카드에서 표시돼요"><span class="feat-check">○</span>매칭 게이지</button>
-              <button class="feat-item" data-feat="confirm" type="button" title="정원이 차면 자동으로 표시돼요"><span class="feat-check">○</span>확정·아이스브레이커</button>
-              <button class="feat-item" data-feat="merge" type="button" title="클릭하면 모집 시나리오를 빠르게 진행해 병합 제안 카드까지 자동으로 보여드려요"><span class="feat-check">○</span>병합·방폭</button>
-              <button class="feat-item" data-feat="timeattack" type="button" title="모집을 시작하면 자동으로 표시돼요"><span class="feat-check">○</span>72h 타임어택</button>
-              <button class="feat-item" data-feat="checkin" type="button" title="장소 추천 이후 체크인 카드에서 체험"><span class="feat-check">○</span>체크인(QR·온라인)</button>
-              <button class="feat-item" data-feat="reminder" type="button" title="모임 1시간 전 카드에서 체험"><span class="feat-check">○</span>리마인더·대기승급</button>
-              <button class="feat-item" data-feat="mypage" type="button" title="클릭하면 🪪 마이 탭으로 이동합니다"><span class="feat-check">○</span>마이페이지·신뢰도</button>
-              <button class="feat-item" data-feat="explore" type="button" title="클릭하면 🔍 탐색 탭으로 이동합니다"><span class="feat-check">○</span>탐색 피드·스폰서드</button>
-            </div>
-          </div>
-          <div class="side-card">
-            <h2>ℹ️ 지금 이 화면</h2>
-            <p class="hint" id="stageDesc">입력창에 자연어 한 줄을 입력하면 파서가 날짜·시간·메뉴·인원을 추출합니다. 예시 버튼을 눌러 시작해보세요.</p>
-          </div>
-          <details class="side-card insp-card" id="inspCard" open>
-            <summary><h2>🔬 엔진 인스펙터</h2></summary>
-            <p class="hint">데모 진행 중 AI/엔진이 내리는 판단이 실시간 로그로 흐릅니다.</p>
-            <div class="insp-log" id="inspLog">
-              <div class="insp-empty" data-insp-empty>대기중 — 예시 버튼을 눌러 시작하면 로그가 흐릅니다.</div>
-            </div>
-          </details>
-        </aside>
+        </div>
 
       </div>
     </div>
@@ -1107,2549 +887,219 @@
 
 </div>
 <script>
+/* 스토리보드 플레이어 컨트롤러 — #om-demo 전용
+   폰틀 고정 · 스크린 가로 슬라이드 · 참여자 단계에서 방 목록 폰 펼침 · 자동재생 + 수동 */
 (function () {
   "use strict";
 
+  var root = document.getElementById('om-demo');
+  if (!root) return;
+
+  var track = document.getElementById('screenTrack');
+  var devices = document.getElementById('storyDevices');
+  var railEl = document.getElementById('storyRail');
+  var personaEl = document.getElementById('storyPersona');
+  var stepEl = document.getElementById('storyStep');
+  var titleEl = document.getElementById('storyTitle');
+  var capEl = document.getElementById('storyCaption');
+  var playBtn = document.getElementById('storyPlay');
+  var prevBtn = document.getElementById('storyPrev');
+  var nextBtn = document.getElementById('storyNext');
+  if (!track || !devices || !railEl) return;
+
+  // 방 목록 폰이 함께 나오는 참여자 단계 인덱스
+  var TWO_UP_INDEX = 2;
+
+  var META = [
+    { persona: 'creator',     name: '방 생성',          title: 'AI로 번개방 만들기',    cap: '취향 기반 추천·이전 방·키워드 — AI 에이전트가 방 만들기를 도와줘요.' },
+    { persona: 'creator',     name: '방 생성 완료',      title: '번개방이 열렸습니다',    cap: '방이 생성되면 참여자에게 알림이 나가고, 시점이 참여자로 전환돼요.' },
+    { persona: 'participant', name: '방 알림 · 방 목록',  title: '알림 한 번, 그리고 탐색', cap: '왼쪽 알림으로 바로 참여하거나, 오른쪽 방폭 임박순 목록에서 골라요.' },
+    { persona: 'meeting',     name: '체크인',           title: '전원 체크인',           cap: '참여자 전원이 체크인하면 모임이 시작돼요.' },
+    { persona: 'meeting',     name: '장소 추천·예약',     title: 'AI 장소 추천 & 예약',    cap: 'AI가 방 성격에 맞는 장소를 추천 → 예약 완료 → 캘린더 자동 등록.' },
+    { persona: 'meeting',     name: '페이백 신청',        title: '영수증으로 페이백 신청',  cap: '영수증을 불러와 인사팀에 페이백을 신청해요.' },
+    { persona: 'meeting',     name: '모임 종료',          title: '포인트 정산 & 종료',     cap: '걸어둔 포인트를 참여자·생성자 전원이 받으며 종료돼요.' }
+  ];
+
+  var PERSONA = {
+    creator:     { cls: 'creator',     label: '⚡ 번개방 생성자' },
+    participant: { cls: 'participant', label: '🙋 번개방 참여자' },
+    meeting:     { cls: 'meeting',     label: '🤝 모임 진행' }
+  };
+
+  var N = META.length;
+  var DWELL = 7000;
+  var idx = 0;
+  var playing = true;
+  var timer = null;
+
+  // 채팅 생동감 · 카운트다운용
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* ================= DOM refs ================= */
-  var chatBody = document.getElementById('chatBody');
-  var chatInput = document.getElementById('chatInput');
-  var sendBtn = document.getElementById('sendBtn');
-  var roomTitle = document.getElementById('roomTitle');
-  var roomSubtitle = document.getElementById('roomSubtitle');
-  var botAvatar = document.getElementById('botAvatar');
-  var appHeader = document.getElementById('appHeader');
-  var stageDesc = document.getElementById('stageDesc');
-  var stageItems = document.querySelectorAll('.stage-item');
-  var btnAutoDemo = document.getElementById('btnAutoDemo');
-  var btnStopDemo = document.getElementById('btnStopDemo');
-  var btnReset = document.getElementById('btnReset');
-  var exampleBtns = document.querySelectorAll('.example-btn');
-  var clockTime = document.getElementById('clockTime');
-  var viewList = document.getElementById('viewList');
-  var viewRoom = document.getElementById('viewRoom');
-  var viewExplore = document.getElementById('viewExplore');
-  var viewMy = document.getElementById('viewMy');
-  var exploreBody = document.getElementById('exploreBody');
-  var myBody = document.getElementById('myBody');
-  var demoTabBtns = document.querySelectorAll('.demo-tab');
-  var roomListEl = document.getElementById('roomList');
-  var btnNewRoom = document.getElementById('btnNewRoom');
-  var appBackBtn = document.getElementById('appBackBtn');
-
-  /* ================= dictionaries ================= */
-  var DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
-
-  var NUM_WORDS = { '한': 1, '두': 2, '세': 3, '네': 4, '다섯': 5, '여섯': 6, '일곱': 7, '여덟': 8 };
-
-  var MENU_DICT = [
-    { k: '마라탕', e: '🍲' }, { k: '마라샹궈', e: '🍲' }, { k: '국밥', e: '🍚' }, { k: '삼겹살', e: '🥓' },
-    { k: '초밥', e: '🍣' }, { k: '스시', e: '🍣' }, { k: '파스타', e: '🍝' }, { k: '쌀국수', e: '🍜' },
-    { k: '라멘', e: '🍜' }, { k: '우동', e: '🍜' }, { k: '커피챗', e: '☕' }, { k: '커피', e: '☕' },
-    { k: '보드게임', e: '🎲' }, { k: '러닝', e: '🏃' }, { k: '등산', e: '⛰️' }, { k: '치킨', e: '🍗' },
-    { k: '피자', e: '🍕' }, { k: '떡볶이', e: '🍢' }, { k: '족발', e: '🐷' }, { k: '보쌈', e: '🥬' },
-    { k: '햄버거', e: '🍔' }, { k: '샐러드', a: '샐러드', e: '🥗' }, { k: '냉면', e: '🍜' }, { k: '짜장면', e: '🍜' },
-    { k: '짬뽕', e: '🍜' }, { k: 'squash', e: '🏸' }, { k: '스쿼시', e: '🏸' }, { k: '테니스', e: '🎾' },
-    { k: '볼링', e: '🎳' }, { k: '요가', e: '🧘' }, { k: '헬스', e: '🏋️' }, { k: '독서모임', e: '📚' },
-    { k: '와인', e: '🍷' }, { k: '맥주', e: '🍺' }, { k: '분식', e: '🍢' }, { k: '카레', e: '🍛' },
-    { k: '스테이크', e: '🥩' }, { k: '샤브샤브', e: '🍲' }, { k: '곱창', e: '🍖' }, { k: '닭갈비', e: '🍗' }
-  ];
-
-  var GENERIC_ACTIVITY = ['먹을', '갈', '할', '하실', '가실', '먹으러', '모임', '점심', '저녁', '아침', '식사'];
-
-  /* ================= parser ================= */
-  // returns { date, time, menu, count, raw } with any field possibly null
-  function parseSentence(text) {
-    var raw = text.trim();
-    var result = { date: null, dateLabel: null, time: null, timeLabel: null, menu: null, menuLabel: null, emoji: null, count: null };
-
-    // ---- date ----
-    var today = new Date(2026, 6, 6); // demo-fixed "오늘" for deterministic weekday math
-    if (/글피/.test(raw)) {
-      result.date = addDays(today, 3); result.dateLabel = '글피';
-    } else if (/모레/.test(raw)) {
-      result.date = addDays(today, 2); result.dateLabel = '모레';
-    } else if (/내일/.test(raw)) {
-      result.date = addDays(today, 1); result.dateLabel = '내일';
-    } else if (/오늘/.test(raw)) {
-      result.date = today; result.dateLabel = '오늘';
-    } else {
-      var mMonthDay = raw.match(/(\d{1,2})월\s*(\d{1,2})일/);
-      if (mMonthDay) {
-        var mm = parseInt(mMonthDay[1], 10), dd = parseInt(mMonthDay[2], 10);
-        var d = new Date(2026, mm - 1, dd);
-        result.date = d; result.dateLabel = mm + '월 ' + dd + '일';
-      } else {
-        var mWeek = raw.match(/(이번\s*주|다음\s*주|다음주|이번주)?\s*(일|월|화|수|목|금|토)요일/);
-        if (mWeek) {
-          var targetDow = DAY_NAMES.indexOf(mWeek[2]);
-          var base = new Date(today);
-          var cur = base.getDay();
-          var diff = (targetDow - cur + 7) % 7;
-          if (diff === 0) diff = 7; // 이번주 같은 요일이면 다음 발생일로
-          if (/다음/.test(mWeek[1] || '')) diff += 7;
-          if (!mWeek[1] && diff <= 7) {
-            // "그냥 금요일" -> 가장 가까운 미래 그 요일 (오늘 포함 X)
-          }
-          result.date = addDays(base, diff);
-          result.dateLabel = (mWeek[1] ? mWeek[1].replace(/\s/g, '') : '이번주') + ' ' + mWeek[2] + '요일';
-        }
-      }
-    }
-
-    // ---- time ----
-    var mHM = raw.match(/오(전|후)\s*(\d{1,2})시\s*(반)?/);
-    if (mHM) {
-      var h = parseInt(mHM[2], 10);
-      var isPM = mHM[1] === '후';
-      var h24 = isPM ? (h === 12 ? 12 : h + 12) : (h === 12 ? 0 : h);
-      var minute = mHM[3] ? 30 : 0;
-      result.time = { h: h24, m: minute };
-      result.timeLabel = '오' + mHM[1] + ' ' + h + '시' + (mHM[3] ? ' 반' : '');
-    } else {
-      var mH = raw.match(/(\d{1,2})시\s*(반)?/);
-      if (mH) {
-        var hh = parseInt(mH[1], 10);
-        result.time = { h: hh, m: mH[2] ? 30 : 0 };
-        result.timeLabel = hh + '시' + (mH[2] ? ' 반' : '');
-      } else if (/점심/.test(raw)) {
-        result.time = { h: 12, m: 0 }; result.timeLabel = '점심 (12:00)';
-      } else if (/저녁/.test(raw)) {
-        result.time = { h: 18, m: 30 }; result.timeLabel = '저녁 (18:30)';
-      } else if (/아침/.test(raw)) {
-        result.time = { h: 8, m: 0 }; result.timeLabel = '아침 (08:00)';
-      }
-    }
-    // daypart tag even if exact time also given
-    if (/점심/.test(raw)) result.daypart = 'lunch';
-    else if (/저녁/.test(raw)) result.daypart = 'dinner';
-    else if (/아침/.test(raw)) result.daypart = 'morning';
-    else if (result.time) {
-      result.daypart = result.time.h < 11 ? 'morning' : (result.time.h < 17 ? 'lunch' : 'dinner');
-    }
-
-    // ---- menu / activity ----
-    for (var i = 0; i < MENU_DICT.length; i++) {
-      if (raw.indexOf(MENU_DICT[i].k) !== -1) {
-        result.menu = MENU_DICT[i].k;
-        result.emoji = MENU_DICT[i].e;
-        result.menuLabel = MENU_DICT[i].k;
-        break;
-      }
-    }
-
-    // ---- count ----
-    var mNum = raw.match(/(\d+)\s*(명|인)/);
-    if (mNum) {
-      result.count = parseInt(mNum[1], 10);
-    } else {
-      for (var w in NUM_WORDS) {
-        if (raw.indexOf(w + ' 명') !== -1 || raw.indexOf(w + '명') !== -1) {
-          result.count = NUM_WORDS[w];
-          break;
-        }
-      }
-    }
-
-    // did we recognize *anything* at all, or was this pure noise?
-    result.anySignal = !!(result.date || result.time || result.menu || result.count || /먹|모임|가실|하실/.test(raw));
-
-    return result;
-  }
-
-  function addDays(d, n) {
-    var r = new Date(d);
-    r.setDate(r.getDate() + n);
-    return r;
-  }
-
-  function fmtSlotSummary(slot) {
-    var parts = [];
-    parts.push(slot.dateLabel || '<날짜 미정>');
-    parts.push(slot.timeLabel || '<시간 미정>');
-    parts.push((slot.emoji ? slot.emoji + ' ' : '') + (slot.menuLabel || '<메뉴 미정>'));
-    parts.push(slot.count ? slot.count + '명' : '<인원 미정>');
-    return parts.join(' · ');
-  }
-
-  /* ================= chat engine ================= */
-  var state = {
-    fsm: 'IDLE', // IDLE, PARSING, CONFIRM, RECRUITING, FULL, ROOM_CREATED
-    slot: null,
-    pendingField: null, // which field we're asking about
-    participants: [],
-    capacity: 4,
-    roomActive: false,
-    demoRunning: false,
-    demoTimers: [],
-    pendingJoins: [],
-    joinTimer: null,
-    taFastTimer: null,
-    trustScore: 82,
-    onboarded: false,
-    profileTags: ['점심러버', '마라탕고수'],
-    credit: 1200,
-    creditLedger: [],
-    checkedIn: [],
-    checkinDone: false,
-    onlineMode: null,
-    // -- no-show simulation (demo trigger only, see reminder card) --
-    demoNoShow: false,
-    noShowList: [],
-    _noShowIdx: -1,
-    splitPerPerson: null,
-    settleTotal: 0,
-    settleAttendees: null,
-    settleReceivedCount: 0,
-    view: 'list',
-    activeTab: 'chat',
-    roomListUnread: true,
-    roomEntered: false,
-    // -- slot picker / on-off auto detect --
-    slotPicks: [],
-    forcedOnlineMode: null,
-    // -- deposit --
-    depositFreeUsed: 0,
-    // -- recruiting reminders / merge --
-    mergeOffered: false,
-    deadlineReminded: false,
-    // -- onboarding extras --
-    profileIntro: '',
-    mealPref: null,
-    workMode: null,
-    privacyAgreed: false,
-    // -- mypage stats --
-    meetingsCount: 2,
-    noShowCount: 0,
-    newColleagues: { '이과장': true, '최사원': true, '정대리': true, '한사원': true },
-    // -- feature checklist / engine inspector (stage 5) --
-    featuresDone: {},
-    inspVirtualSec: 0
-  };
-
-  var FEATURE_KEYS = ['nlp', 'slotpicker', 'onoff', 'deposit', 'gauge', 'confirm', 'merge', 'timeattack', 'checkin', 'reminder', 'mypage', 'explore'];
-
-  var TRUST_R = 18;
-  var TRUST_C = 2 * Math.PI * TRUST_R;
-
-  var ROSTER = [
-    { name: '박주임', initial: '박', cls: 'a1' },
-    { name: '이과장', initial: '이', cls: 'a2' },
-    { name: '최사원', initial: '최', cls: 'a3' },
-    { name: '정대리', initial: '정', cls: 'a0' }
-  ];
-
-  var WAITLIST_ROSTER = [
-    { name: '한사원', initial: '한', cls: 'a1' }
-  ];
-
-  var SLOT_TIMES = {
-    morning: ['07:30', '08:00', '08:30', '09:00', '09:30'],
-    lunch: ['11:30', '12:00', '12:30', '13:00', '13:30'],
-    dinner: ['18:00', '18:30', '19:00', '19:30', '20:00']
-  };
-  var DAYPART_LABEL = { morning: '아침', lunch: '점심', dinner: '저녁' };
-  var DAYPART_EMOJI = { morning: '🌅', lunch: '🍜', dinner: '🌙' };
-
-  function scrollToBottom() {
-    chatBody.scrollTop = chatBody.scrollHeight;
-  }
-
-  function appendNode(node) {
-    chatBody.appendChild(node);
-    scrollToBottom();
-    return node;
-  }
-
-  function botMsgRow(innerHtml) {
-    var row = document.createElement('div');
-    row.className = 'msg-row bot';
-    row.innerHTML =
-      '<div class="msg-avatar">🍱</div>' +
-      '<div class="msg-col">' + innerHtml + '</div>';
-    return row;
-  }
-
-  function userMsgRow(text) {
-    var row = document.createElement('div');
-    row.className = 'msg-row user';
-    row.innerHTML = '<div class="msg-col"><div class="bubble"></div></div>';
-    row.querySelector('.bubble').textContent = text;
-    return row;
-  }
-
-  function guestMsgRow(name, cls, text) {
-    var row = document.createElement('div');
-    row.className = 'msg-row bot';
-    row.innerHTML =
-      '<div class="msg-avatar" style="background:var(--' + (cls === 'a1' ? 'lunch' : cls === 'a2' ? 'dinner' : cls === 'a3' ? 'morning' : 'brand') + ')">' + name.charAt(0) + '</div>' +
-      '<div class="msg-col"><div class="msg-name">' + name + '</div><div class="bubble"></div></div>';
-    row.querySelector('.bubble').textContent = text;
-    return row;
-  }
-
-  function addBotBubble(text) {
-    var row = botMsgRow('<div class="bubble"></div>');
-    row.querySelector('.bubble').textContent = text;
-    appendNode(row);
-    return row;
-  }
-
-  function addUserBubble(text) {
-    appendNode(userMsgRow(text));
-  }
-
-  function addGuestBubble(person, text) {
-    appendNode(guestMsgRow(person.name, person.cls, text));
-  }
-
-  function appendToast(text) {
-    var row = document.createElement('div');
-    row.className = 'msg-row bot';
-    row.innerHTML = '<div class="msg-avatar">🍱</div><div class="msg-col"><div class="toast"></div></div>';
-    row.querySelector('.toast').textContent = text;
-    appendNode(row);
-    return row;
-  }
-
-  /* ================= engine inspector (visualizes existing logic only) ================= */
-  function inspStamp() {
-    // deterministic virtual clock — not tied to real time, no randomness
-    state.inspVirtualSec += 3 + (state.inspVirtualSec % 5);
-    var base = 9 * 3600 + 12 * 60; // 09:12:00 baseline, matches the demo's initial status-bar time
-    var t = (base + state.inspVirtualSec) % 86400;
-    var hh = Math.floor(t / 3600), mm = Math.floor((t % 3600) / 60), ss = t % 60;
-    return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0') + ':' + String(ss).padStart(2, '0');
-  }
-
-  function inspectorLog(tag, text) {
-    var logEl = document.getElementById('inspLog');
-    if (!logEl) return;
-    var emptyNote = logEl.querySelector('[data-insp-empty]');
-    if (emptyNote) emptyNote.remove();
-    var row = document.createElement('div');
-    row.className = 'insp-line';
-    row.innerHTML = '<span class="insp-time">' + inspStamp() + '</span> <span class="insp-tag ' + tag.toLowerCase() + '">' + tag + '</span> <span class="insp-text"></span>';
-    row.querySelector('.insp-text').textContent = text;
-    logEl.appendChild(row);
-    while (logEl.children.length > 20) logEl.removeChild(logEl.firstChild);
-    logEl.scrollTop = logEl.scrollHeight;
-  }
-
-  function resetInspectorLog() {
-    var logEl = document.getElementById('inspLog');
-    if (!logEl) return;
-    logEl.innerHTML = '<div class="insp-empty" data-insp-empty>대기중 — 예시 버튼을 눌러 시작하면 로그가 흐릅니다.</div>';
-  }
-
-  // deterministic string hash (no Math.random) — used to derive stable,
-  // reproducible "score breakdown" numbers from existing names/state.
-  function strHash(s) {
-    var h = 0;
-    for (var i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) >>> 0; }
-    return h;
-  }
-  function pseudoFrac(seed, salt) {
-    return (strHash(seed + '|' + salt) % 1000) / 1000;
-  }
-
-  function logMatchScore(person) {
-    var tagOverlap = 0.25 + pseudoFrac(person.name, 'tag') * 0.35;
-    var deptDiv = 0.15 + pseudoFrac(person.name, 'dept') * 0.25;
-    var trustNorm = Math.round((state.trustScore / 100) * 100) / 100;
-    var score = Math.min(1, tagOverlap + deptDiv + (trustNorm - 0.5) * 0.2);
-    if (score < 0) score = 0;
-    inspectorLog('MATCH', person.name + ' · 태그교집합 +' + tagOverlap.toFixed(2) + ' · 부서다양성 +' + deptDiv.toFixed(2) +
-      ' · 신뢰도 ' + trustNorm.toFixed(2) + ' → score ' + score.toFixed(2));
-  }
-
-  function logParse(slot) {
-    var modeText = state.forcedOnlineMode
-      ? (state.forcedOnlineMode === 'online' ? '온라인' : '오프라인')
-      : (/커피/.test((slot.menu || slot.menuLabel || '')) ? '온라인' : '오프라인');
-    inspectorLog('PARSE', '슬롯: ' + (slot.dateLabel || '?') + ' ' + (slot.timeLabel || '?') +
-      ' · 인원: ' + (slot.count || '?') + ' · 취향: ' + (slot.menuLabel || '?') + ' · 모드: ' + modeText);
-  }
-
-  /* ================= feature checklist (visualizes existing logic only) ================= */
-  function markFeature(key) {
-    if (state.featuresDone[key]) return;
-    state.featuresDone[key] = true;
-    var item = document.querySelector('.feat-item[data-feat="' + key + '"]');
-    if (item) {
-      item.classList.add('done');
-      var check = item.querySelector('.feat-check');
-      if (check) check.textContent = '✓';
-    }
-    var counter = document.getElementById('featCounter');
-    if (counter) counter.textContent = '체험 ' + Object.keys(state.featuresDone).length + '/' + FEATURE_KEYS.length;
-  }
-
-  function resetFeatureChecklist() {
-    state.featuresDone = {};
-    document.querySelectorAll('.feat-item').forEach(function (item) {
-      item.classList.remove('done');
-      var check = item.querySelector('.feat-check');
-      if (check) check.textContent = '○';
-    });
-    var counter = document.getElementById('featCounter');
-    if (counter) counter.textContent = '체험 0/' + FEATURE_KEYS.length;
-  }
-
-  function addDayDivider(label) {
-    var div = document.createElement('div');
-    div.className = 'day-divider';
-    div.textContent = label;
-    appendNode(div);
-  }
-
-  // typing indicator returns a function to remove it, and a promise-based delay helper
-  function showTyping() {
-    var row = document.createElement('div');
-    row.className = 'msg-row bot';
-    row.innerHTML = '<div class="msg-avatar">🍱</div><div class="msg-col"><div class="typing-bubble"><span></span><span></span><span></span></div></div>';
-    appendNode(row);
-    return row;
-  }
-
-  function wait(ms) {
-    return new Promise(function (resolve) {
-      if (reduceMotion) { resolve(); return; }
-      var t = setTimeout(resolve, ms);
-      state.demoTimers.push(t);
-    });
-  }
-
-  function botSay(text) {
-    return new Promise(function (resolve) {
-      if (reduceMotion) {
-        addBotBubble(text);
-        resolve();
-        return;
-      }
-      var typingRow = showTyping();
-      var delay = 600 + Math.random() * 600;
-      var t = setTimeout(function () {
-        typingRow.remove();
-        addBotBubble(text);
-        resolve();
-      }, delay);
-      state.demoTimers.push(t);
-    });
-  }
-
-  function botSayCard(node) {
-    return new Promise(function (resolve) {
-      function place() {
-        var row = document.createElement('div');
-        row.className = 'msg-row bot';
-        row.innerHTML = '<div class="msg-avatar">🍱</div><div class="msg-col"></div>';
-        row.querySelector('.msg-col').appendChild(node);
-        appendNode(row);
-        resolve(row);
-      }
-      if (reduceMotion) { place(); return; }
-      var typingRow = showTyping();
-      var delay = 500 + Math.random() * 500;
-      var t = setTimeout(function () {
-        typingRow.remove();
-        place();
-      }, delay);
-      state.demoTimers.push(t);
-    });
-  }
-
-  /* ================= stage indicator ================= */
-  function setStage(name, descText) {
-    stageItems.forEach(function (el) {
-      var s = el.getAttribute('data-stage');
-      el.classList.remove('active', 'done');
-      var order = ['parse', 'recruit', 'full', 'room', 'place', 'checkin', 'settle'];
-      var curIdx = order.indexOf(name);
-      var elIdx = order.indexOf(s);
-      if (elIdx < curIdx) el.classList.add('done');
-      else if (elIdx === curIdx) el.classList.add('active');
-    });
-    if (descText) stageDesc.textContent = descText;
-  }
-
-  /* ================= parsing confirm card ================= */
-  function buildConfirmCard(slot) {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">📝 파싱 확인</div>' +
-      '<div class="field-row">' +
-        field('날짜', slot.dateLabel) +
-        field('시간', slot.timeLabel) +
-        field('메뉴', (slot.emoji ? slot.emoji + ' ' : '') + (slot.menuLabel || null)) +
-        field('인원', slot.count ? slot.count + '명' : null) +
-      '</div>' +
-      '<div class="card-btn-row">' +
-        '<button class="card-btn primary" data-act="start-recruit" type="button">모집 시작</button>' +
-        '<button class="card-btn ghost" data-act="edit-slot" type="button">수정</button>' +
-      '</div>';
-    return wrap;
-
-    function field(k, v) {
-      return '<div class="field-line"><span class="k">' + k + '</span><span class="v' + (v ? '' : ' missing') + '">' + (v || '미정') + '</span></div>';
-    }
-  }
-
-  function wireConfirmCard(cardRow) {
-    var startBtn = cardRow.querySelector('[data-act="start-recruit"]');
-    var editBtn = cardRow.querySelector('[data-act="edit-slot"]');
-    if (startBtn) startBtn.addEventListener('click', function () {
-      disableCardButtons(cardRow);
-      botSayCard(buildDepositCard()).then(function (row) {
-        wireDepositCard(row.querySelector('.card') || row);
-      });
-    });
-    if (editBtn) editBtn.addEventListener('click', function () {
-      disableCardButtons(cardRow);
-      state.fsm = 'PARSING';
-      botSay('수정할 부분을 다시 말씀해주세요. 예: "저녁 말고 점심으로 바꿔줘"');
-    });
-  }
-
-  function disableCardButtons(cardRow) {
-    var btns = cardRow.querySelectorAll('button');
-    btns.forEach(function (b) { b.disabled = true; });
-  }
-
-  /* ================= deposit (③) ================= */
-  function buildDepositCard() {
-    var free = state.depositFreeUsed || 0;
-    var exempt = free < 3;
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">🪙 참여 디파짓</div>' +
-      '<div class="note-inline">① 정상 참석 시 디파짓 전액 환급 + 50P 보너스</div>' +
-      '<div class="note-inline">② 모임 2시간 전까지 취소하면 페널티 없음</div>' +
-      '<div class="note-inline">③ 노쇼 시 디파짓 몰수 후 참석자에게 분배</div>' +
-      (exempt ? '<span class="tag good">최초 3회 면제 대상 · ' + (free + 1) + '/3회차</span>' : '<span class="tag brand">디파짓 500P</span>') +
-      '<div class="card-btn-row"><button class="card-btn primary" data-act="deposit-confirm">' + (exempt ? '면제 혜택으로 참여 확정' : '500P 예치하고 참여 확정') + '</button></div>';
-    return wrap;
-  }
-
-  function wireDepositCard(node) {
-    var btn = node.querySelector('[data-act="deposit-confirm"]');
-    btn.addEventListener('click', function () {
-      if (btn.disabled) return;
-      disableCardButtons(node);
-      var free = state.depositFreeUsed || 0;
-      markFeature('deposit');
-      if (free < 3) {
-        state.depositFreeUsed = free + 1;
-        addCreditTx('참여 디파짓(최초 3회 면제 적용)', 0);
-      } else {
-        addCreditTx('참여 디파짓 예치', -500);
-      }
-      startRecruiting();
-    });
-  }
-
-  /* ================= slot picker (①②) ================= */
-  function buildSlotPickerCard() {
-    state.slotPicks = [];
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">🗓️ 슬롯 직접 선택</div>' +
-      '<div class="persona-tabs" data-slot-tabs role="tablist">' +
-        ['morning', 'lunch', 'dinner'].map(function (d, i) {
-          return '<button class="persona-tab' + (i === 0 ? ' active' : '') + '" type="button" data-slot-daypart="' + d + '">' + DAYPART_LABEL[d] + '</button>';
-        }).join('') +
-      '</div>' +
-      ['morning', 'lunch', 'dinner'].map(function (d, i) {
-        return '<div class="chip-row" data-slot-panel="' + d + '"' + (i === 0 ? '' : ' hidden') + '>' +
-          SLOT_TIMES[d].map(function (t) {
-            return '<button class="card-btn ghost" style="flex:none;padding:6px 10px;" data-slot-chip="' + d + '|' + t + '">' + t + '</button>';
-          }).join('') +
-        '</div>';
-      }).join('') +
-      '<div class="note-inline" data-slot-hint>2개 이상 선택하면 매칭 확률이 올라가요 ↑ (0개 선택됨)</div>' +
-      '<div class="note-inline" data-slot-summary hidden></div>' +
-      '<div class="card-btn-row"><button class="card-btn primary" data-act="slot-confirm" disabled>선택 완료</button></div>';
-    return wrap;
-  }
-
-  // 탭은 시간대별 칩 목록을 걸러 보여주는 필터일 뿐, 선택 자체는 탭과 무관하게
-  // state.slotPicks에 daypart|time 키로 누적된다 — 탭을 넘나들며 고른 슬롯이
-  // 안 보이는 동안에도 사라지지 않았음을 보여주기 위해 별도 선택 요약을 렌더링한다.
-  function updateSlotSummary(node) {
-    var summaryEl = node.querySelector('[data-slot-summary]');
-    if (!summaryEl) return;
-    if (!state.slotPicks.length) { summaryEl.hidden = true; summaryEl.textContent = ''; return; }
-    var grouped = {};
-    var order = [];
-    state.slotPicks.forEach(function (key) {
-      var parts = key.split('|');
-      var d = parts[0], t = parts[1];
-      if (!grouped[d]) { grouped[d] = []; order.push(d); }
-      grouped[d].push(t);
-    });
-    summaryEl.hidden = false;
-    summaryEl.textContent = '선택됨: ' + order.map(function (d) {
-      return DAYPART_LABEL[d] + ' ' + grouped[d].join(', ');
-    }).join(' · ');
-  }
-
-  function wireSlotPickerCard(node) {
-    var tabs = node.querySelectorAll('[data-slot-daypart]');
-    var panels = node.querySelectorAll('[data-slot-panel]');
-    tabs.forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        tabs.forEach(function (t) { t.classList.remove('active'); });
-        tab.classList.add('active');
-        var d = tab.getAttribute('data-slot-daypart');
-        panels.forEach(function (p) { p.hidden = p.getAttribute('data-slot-panel') !== d; });
-      });
-    });
-    var hint = node.querySelector('[data-slot-hint]');
-    var confirmBtn = node.querySelector('[data-act="slot-confirm"]');
-    node.querySelectorAll('[data-slot-chip]').forEach(function (chip) {
-      chip.addEventListener('click', function () {
-        var key = chip.getAttribute('data-slot-chip');
-        var idx = state.slotPicks.indexOf(key);
-        if (idx === -1) { state.slotPicks.push(key); chip.classList.remove('ghost'); chip.classList.add('primary'); }
-        else { state.slotPicks.splice(idx, 1); chip.classList.remove('primary'); chip.classList.add('ghost'); }
-        hint.textContent = (state.slotPicks.length >= 2 ? '2개 이상 선택 완료 — 매칭 확률이 높아졌어요 ↑' : '2개 이상 선택하면 매칭 확률이 올라가요 ↑') + ' (' + state.slotPicks.length + '개 선택됨)';
-        confirmBtn.disabled = state.slotPicks.length === 0;
-        updateSlotSummary(node);
-      });
-    });
-    confirmBtn.addEventListener('click', function () {
-      if (confirmBtn.disabled) return;
-      disableCardButtons(node);
-      onSlotPickConfirmed();
-    });
-  }
-
-  function onSlotPickConfirmed() {
-    markFeature('slotpicker');
-    var picks = state.slotPicks.slice();
-    var first = picks[0].split('|');
-    var daypart = first[0], timeStr = first[1];
-    var hm = timeStr.split(':');
-    state.slot = {
-      date: addDays(new Date(2026, 6, 6), 1), dateLabel: '내일',
-      time: { h: parseInt(hm[0], 10), m: parseInt(hm[1], 10) },
-      timeLabel: picks.length > 1 ? (timeStr + ' 외 ' + (picks.length - 1) + '건') : timeStr,
-      daypart: daypart,
-      menu: null, menuLabel: '직접 선택', emoji: DAYPART_EMOJI[daypart],
-      count: 4, anySignal: true
-    };
-    setStage('parse', '슬롯 선택 카드로 시간을 직접 골랐습니다. 선택한 슬롯 길이에 따라 온·오프라인이 자동 판별됩니다.');
-    if (picks.length <= 1) {
-      inspectorLog('RULE', 'slot=30min → ONLINE · Meet 링크 자동 생성');
-      botSay('선택하신 슬롯은 30분이라 자동으로 온라인 모임으로 전환할게요 💻').then(function () {
-        return botSayCard(buildOnlineConfirmCard());
-      }).then(function (row) {
-        wireOnlineConfirmCard(row.querySelector('.card') || row);
-      });
-    } else {
-      inspectorLog('RULE', 'slot=60min → 근무형태 기반 온/오프 제안');
-      botSay('선택하신 슬롯이 60분 이상이라 근무형태에 맞춰 온/오프라인을 제안해드릴게요').then(function () {
-        return botSayCard(buildWorkModeSuggestCard());
-      }).then(function (row) {
-        wireWorkModeSuggestCard(row.querySelector('.card') || row);
-      });
-    }
-  }
-
-  function buildOnlineConfirmCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">💻 온라인 확정</div>' +
-      '<span class="tag good">Meet 링크 자동 생성</span>' +
-      '<div class="field-row"><div class="field-line"><span class="k">링크</span><span class="v">meet.officemate.dev/' + Math.random().toString(36).slice(2, 7) + '</span></div></div>' +
-      '<div class="note-inline">30분 이하 슬롯은 자동으로 온라인 화상 모임으로 전환됩니다.</div>' +
-      '<div class="card-btn-row"><button class="card-btn primary" data-act="online-ack">확인</button></div>';
-    return wrap;
-  }
-
-  function wireOnlineConfirmCard(node) {
-    var btn = node.querySelector('[data-act="online-ack"]');
-    btn.addEventListener('click', function () {
-      if (btn.disabled) return;
-      disableCardButtons(node);
-      state.forcedOnlineMode = 'online';
-      promptCapacityThenFinalize();
-    });
-  }
-
-  // 팀원 프로토타입(index-2.html)의 단계형 방 생성 플로우 중 가장 구체적이었던
-  // "인원 스테퍼(2~99명, +/- 버튼)" 단계를 슬롯피커 경로에 이식.
-  // 기존 데모는 슬롯피커로 개설 시 인원이 4명으로 고정돼 있었는데,
-  // 그 지점만 우리 카드/버튼 토큰으로 재구현해 얹었다 — 자연어 개설·확인카드·인스펙터는 그대로 둔다.
-  function buildCapacityStepCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    if (!state.slot.count) state.slot.count = 4;
-    wrap.innerHTML =
-      '<div class="card-title">👥 몇 명이 모이나요?</div>' +
-      '<div class="note-inline">본인 포함 최소 2명 · 최대 ' + (ROSTER.length + 1) + '명까지 정할 수 있어요.</div>' +
-      '<div class="capacity-stepper">' +
-        '<button class="cap-btn" type="button" data-cap-step="-1">−</button>' +
-        '<span class="cap-num" data-cap-num>' + state.slot.count + '<small>명</small></span>' +
-        '<button class="cap-btn" type="button" data-cap-step="1">+</button>' +
-      '</div>' +
-      '<div class="card-btn-row"><button class="card-btn primary" data-act="capacity-confirm">확정하고 계속</button></div>';
-    return wrap;
-  }
-
-  function wireCapacityStepCard(node) {
-    var numEl = node.querySelector('[data-cap-num]');
-    var minusBtn = node.querySelector('[data-cap-step="-1"]');
-    var plusBtn = node.querySelector('[data-cap-step="1"]');
-    var capMax = ROSTER.length + 1;
-    function render() {
-      numEl.innerHTML = state.slot.count + '<small>명</small>';
-      minusBtn.disabled = state.slot.count <= 2;
-      plusBtn.disabled = state.slot.count >= capMax;
-    }
-    render();
-    minusBtn.addEventListener('click', function () {
-      if (minusBtn.disabled) return;
-      state.slot.count = Math.max(2, state.slot.count - 1);
-      render();
-    });
-    plusBtn.addEventListener('click', function () {
-      if (plusBtn.disabled) return;
-      state.slot.count = Math.min(capMax, state.slot.count + 1);
-      render();
-    });
-    var confirmBtn = node.querySelector('[data-act="capacity-confirm"]');
-    confirmBtn.addEventListener('click', function () {
-      if (confirmBtn.disabled) return;
-      disableCardButtons(node);
-      finalizeSlotFromPicker();
-    });
-  }
-
-  function promptCapacityThenFinalize() {
-    botSayCard(buildCapacityStepCard()).then(function (row) {
-      wireCapacityStepCard(row.querySelector('.card') || row);
-    });
-  }
-
-  function buildWorkModeSuggestCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">🏢 근무형태를 알려주세요</div>' +
-      '<div class="note-inline">선택하신 슬롯이 60분이라 근무형태에 따라 온/오프라인을 제안해드려요.</div>' +
-      '<div class="profile-tags">' +
-        ['출근', '재택', '하이브리드'].map(function (w) {
-          return '<button class="card-btn ghost" style="flex:none;padding:5px 10px;" data-workmode="' + w + '">' + w + '</button>';
-        }).join('') +
-      '</div>' +
-      '<div class="note-inline" data-workmode-result style="display:none;"></div>' +
-      '<div class="card-btn-row" data-workmode-confirm-row style="display:none;"><button class="card-btn primary" data-act="workmode-confirm">확인</button></div>';
-    return wrap;
-  }
-
-  function wireWorkModeSuggestCard(node) {
-    var resultEl = node.querySelector('[data-workmode-result]');
-    var confirmRow = node.querySelector('[data-workmode-confirm-row]');
-    node.querySelectorAll('[data-workmode]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        node.querySelectorAll('[data-workmode]').forEach(function (b) { b.classList.remove('primary'); b.classList.add('ghost'); });
-        btn.classList.remove('ghost'); btn.classList.add('primary');
-        var w = btn.getAttribute('data-workmode');
-        state.workMode = w;
-        var map = { '출근': 'offline', '재택': 'online', '하이브리드': 'offline' };
-        state.forcedOnlineMode = map[w];
-        var msg = w === '출근' ? '사무실 출근이시니 오프라인 모임으로 제안할게요 🏢' :
-          w === '재택' ? '재택 근무시니 온라인 모임으로 제안할게요 💻' :
-          '하이브리드시니 우선 오프라인으로 잡고, 필요하면 언제든 온라인으로 바꿀 수 있어요 🔀';
-        resultEl.textContent = msg;
-        resultEl.style.display = 'block';
-        confirmRow.style.display = 'flex';
-      });
-    });
-    var confirmBtn = node.querySelector('[data-act="workmode-confirm"]');
-    confirmBtn.addEventListener('click', function () {
-      if (confirmBtn.disabled) return;
-      disableCardButtons(node);
-      promptCapacityThenFinalize();
-    });
-  }
-
-  function finalizeSlotFromPicker() {
-    state.pendingField = null;
-    state.fsm = 'CONFIRM';
-    logParse(state.slot);
-    botSayCard(buildConfirmCard(state.slot)).then(wireConfirmCard);
-  }
-
-  /* ================= recruiting flow ================= */
-  var TA_TOTAL_SEC = 72 * 3600; // 72시간 타임어택
-
-  function fmtTaClock(sec) {
-    var h = Math.floor(sec / 3600);
-    var m = Math.floor((sec % 3600) / 60);
-    var s = sec % 60;
-    return h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-  }
-
-  function startTimeAttack() {
-    markFeature('timeattack');
-    stopTimeAttack();
-    state.taRemaining = TA_TOTAL_SEC;
-    var el = document.getElementById('taClock');
-    if (el) el.textContent = fmtTaClock(state.taRemaining);
-    if (reduceMotion) return;
-    state.taTimer = setInterval(function () {
-      state.taRemaining--;
-      var clock = document.getElementById('taClock');
-      if (clock) clock.textContent = fmtTaClock(state.taRemaining);
-      checkDeadlineTriggers();
-      if (state.taRemaining <= 0) stopTimeAttack();
-    }, 1000);
-  }
-
-  function stopTimeAttack() {
-    if (state.taTimer) { clearInterval(state.taTimer); state.taTimer = null; }
-    if (state.taFastTimer) { clearInterval(state.taFastTimer); state.taFastTimer = null; }
-  }
-
-  function finishTimeAttack() {
-    stopTimeAttack();
-    var row = document.getElementById('taRow');
-    if (row) {
-      row.classList.add('ta-done');
-      row.innerHTML = '⚡ 타임어택 성공 — <span class="ta-clock">' + fmtTaClock(state.taRemaining || TA_TOTAL_SEC) + '</span> 남기고 마감';
-    }
-  }
-
-  function startRecruiting() {
-    markFeature('gauge');
-    state.fsm = 'RECRUITING';
-    state.mergeOffered = false;
-    state.deadlineReminded = false;
-    state.capacity = Math.max(2, Math.min(ROSTER.length + 1, (state.slot && state.slot.count) || 4));
-    state.participants = [{ name: '김대리(나)', initial: '김', cls: 'a0' }];
-    setStage('recruit', '모집 공고가 올라갔습니다. 72시간 타임어택 안에 정원이 차면 확정 — 참여자는 디파짓 500P를 걸고, 확정 시 전액 환급됩니다.');
-
-    botSayCard(buildRecruitCard()).then(function (row) {
-      state._recruitCardRow = row;
-      var ffBtn = row.querySelector('#btnFastForward');
-      var dissolveBtn = row.querySelector('#btnForceDissolve');
-      if (ffBtn) ffBtn.addEventListener('click', fastForwardTimeAttack);
-      if (dissolveBtn) dissolveBtn.addEventListener('click', forceDissolveDemo);
-      startTimeAttack();
-      scheduleJoins();
-    });
-  }
-
-  function disableTaControls() {
-    var controls = document.getElementById('taControls');
-    if (controls) {
-      controls.querySelectorAll('button').forEach(function (b) { b.disabled = true; });
-    }
-  }
-
-  function buildRecruitCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.id = 'recruitCard';
-    wrap.innerHTML =
-      '<div class="card-title">' + (state.slot.emoji || '🍽️') + ' ' + fmtSlotTitle(state.slot) + '</div>' +
-      '<span class="tag brand">모집중</span>' +
-      '<div class="ta-row" id="taRow">⏳ <span class="ta-clock" id="taClock">72:00:00</span> 남음 · 72시간 타임어택</div>' +
-      '<div class="ta-controls" id="taControls">' +
-        '<button class="ta-btn" id="btnFastForward" type="button">⏩ (데모) 마감 임박으로 건너뛰기</button>' +
-        '<button class="ta-btn danger" id="btnForceDissolve" type="button">💥 (데모) 인원 미달로 마감</button>' +
-      '</div>' +
-      '<div class="avatar-stack" id="avatarStack">' + renderAvatars() + '</div>' +
-      '<div class="chip-row">' + state.profileTags.slice(0, 3).map(function (t) { return '<span class="chip-sm">#' + t + '</span>'; }).join('') + (state.slot.menuLabel ? '<span class="chip-sm">#' + state.slot.menuLabel + '</span>' : '') + '</div>' +
-      '<div class="gauge">' +
-        '<div class="gauge-track"><div class="gauge-fill" id="recruitGaugeFill" style="width:' + (100 / state.capacity) + '%"></div></div>' +
-        '<div class="gauge-label"><span id="recruitGaugeLabel">1/' + state.capacity + '명 참여중</span><span>정원 ' + state.capacity + '명</span></div>' +
-      '</div>' +
-      '<div class="deposit-row">🪙 참여 디파짓 <b>500P</b> · 정상 참석 시 전액 환급 <b>+50P</b> 보너스</div>';
-    return wrap;
-  }
-
-  function fmtSlotTitle(slot) {
-    return (slot.dateLabel || '') + ' ' + (slot.timeLabel || '') + ' · ' + (slot.menuLabel || '모임');
-  }
-
-  function renderAvatars() {
-    var html = '';
-    state.participants.forEach(function (p) {
-      html += '<span class="avatar ' + p.cls + '">' + p.initial + '</span>';
-    });
-    for (var i = state.participants.length; i < state.capacity; i++) {
-      html += '<span class="avatar empty">?</span>';
-    }
-    return html;
-  }
-
-  function updateRecruitCard() {
-    var stack = document.getElementById('avatarStack');
-    var fill = document.getElementById('recruitGaugeFill');
-    var label = document.getElementById('recruitGaugeLabel');
-    if (stack) stack.innerHTML = renderAvatars();
-    if (fill) fill.style.width = (state.participants.length / state.capacity * 100) + '%';
-    if (label) label.textContent = state.participants.length + '/' + state.capacity + '명 참여중';
-    if (state.participants.length >= state.capacity && fill) fill.classList.add('good');
-  }
-
-  function scheduleJoins() {
-    var needed = state.capacity - state.participants.length;
-    state.pendingJoins = ROSTER.slice(0, needed);
-    scheduleNextJoin(false);
-  }
-
-  function scheduleNextJoin(fast) {
-    if (!state.pendingJoins || !state.pendingJoins.length) return;
-    if (state.fsm !== 'RECRUITING') return;
-    var gap = fast ? (150 + Math.random() * 200) : (2000 + Math.random() * 3000);
-    state.joinTimer = setTimeout(function () {
-      state.joinTimer = null;
-      if (state.fsm !== 'RECRUITING') return;
-      var person = state.pendingJoins.shift();
-      state.participants.push(person);
-      // 개설자(김대리) 시점 고정 — 참가자가 "말하는" 척하는 대신, 개설자가 받는
-      // 초대 수락 이벤트로 표현한다 (디파짓 500P 커밋까지 한 줄에 담아 중복 메시지 없이).
-      appendToast('📩 ' + person.name + '님이 초대를 수락하고 500P를 걸었어요');
-      logMatchScore(person);
-      updateRecruitCard();
-      if (state.participants.length >= state.capacity) {
-        disableTaControls();
-        setTimeout(onCapacityFull, reduceMotion || fast ? 100 : 700);
-      } else {
-        scheduleNextJoin(fast);
-      }
-    }, reduceMotion ? 0 : gap);
-    state.demoTimers.push(state.joinTimer);
-  }
-
-  function fastForwardTimeAttack() {
-    if (state.fsm !== 'RECRUITING') return;
-    disableTaControls();
-    stopTimeAttack();
-    // bug fix: the join pool (ROSTER) is always sized to exactly fill the
-    // remaining capacity, so participants finish joining in a few hundred ms —
-    // long before a 72h countdown could ever tick down to the 40%/15%
-    // thresholds below, even with fast-forward's -900s/60ms rate. That left
-    // the reminder + 병합 제안 (merge-suggestion) branch unreachable. Jumping
-    // the clock near the deadline here guarantees the very first tick fires it.
-    if (state.participants.length < state.capacity) {
-      state.taRemaining = Math.min(state.taRemaining, Math.floor(TA_TOTAL_SEC * 0.15) - 1);
-      var clockEl = document.getElementById('taClock');
-      if (clockEl) clockEl.textContent = fmtTaClock(state.taRemaining);
-    }
-    state.taFastTimer = setInterval(function () {
-      if (state.fsm !== 'RECRUITING') { clearInterval(state.taFastTimer); state.taFastTimer = null; return; }
-      state.taRemaining = Math.max(state.taRemaining - 900, 30);
-      var clock = document.getElementById('taClock');
-      if (clock) clock.textContent = fmtTaClock(state.taRemaining);
-      checkDeadlineTriggers();
-    }, 60);
-    state.demoTimers.push(state.taFastTimer);
-    if (state.joinTimer) { clearTimeout(state.joinTimer); state.joinTimer = null; }
-    scheduleNextJoin(true);
-  }
-
-  /* ================= deadline reminder / auto merge (⑤⑥) ================= */
-  function checkDeadlineTriggers() {
-    if (state.fsm !== 'RECRUITING') return;
-    if (!state.deadlineReminded && state.taRemaining <= TA_TOTAL_SEC * 0.4 && state.participants.length < state.capacity) {
-      state.deadlineReminded = true;
-      botSay('⏰ 마감이 얼마 남지 않았어요! 정원이 아직 다 안 찼어요.');
-    }
-    if (!state.mergeOffered && state.taRemaining <= TA_TOTAL_SEC * 0.15 && state.participants.length < state.capacity) {
-      state.mergeOffered = true;
-      if (state.joinTimer) { clearTimeout(state.joinTimer); state.joinTimer = null; }
-      showAutoMergeSuggestion();
-    }
-  }
-
-  function adjacentTimeLabel(slot) {
-    if (!slot || !slot.time) return '비슷한 시간';
-    var h = slot.time.h, m = slot.time.m + 30;
-    if (m >= 60) { m -= 60; h += 1; }
-    return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
-  }
-
-  function showAutoMergeSuggestion() {
-    markFeature('merge');
-    inspectorLog('RULE', '마감임박 · 정원미달 → 인접슬롯 병합 제안');
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">🔀 인접 슬롯 병합 제안</div>' +
-      '<div class="note-inline">' + adjacentTimeLabel(state.slot) + ' 대에 비슷한 모임이 모집 중이에요. 병합하면 정원을 더 빨리 채울 수 있어요.</div>' +
-      '<div class="card-btn-row">' +
-        '<button class="card-btn primary" data-act="auto-merge-yes" type="button">병합 수락</button>' +
-        '<button class="card-btn ghost" data-act="auto-merge-no" type="button">거절</button>' +
-      '</div>';
-    botSayCard(wrap).then(function (row) {
-      var yesBtn = row.querySelector('[data-act="auto-merge-yes"]');
-      var noBtn = row.querySelector('[data-act="auto-merge-no"]');
-      yesBtn.addEventListener('click', function () {
-        disableCardButtons(row);
-        botSay('인접 슬롯과 병합했어요! 참여자를 더 모아볼게요 🙌').then(function () {
-          if (state.fsm !== 'RECRUITING') return;
-          state.pendingJoins = ROSTER.filter(function (p) { return state.participants.indexOf(p) === -1; });
-          if (!state.joinTimer) scheduleNextJoin(true);
-        });
-      });
-      noBtn.addEventListener('click', function () {
-        disableCardButtons(row);
-        botSay('알겠어요, 병합하지 않고 마감할게요.').then(function () {
-          onTimeAttackFail();
-        });
-      });
-    });
-  }
-
-  function forceDissolveDemo() {
-    if (state.fsm !== 'RECRUITING') return;
-    if (state.participants.length >= state.capacity) return;
-    disableTaControls();
-    if (state.joinTimer) { clearTimeout(state.joinTimer); state.joinTimer = null; }
-    state.pendingJoins = [];
-    stopTimeAttack();
-    state.taRemaining = 0;
-    var clock = document.getElementById('taClock');
-    if (clock) clock.textContent = fmtTaClock(0);
-    onTimeAttackFail();
-  }
-
-  function onTimeAttackFail() {
-    if (state.fsm !== 'RECRUITING') return;
-    markFeature('merge');
-    inspectorLog('REFUND', state.participants.length + '명 × 500P 전액 환급 (정원 미달 · 방폭)');
-    state.fsm = 'DISSOLVED';
-    setStage('recruit', '72시간 타임어택 안에 정원을 채우지 못해 모임이 자동으로 방폭(해산)됩니다. 디파짓은 참여자 전원에게 전액 환급됩니다.');
-    var tag = document.querySelector('#recruitCard .tag');
-    if (tag) { tag.textContent = '방폭'; tag.className = 'tag danger'; }
-    var row = document.getElementById('taRow');
-    if (row) {
-      row.style.color = 'var(--danger-text)';
-      row.innerHTML = '💥 타임어택 실패 — 정원 미달로 모집 자동 종료';
-    }
-    botSay('😥 72시간 안에 정원을 채우지 못했어요. 노쇼 페널티 없이 모임을 자동 해산할게요 (방폭)').then(function () {
-      return botSayCard(buildDissolveRefundCard());
-    }).then(function () {
-      appendToast('💥 모임 방폭 · 디파짓 500P 전액 환급 완료');
-      return wait(reduceMotion ? 0 : 500);
-    }).then(function () {
-      return botSay('참여자 전원에게 디파짓 500P를 전액 환급 처리했어요. 인원을 조금 낮춰서 다시 모집해볼까요? 🙌');
-    }).then(function () {
-      state.fsm = 'IDLE';
-      state.slot = null;
-      state.participants = [];
-      state.pendingJoins = [];
-    });
-  }
-
-  function buildDissolveRefundCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">💥 모임 방폭 · 디파짓 환급</div>' +
-      '<div class="settle-line"><span class="amt plus">' + state.participants.length + '명 × 500P</span><span>전원 전액 환급 완료</span></div>' +
-      '<span class="tag danger">정원 미달로 자동 해산</span>' +
-      '<div class="note-inline">72시간 타임어택 안에 정원(' + state.capacity + '명)을 채우지 못해 모임이 자동 해산되었습니다. 페널티 없이 디파짓 전액이 환급됩니다.</div>';
-    return wrap;
-  }
-
-  // 상황별 아이스브레이커 문구 풀 — 슬롯(메뉴·시간대·인원)에서 결정적으로 고른다 (Math.random 미사용)
-  var ICEBREAKER_LINES = [
-    '다들 오늘 {MENU} 모임 기대하고 계셨죠? 서로 어떤 팀인지부터 소개해볼까요?',
-    '{MENU} 좋아하게 된 계기가 다들 궁금하네요 — 한 분씩 짧게 말해볼까요?',
-    '처음 뵙는 분도 있으니 부서랑 이름만 가볍게 소개해봐요!',
-    '자리에 앉으면 바로 주문부터 하고, 기다리는 동안 요즘 팀 근황 얘기 나눠볼까요?'
-  ];
-  function pickIcebreaker() {
-    var menu = (state.slot && state.slot.menuLabel) || '이 모임';
-    var seed = menu + '|' + ((state.slot && state.slot.daypart) || '') + '|' + state.capacity;
-    var idx = strHash(seed) % ICEBREAKER_LINES.length;
-    return ICEBREAKER_LINES[idx].split('{MENU}').join(menu);
-  }
-
-  function onCapacityFull() {
-    if (state.fsm !== 'RECRUITING') return;
-    markFeature('confirm');
-    state.fsm = 'FULL';
-    setStage('full', '타임어택 안에 정원이 찼습니다. 디파짓이 확정 상태로 잠기고, 봇이 그룹 대화방을 자동으로 만듭니다.');
-    var tag = document.querySelector('#recruitCard .tag');
-    if (tag) { tag.textContent = '마감'; tag.className = 'tag good'; }
-    finishTimeAttack();
-
-    botSay('🎉 매칭 완료! 대화방을 만들었어요').then(function () {
-      return botSayCard(buildDepositSettleCard());
-    }).then(function () {
-      return wait(reduceMotion ? 0 : 500);
-    }).then(function () {
-      return botSay('🧊 AI 아이스브레이커: "' + pickIcebreaker() + '"');
-    }).then(function () {
-      return wait(reduceMotion ? 0 : 700);
-    }).then(function () {
-      transitionRoom();
-    });
-  }
-
-  function buildDepositSettleCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">🪙 디파짓 확정</div>' +
-      '<div class="settle-line"><span class="amt">' + state.capacity + '명 × 500P</span><span>모임 확정으로 잠금 완료</span></div>' +
-      '<div class="settle-line"><span class="amt plus">+50P</span><span>정상 참석 시 전액 환급과 함께 적립</span></div>' +
-      '<span class="tag good">노쇼 방지 장치 작동중</span>' +
-      '<div class="note-inline">노쇼 시 디파짓은 참석자에게 분배, 모임이 무산(방폭)되면 전원 전액 환급됩니다.</div>';
-    return wrap;
-  }
-
-  /* ================= onboarding / trust ring ================= */
-  function buildTrustRingNode(label) {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    var pct = Math.max(0, Math.min(100, state.trustScore)) / 100;
-    var offset = (TRUST_C * (1 - pct)).toFixed(2);
-    wrap.innerHTML =
-      '<div class="card-title">🪪 ' + (label || '내 프로필') + '</div>' +
-      '<div class="trust-ring-wrap">' +
-        '<svg class="trust-ring" viewBox="0 0 44 44">' +
-          '<circle class="track" cx="22" cy="22" r="' + TRUST_R + '"></circle>' +
-          '<circle class="fill" cx="22" cy="22" r="' + TRUST_R + '" stroke-dasharray="' + TRUST_C.toFixed(2) + '" stroke-dashoffset="' + offset + '" data-trust-fill></circle>' +
-        '</svg>' +
-        '<div class="trust-num-box"><span class="tn-val" data-trust-num>' + Math.round(state.trustScore) + '</span><span class="tn-label">신뢰도 점수</span></div>' +
-      '</div>' +
-      '<div class="profile-tags">' + state.profileTags.map(function (t) { return '<span class="tag brand">#' + t + '</span>'; }).join('') + '</div>' +
-      '<div class="note-inline">체크인 이력·탐색 피드 참여가 쌓일수록 신뢰도가 올라가고 매칭 우선순위가 높아져요.</div>';
-    return wrap;
-  }
-
-  function bumpTrust(delta) {
-    state.trustScore = Math.max(0, Math.min(100, state.trustScore + delta));
-    var fillEl = document.querySelector('[data-trust-fill]');
-    var numEl = document.querySelector('[data-trust-num]');
-    if (fillEl) {
-      var pct = state.trustScore / 100;
-      fillEl.setAttribute('stroke-dashoffset', (TRUST_C * (1 - pct)).toFixed(2));
-    }
-    if (numEl) numEl.textContent = Math.round(state.trustScore);
-  }
-
-  function buildExploreFeedCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    var items = [
-      { key: 'sponsored1', title: '신메뉴 카페 원정단', meta: '스폰서드 · 화요일 오전 10시 · 참여 시 아메리카노 쿠폰 자동 적용', sponsored: true, emoji: '☕' },
-      { key: 'feed1', title: '목요일 점심 · 라멘 탐방대', meta: '2명 모집중 · 신뢰도 70+ 추천', emoji: '🍜' },
-      { key: 'feed2', title: '금요일 오후 5시 · 신메뉴 카페 원정', meta: '3명 모집중 · 온라인 15분', emoji: '☕' },
-      { key: 'feed3', title: '월요일 아침 7시 30분 · 조기 러닝크루', meta: '4명 모집중 · 오프라인 30분 · 신뢰도 60+ 추천', emoji: '🏃' },
-      { key: 'feed4', title: '수요일 저녁 7시 · 보드게임 소셜', meta: '5명 모집중 · 부서 다양성 매칭', emoji: '🎲' },
-      { key: 'feed5', title: '금요일 점심 12시 30분 · 초밥 오마카세', meta: '3명 모집중 · 예산 3만원대', emoji: '🍣' }
-    ];
-    wrap.innerHTML =
-      '<div class="card-title">🔎 탐색 피드</div>' +
-      items.map(function (it) {
-        return '<div class="settle-line" data-feed-row="' + it.key + '">' +
-          '<span>' + (it.sponsored ? '<span class="tag warn">스폰서드</span> ' : '') + it.emoji + ' ' + it.title + '</span>' +
-          '<button class="card-btn ghost" style="flex:none;padding:5px 10px;" data-feed-join="' + it.key + '" data-sponsored="' + (it.sponsored ? '1' : '0') + '">참여 신청</button>' +
-          '</div><div class="note-inline">' + it.meta + '</div>';
-      }).join('') +
-      '<div class="note-inline">참여 신청만으로도 신뢰도 +2점이 즉시 반영됩니다 (SIMULATED 매칭).</div>' +
-      '<div class="card-btn-row"><button class="card-btn primary" data-act="feed-new-room" type="button">＋ 새 모임 만들기</button></div>';
-    return wrap;
-  }
-
-  function wireExploreFeedCard(node) {
-    var btns = node.querySelectorAll('[data-feed-join]');
-    btns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (btn.disabled) return;
-        btn.disabled = true;
-        btn.textContent = '신청 완료 ✓';
-        bumpTrust(2);
-        var key = btn.getAttribute('data-feed-join');
-        if (btn.getAttribute('data-sponsored') === '1') {
-          appendToast('🎟️ 쿠폰이 자동 적용됐어요 — 아메리카노 무료');
-        }
-        // cross-tab flow: joining the 라멘 탐방대 feed opens its room in the 채팅 탭
-        if (key === 'feed1') {
-          joinFeedRoom('🍜 라멘 탐방대');
-        }
-      });
-    });
-    var newRoomBtn = node.querySelector('[data-act="feed-new-room"]');
-    if (newRoomBtn) newRoomBtn.addEventListener('click', function () {
-      if (newRoomBtn.disabled) return;
-      if (state.fsm !== 'IDLE') {
-        newRoomBtn.disabled = true;
-        botSay('지금 진행 중인 모임이 있어요. 채팅 탭에서 이어서 진행해주세요.');
-        return;
-      }
-      ensureRoomReady();
-    });
-  }
-
-  /* ================= 마이페이지 (여정④) ================= */
-  function buildMyPageEmptyCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">🪪 마이페이지</div>' +
-      '<span class="tag warn">프로필 미작성</span>' +
-      '<div class="note-inline">아직 프로필이 없어요. 프로필을 만들면 신뢰도 링·포인트 지갑·부서 다양성 통계가 채워져요.</div>' +
-      '<div class="credit-balance"><span class="cb-num">' + state.credit.toLocaleString() + '</span><span class="cb-unit">P 보유중</span></div>' +
-      '<div class="note-inline">채팅 탭에서 첫 모임을 진행하면 프로필 만들기가 자연스럽게 이어져요.</div>';
-    return wrap;
-  }
-
-  function buildMyPageCard() {
-    if (!state.onboarded) return buildMyPageEmptyCard();
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    var deptPct = 62;
-    var newColleagueCount = Object.keys(state.newColleagues || {}).length;
-    wrap.innerHTML =
-      '<div class="card-title">🪪 마이페이지</div>' +
-      '<div class="trust-ring-wrap">' +
-        '<svg class="trust-ring" viewBox="0 0 44 44">' +
-          '<circle class="track" cx="22" cy="22" r="' + TRUST_R + '"></circle>' +
-          '<circle class="fill" cx="22" cy="22" r="' + TRUST_R + '" stroke-dasharray="' + TRUST_C.toFixed(2) + '" stroke-dashoffset="' + (TRUST_C * (1 - state.trustScore / 100)).toFixed(2) + '"></circle>' +
-        '</svg>' +
-        '<div class="trust-num-box"><span class="tn-val">' + Math.round(state.trustScore) + '</span><span class="tn-label">신뢰도 점수</span></div>' +
-        '<div class="credit-balance" style="margin-left:auto;"><span class="cb-num">' + state.credit.toLocaleString() + '</span><span class="cb-unit">P</span></div>' +
-      '</div>' +
-      '<div class="field-row">' +
-        '<div class="field-line"><span class="k">부서다양성</span><span class="v">' + deptPct + '%</span></div>' +
-        '<div class="field-line"><span class="k">이번달</span><span class="v">모임 ' + (state.meetingsCount || 0) + '회 · 노쇼 ' + (state.noShowCount || 0) + '회</span></div>' +
-        '<div class="field-line"><span class="k">새동료</span><span class="v">' + newColleagueCount + '명</span></div>' +
-      '</div>' +
-      '<div class="donut" style="background: conic-gradient(var(--brand) 0% ' + deptPct + '%, var(--paper) ' + deptPct + '% 100%);"><div class="donut-center">' + deptPct + '%</div></div>' +
-      '<div class="note-inline">서로 다른 부서 동료와 만날수록 다양성 지수가 올라가요.</div>';
-    return wrap;
-  }
-
-  function buildOnboardingCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">👋 처음이시네요 — 프로필을 만들어주세요</div>' +
-      '<div class="profile-tags">' +
-        ['점심러버', '마라탕고수', '커피매니아', '헬스러', '와인러'].map(function (t) {
-          var picked = state.profileTags.indexOf(t) !== -1;
-          return '<button class="card-btn ' + (picked ? 'primary' : 'ghost') + '" style="flex:none;padding:5px 10px;" data-onb-tag="' + t + '">' + (picked ? '✓ ' : '#') + t + '</button>';
-        }).join('') +
-      '</div>' +
-      '<input class="msg-input" type="text" style="width:100%;" maxlength="40" placeholder="한 줄 소개를 적어주세요 (예: 등산과 마라탕을 좋아해요)" data-onb-intro value="' + (state.profileIntro || '') + '" />' +
-      '<div class="note-inline">식사 취향</div>' +
-      '<div class="profile-tags">' +
-        ['한식', '중식', '일식', '양식', '비건'].map(function (m) {
-          var picked = state.mealPref === m;
-          return '<button class="card-btn ' + (picked ? 'primary' : 'ghost') + '" style="flex:none;padding:5px 10px;" data-onb-meal="' + m + '">' + m + '</button>';
-        }).join('') +
-      '</div>' +
-      '<div class="note-inline">근무형태</div>' +
-      '<div class="profile-tags">' +
-        ['출근', '재택', '하이브리드'].map(function (w) {
-          var picked = state.workMode === w;
-          return '<button class="card-btn ' + (picked ? 'primary' : 'ghost') + '" style="flex:none;padding:5px 10px;" data-onb-work="' + w + '">' + w + '</button>';
-        }).join('') +
-      '</div>' +
-      '<button class="card-btn ghost" style="align-self:flex-start;" data-onb-privacy>' + (state.privacyAgreed ? '✓ ' : '🔒 ') + '사적 대화는 분석하지 않아요 — 동의합니다</button>' +
-      '<div class="card-btn-row"><button class="card-btn good" data-act="save-onboarding"' + (state.privacyAgreed ? '' : ' disabled') + '>시작하기 (+5 신뢰도)</button></div>';
-    return wrap;
-  }
-
-  function wireOnboardingCard(node) {
-    var tagBtns = node.querySelectorAll('[data-onb-tag]');
-    tagBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var tag = btn.getAttribute('data-onb-tag');
-        var idx = state.profileTags.indexOf(tag);
-        if (idx === -1) {
-          state.profileTags.push(tag);
-          btn.classList.remove('ghost'); btn.classList.add('primary');
-          btn.textContent = '✓ ' + tag;
-        } else {
-          state.profileTags.splice(idx, 1);
-          btn.classList.remove('primary'); btn.classList.add('ghost');
-          btn.textContent = '#' + tag;
-        }
-      });
-    });
-
-    var introInput = node.querySelector('[data-onb-intro]');
-    introInput.addEventListener('input', function () { state.profileIntro = introInput.value; });
-
-    var mealBtns = node.querySelectorAll('[data-onb-meal]');
-    mealBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        mealBtns.forEach(function (b) { b.classList.remove('primary'); b.classList.add('ghost'); });
-        btn.classList.remove('ghost'); btn.classList.add('primary');
-        state.mealPref = btn.getAttribute('data-onb-meal');
-      });
-    });
-
-    var workBtns = node.querySelectorAll('[data-onb-work]');
-    workBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        workBtns.forEach(function (b) { b.classList.remove('primary'); b.classList.add('ghost'); });
-        btn.classList.remove('ghost'); btn.classList.add('primary');
-        state.workMode = btn.getAttribute('data-onb-work');
-      });
-    });
-
-    var privacyBtn = node.querySelector('[data-onb-privacy]');
-    var saveBtn = node.querySelector('[data-act="save-onboarding"]');
-    privacyBtn.addEventListener('click', function () {
-      state.privacyAgreed = !state.privacyAgreed;
-      privacyBtn.classList.toggle('primary', state.privacyAgreed);
-      privacyBtn.classList.toggle('ghost', !state.privacyAgreed);
-      privacyBtn.textContent = (state.privacyAgreed ? '✓ ' : '🔒 ') + '사적 대화는 분석하지 않아요 — 동의합니다';
-      saveBtn.disabled = !state.privacyAgreed;
-    });
-
-    saveBtn.addEventListener('click', function () {
-      if (saveBtn.disabled) return;
-      disableCardButtons(node);
-      if (!state.onboarded) {
-        state.onboarded = true;
-        bumpTrust(5);
-      }
-      botSay('프로필 저장 완료! 신뢰도 링과 탐색 피드를 바로 보여드릴게요 🪪').then(function () {
-        return botSayCard(buildTrustRingNode());
-      }).then(function () {
-        return wait(reduceMotion ? 0 : 400);
-      }).then(function () {
-        return botSayCard(buildExploreFeedCard());
-      }).then(function (row) {
-        wireExploreFeedCard(row.querySelector('.card') || row);
-      });
-    });
-  }
-
-  /* ================= check-in / QR ================= */
-  function detectCheckinMode() {
-    if (state.forcedOnlineMode) return state.forcedOnlineMode;
-    var menu = (state.slot && (state.slot.menu || state.slot.menuLabel)) || '';
-    return /커피/.test(menu) ? 'online' : 'offline';
-  }
-
-  function buildCheckinCard() {
-    state.onlineMode = detectCheckinMode();
-    markFeature('onoff');
-    inspectorLog('RULE', state.onlineMode === 'online' ? 'slot≤30min → ONLINE · Meet 링크 생성' : '오프라인 판별 → QR 체크인 방식');
-    state.checkedIn = [];
-    state.checkinDone = false;
-    state.noShowList = [];
-    state._noShowIdx = (state.demoNoShow && state.participants.length > 1) ? state.participants.length - 1 : -1;
-    var isOnline = state.onlineMode === 'online';
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    var peopleRows = state.participants.map(function (p, idx) {
-      return '<div class="checkin-person" data-checkin-person="' + idx + '"><span class="avatar a' + (idx % 4) + '" style="width:20px;height:20px;font-size:9px;margin-left:0;">' + p.initial + '</span><span>' + p.name + '</span><span class="ci-state">대기중</span></div>';
-    }).join('');
-    wrap.innerHTML =
-      '<div class="card-title">📍 도착 체크인</div>' +
-      '<div class="checkin-mode-row"><span class="checkin-mode-badge ' + (isOnline ? 'online' : 'offline') + '">' + (isOnline ? '온라인 자동판별' : '오프라인 자동판별') + '</span><span class="note-inline">' + (isOnline ? '30분 내 온라인 슬롯은 자동으로 화상 모임으로 전환됩니다.' : '매장 도착 후 QR을 스캔하면 체크인됩니다.') + '</span></div>' +
-      (isOnline ? '' : '<div class="qr-box"></div>') +
-      '<div class="checkin-list">' + peopleRows + '</div>' +
-      '<div class="card-btn-row"><button class="card-btn primary" data-checkin-me>' + (isOnline ? '입장 확인' : 'QR 스캔 체크인') + '</button></div>';
-    return wrap;
-  }
-
-  function markCheckedIn(node, idx) {
-    var row = node.querySelector('[data-checkin-person="' + idx + '"]');
-    if (!row || row.classList.contains('done')) return;
-    row.classList.add('done');
-    row.querySelector('.ci-state').textContent = '체크인 완료 ✓';
-    if (state.checkedIn.indexOf(idx) === -1) state.checkedIn.push(idx);
-    checkAllCheckedIn(node);
-  }
-
-  function scheduleOtherCheckins(node) {
-    state.participants.forEach(function (p, idx) {
-      if (idx === 0) return;
-      if (idx === state._noShowIdx) {
-        // (데모) 노쇼 시뮬레이션: 이 참여자는 끝까지 체크인하지 않는다
-        var noDelay = reduceMotion ? 60 : 2200;
-        var tNo = setTimeout(function () { declareNoShow(node, idx); }, noDelay);
-        state.demoTimers.push(tNo);
-        return;
-      }
-      var delay = reduceMotion ? 50 : (700 + idx * 500 + Math.random() * 300);
-      var t = setTimeout(function () { markCheckedIn(node, idx); }, delay);
-      state.demoTimers.push(t);
-    });
-  }
-
-  function declareNoShow(node, idx) {
-    var row = node.querySelector('[data-checkin-person="' + idx + '"]');
-    if (!row || row.classList.contains('noshow')) return;
-    row.classList.add('noshow');
-    row.querySelector('.ci-state').textContent = '노쇼';
-    if (!state.noShowList) state.noShowList = [];
-    if (state.noShowList.indexOf(idx) === -1) state.noShowList.push(idx);
-    checkAllCheckedIn(node);
-  }
-
-  function checkAllCheckedIn(node) {
-    if (state.checkinDone) return;
-    var noShowCount = (state.noShowList || []).length;
-    if (state.checkedIn.length + noShowCount < state.participants.length) return;
-
-    state.checkinDone = true;
-    state.meetingsCount = (state.meetingsCount || 0) + 1;
-    state.participants.forEach(function (p, idx) {
-      if (p.name.indexOf('나') === -1 && state.noShowList.indexOf(idx) === -1) state.newColleagues[p.name] = true;
-    });
-
-    if (noShowCount > 0) {
-      var noShowNames = state.noShowList.map(function (i) { return state.participants[i].name; }).join(', ');
-      var attendCount = state.participants.length - noShowCount;
-      var forfeited = 500 * noShowCount;
-      var bonus = Math.floor(forfeited / Math.max(1, attendCount));
-      bumpTrust(-4 * noShowCount);
-      inspectorLog('RULE', noShowNames + ' · 체크인 마감 시간 초과 → 노쇼 판정, 디파짓 몰수 규칙 적용');
-      setStage('checkin', '체크인 마감 — 일부 참여자가 노쇼로 판정되어 디파짓이 몰수되고 남은 참석자에게 분배됩니다.');
-      botSay('⏱ 체크인 마감 시간이 지났어요. ' + noShowNames + '님은 노쇼로 처리되어 디파짓 500P가 몰수됩니다.').then(function () {
-        addCreditTx('디파짓 환급 + 정상 참석 적립', 550);
-        addCreditTx('노쇼 디파짓 분배 보너스 (' + noShowNames + ' 몫)', bonus);
-        appendToast('🚫 ' + noShowNames + ' 노쇼 · 디파짓 500P×' + noShowCount + ' 몰수 → 참석자 ' + attendCount + '명에게 분배');
-        return botSayCard(buildCreditCard());
-      }).then(function () {
-        return wait(reduceMotion ? 0 : 400);
-      }).then(function () {
-        setStage('settle', '모임 비용은 김대리님이 먼저 결제하고, n-빵 정산으로 나머지 참석자에게 받습니다 (디파짓 P와는 별도 · 원 단위).');
-        return botSay('마지막으로 오늘 모임 비용을 정산할게요 💳');
-      }).then(function () {
-        return botSayCard(buildPaymentCard());
-      }).then(function (row) {
-        wirePaymentCard(row.querySelector('.card') || row);
-      });
-      return;
-    }
-
-    bumpTrust(3);
-    setStage('checkin', '전원 체크인이 완료되면 디파짓이 자동으로 환급되고 참석 보너스가 적립됩니다.');
-    botSay('전원 체크인 완료! 디파짓 환급과 참석 보너스를 바로 적립할게요 🎉').then(function () {
-      addCreditTx('디파짓 환급 + 정상 참석 적립', 550);
-      appendToast('✅ +500P 환급 · +50P 적립 · 신뢰도 +3');
-      return botSayCard(buildCreditCard());
-    }).then(function () {
-      return wait(reduceMotion ? 0 : 400);
-    }).then(function () {
-      setStage('settle', '모임 비용은 김대리님이 먼저 결제하고, n-빵 정산으로 나머지 참석자에게 받습니다 (디파짓 P와는 별도 · 원 단위).');
-      return botSay('마지막으로 오늘 모임 비용을 정산할게요 💳');
-    }).then(function () {
-      return botSayCard(buildPaymentCard());
-    }).then(function (row) {
-      wirePaymentCard(row.querySelector('.card') || row);
-    });
-  }
-
-  function wireCheckinCard(node) {
-    var btn = node.querySelector('[data-checkin-me]');
-    btn.addEventListener('click', function () {
-      if (btn.disabled) return;
-      markFeature('checkin');
-      btn.disabled = true;
-      btn.textContent = '체크인 완료 ✓';
-      markCheckedIn(node, 0);
-      scheduleOtherCheckins(node);
-    });
-  }
-
-  /* ================= credit ledger ================= */
-  function addCreditTx(label, amount) {
-    state.credit += amount;
-    state.creditLedger.push({ label: label, amount: amount });
-    inspectorLog('LEDGER', (amount >= 0 ? '+' : '') + amount + 'P ' + label + ' (잔액 ' + state.credit.toLocaleString() + 'P)');
-  }
-
-  function buildCreditCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    var rows = state.creditLedger.length
-      ? state.creditLedger.slice().reverse().map(function (tx) {
-          var cls = tx.amount >= 0 ? 'plus' : 'minus';
-          var sign = tx.amount >= 0 ? '+' : '';
-          return '<div class="credit-tx"><span>' + tx.label + '</span><span class="tx-amt ' + cls + '">' + sign + tx.amount.toLocaleString() + 'P</span></div>';
-        }).join('')
-      : '<div class="note-inline">아직 거래 내역이 없어요.</div>';
-    wrap.innerHTML =
-      '<div class="card-title">💰 가상 크레딧 원장</div>' +
-      '<div class="credit-balance"><span class="cb-num">' + state.credit.toLocaleString() + '</span><span class="cb-unit">P 보유중</span></div>' +
-      '<div class="credit-tx-list">' + rows + '</div>' +
-      '<div class="card-btn-row"><button class="card-btn ghost" data-act="topup">＋ 충전하기</button></div>' +
-      '<div class="pay-method-row" data-pay-row style="display:none;">' +
-        '<button class="pay-method-btn" data-pay="네이버페이" data-amount="10000">🟢 네이버페이 1만P</button>' +
-        '<button class="pay-method-btn" data-pay="카카오페이" data-amount="10000">🟡 카카오페이 1만P</button>' +
-        '<button class="pay-method-btn" data-pay="카드" data-amount="10000">💳 카드 1만P</button>' +
-      '</div>';
-    return wrap;
-  }
-
-  function wireCreditCard(node) {
-    var topupBtn = node.querySelector('[data-act="topup"]');
-    var payRow = node.querySelector('[data-pay-row]');
-    topupBtn.addEventListener('click', function () {
-      payRow.style.display = payRow.style.display === 'none' ? 'flex' : 'none';
-    });
-    node.querySelectorAll('[data-pay]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var label = btn.getAttribute('data-pay');
-        var amount = parseInt(btn.getAttribute('data-amount'), 10);
-        addCreditTx(label + ' 충전', amount);
-        payRow.style.display = 'none';
-        var fresh = buildCreditCard();
-        node.replaceWith(fresh);
-        wireCreditCard(fresh);
-      });
-    });
-  }
-
-  /* ================= settlement (원 단위 — 디파짓 P와 별도) =================
-     흐름: ① 김대리(나)가 총액을 먼저 결제 → ② 나를 제외한 참석자에게 n-빵 요청
-     → ③ 각자 순차 입금 연출 → ④ 전원 입금 완료 시 정산 종료. 김대리 시점 고정 —
-     "내가 결제할 금액" 화면(상대방 시점)은 등장하지 않는다. */
-  function settlementAttendees() {
-    var noShowList = state.noShowList || [];
-    return state.participants.filter(function (p, idx) { return noShowList.indexOf(idx) === -1; });
-  }
-
-  function buildPaymentCard() {
-    var attendees = settlementAttendees();
-    var total = (attendees.length || state.capacity) * 12000;
-    state.settleTotal = total;
-    state.settleAttendees = attendees;
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">💳 모임 비용 결제</div>' +
-      '<div class="note-inline">오늘 모임 비용 <b>' + total.toLocaleString() + '원</b>을 김대리님이 먼저 결제할게요. 나머지는 n-빵으로 받을게요.</div>' +
-      '<div class="pay-method-row">' +
-        '<button class="pay-method-btn" data-paysim="네이버페이">🟢 네이버페이</button>' +
-        '<button class="pay-method-btn" data-paysim="카카오페이">🟡 카카오페이</button>' +
-        '<button class="pay-method-btn" data-paysim="법인카드">💳 법인카드</button>' +
-      '</div>' +
-      '<div class="note-inline" data-pay-result></div>' +
-      '<span class="sim-badge">SIMULATED</span>';
-    return wrap;
-  }
-
-  function wirePaymentCard(node) {
-    var resultEl = node.querySelector('[data-pay-result]');
-    node.querySelectorAll('[data-paysim]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (node.dataset.paid === '1') return;
-        node.dataset.paid = '1';
-        node.querySelectorAll('[data-paysim]').forEach(function (b) { b.disabled = true; });
-        var method = btn.getAttribute('data-paysim');
-        var total = state.settleTotal || 0;
-        resultEl.textContent = '✅ ' + method + '로 ' + total.toLocaleString() + '원 결제 완료';
-        inspectorLog('LEDGER', '모임 비용 총액 결제 ' + total.toLocaleString() + '원 (' + method + ', 김대리)');
-        wait(reduceMotion ? 0 : 500).then(function () {
-          return botSayCard(buildSplitCard());
-        }).then(function (row) {
-          wireSplitCard(row.querySelector('.card') || row);
-        });
-      });
-    });
-  }
-
-  /* ================= n-bbang split request (나를 제외한 참석자에게만) ================= */
-  function buildSplitCard() {
-    var attendees = state.settleAttendees || settlementAttendees();
-    var total = state.settleTotal || ((attendees.length || state.capacity) * 12000);
-    var others = attendees.filter(function (p) { return p.name.indexOf('나') === -1; });
-    var perPerson = attendees.length ? Math.round(total / attendees.length) : 0;
-    state.splitPerPerson = perPerson;
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    var meRow =
-      '<div class="split-person-row"><span class="avatar a0" style="width:20px;height:20px;font-size:9px;margin-left:0;">김</span>' +
-      '<span>김대리(나)</span><span class="split-req-badge paid" style="margin-left:auto;">결제함 ✓</span></div>';
-    var rows = others.map(function (p, idx) {
-      return '<div class="split-person-row" data-split-person="' + idx + '"><span class="avatar a' + (idx % 4) + '" style="width:20px;height:20px;font-size:9px;margin-left:0;">' + p.initial + '</span><span>' + p.name + '</span><span class="sp-amt">' + perPerson.toLocaleString() + '원</span></div>';
-    }).join('');
-    wrap.innerHTML =
-      '<div class="card-title">🧮 n-빵 정산 요청</div>' +
-      '<div class="settle-line"><span>총 결제 금액</span><span class="amt">' + total.toLocaleString() + '원</span></div>' +
-      ((state.noShowList || []).length ? '<div class="note-inline">노쇼 참여자는 정산 인원에서 제외됐어요.</div>' : '') +
-      '<div class="split-list">' + meRow + rows + '</div>' +
-      '<div class="card-btn-row"><button class="card-btn primary" data-act="send-split-request"' + (others.length ? '' : ' disabled') + '>정산 요청 보내기</button></div>' +
-      '<span class="sim-badge">SIMULATED</span>';
-    return wrap;
-  }
-
-  function wireSplitCard(node) {
-    var others = (state.settleAttendees || settlementAttendees()).filter(function (p) { return p.name.indexOf('나') === -1; });
-    var btn = node.querySelector('[data-act="send-split-request"]');
-    btn.addEventListener('click', function () {
-      if (btn.disabled) return;
-      node.querySelectorAll('.split-person-row[data-split-person]').forEach(function (row) {
-        if (!row.querySelector('.split-req-badge')) {
-          var badge = document.createElement('span');
-          badge.className = 'split-req-badge';
-          badge.textContent = '요청됨';
-          row.appendChild(badge);
-        }
-      });
-      btn.disabled = true;
-      btn.textContent = '정산 요청 완료';
-      if (!others.length) { finishSettlement(node); return; }
-      inspectorLog('LEDGER', others.length + '명에게 각 ' + (state.splitPerPerson || 0).toLocaleString() + '원 정산 요청 발송');
-      scheduleSettlementDeposits(node, others);
-    });
-  }
-
-  // 요청 후 몇 초 간격으로 상대가 입금하는 연출 — 요청됨 → 입금완료 배지 전이.
-  function scheduleSettlementDeposits(node, others) {
-    state.settleReceivedCount = 0;
-    others.forEach(function (p, idx) {
-      var delay = reduceMotion ? 60 : (900 + idx * 900);
-      var t = setTimeout(function () { markSettlementPaid(node, p, idx, others.length); }, delay);
-      state.demoTimers.push(t);
-    });
-  }
-
-  function markSettlementPaid(node, person, idx, othersCount) {
-    var row = node.querySelector('[data-split-person="' + idx + '"]');
-    var badge = row ? row.querySelector('.split-req-badge') : null;
-    if (badge) { badge.textContent = '입금완료 ✓'; badge.classList.add('paid'); }
-    state.settleReceivedCount = (state.settleReceivedCount || 0) + 1;
-    inspectorLog('LEDGER', person.name + ' 정산 입금 ' + (state.splitPerPerson || 0).toLocaleString() + '원 완료');
-    var isLast = state.settleReceivedCount >= othersCount;
-    // wait for this "보냈어요" bubble to actually render before closing out —
-    // otherwise the completion toast can race ahead of the last deposit message.
-    botSay(person.name + '님이 ' + (state.splitPerPerson || 0).toLocaleString() + '원을 보냈어요 ✓').then(function () {
-      if (isLast) finishSettlement();
-    });
-  }
-
-  function finishSettlement() {
-    appendToast('✅ 정산 완료 · 영수증 증빙 저장');
-    wait(reduceMotion ? 0 : 500).then(function () {
-      return botSay('오늘 모임 여기까지! 체크인부터 정산까지 전부 마무리됐어요. 다음에 또 만나요 👋');
-    }).then(function () {
-      addDayDivider('정산 완료');
-    });
-  }
-
-  function transitionRoom() {
-    state.fsm = 'ROOM_CREATED';
-    state.roomActive = true;
-    setStage('room', '대화방이 새로 생성되고 앱바 제목이 모임명으로 바뀝니다. 이제 장소 추천이 이어집니다.');
-
-    var newTitle = state.slot.emoji + ' ' + (state.slot.dateLabel || '') + ' ' + (state.slot.timeLabel ? state.slot.timeLabel.split(' ')[0] : '') + ' · ' + state.slot.menuLabel + ' (' + state.capacity + ')';
-    appHeader.classList.add('pulse');
-    roomTitle.textContent = newTitle;
-    roomSubtitle.textContent = state.participants.map(function (p) { return p.initial + (p.name.indexOf('나') !== -1 ? '(나)' : ''); }).join(', ') + ' 참여중';
-    botAvatar.textContent = state.slot.emoji || '🍱';
-    setTimeout(function () { appHeader.classList.remove('pulse'); }, 900);
-
-    addDayDivider('그룹 대화방이 생성되었습니다');
-
-    botSay('모두 반가워요! 먼저 공통점부터 살펴볼게요 🤝').then(function () {
-      return botSayCard(buildCommonGroundCard());
-    }).then(function () {
-      return wait(reduceMotion ? 0 : 400);
-    }).then(function () {
-      setStage('place', '메뉴에 맞는 주변 가게를 거리·평점 기준으로 추천합니다. 리마인드까지 봇이 챙깁니다.');
-      return botSayCard(buildPlaceCard());
-    }).then(function (row) {
-      wirePlaceCard(row.querySelector('.card') || row);
-      return wait(reduceMotion ? 0 : 500);
-    }).then(function () {
-      appendToast('📅 캘린더에 모임 일정을 등록했어요');
-      return wait(reduceMotion ? 0 : 500);
-    }).then(function () {
-      return botSayCard(buildOneHourReminderCard());
-    }).then(function (row) {
-      wireOneHourReminderCard(row.querySelector('.card') || row);
-    });
-  }
-
-  function proceedToCheckinFlow() {
-    Promise.resolve().then(function () {
-      if (!state.onboarded) {
-        return botSay('아 참, 처음이시니 프로필부터 간단히 만들어봐요 🪪').then(function () {
-          return botSayCard(buildOnboardingCard());
-        }).then(function (row) {
-          wireOnboardingCard(row.querySelector('.card') || row);
-        });
-      }
-      return null;
-    }).then(function () {
-      return wait(reduceMotion ? 0 : 600);
-    }).then(function () {
-      return botSay('당일이 되어 체크인을 시작할게요. 자동판별 결과부터 확인해주세요 📍');
-    }).then(function () {
-      return botSayCard(buildCheckinCard());
-    }).then(function (row) {
-      wireCheckinCard(row.querySelector('.card') || row);
-    });
-  }
-
-  /* ================= 확정 그룹방: 공통점 브리핑 (여정②) ================= */
-  function buildCommonGroundCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    var tags = state.profileTags.slice(0, 3);
-    wrap.innerHTML =
-      '<div class="card-title">🤝 공통점 브리핑</div>' +
-      '<div class="chip-row">' + tags.map(function (t) { return '<span class="chip-sm">#' + t + '</span>'; }).join('') + (state.slot.menuLabel ? '<span class="chip-sm">#' + state.slot.menuLabel + '</span>' : '') + '</div>' +
-      '<div class="note-inline">부서는 전부 달라요 — 개발·영업·인사가 한 테이블에 모였어요. 새로운 대화가 기대되네요!</div>' +
-      '<span class="tag brand">AI 대화 스타터</span>' +
-      '<div class="note-inline">"오늘 다들 ' + (state.slot.menuLabel || '이 모임') + ' 좋아하시는 이유가 뭐예요?"</div>';
-    return wrap;
-  }
-
-  /* ================= 리마인더 · 사전취소 · 대기 승급 (여정③) ================= */
-  function buildOneHourReminderCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">⏰ 모임 1시간 전</div>' +
-      '<div class="note-inline">' + fmtSlotTitle(state.slot) + ' 모임이 곧 시작돼요. 참석하실 건가요?</div>' +
-      '<div class="card-btn-row">' +
-        '<button class="card-btn good" data-act="reminder-attend" type="button">참석할게요</button>' +
-        '<button class="card-btn ghost" data-act="reminder-cancel" type="button">취소할게요</button>' +
-      '</div>' +
-      '<div class="card-btn-row" style="margin-top:2px;">' +
-        '<button class="card-btn danger" data-act="reminder-noshow-demo" type="button" style="font-size:10.5px;">(데모) 노쇼 시뮬레이션 보기</button>' +
-      '</div>' +
-      '<div class="note-inline" style="opacity:.7;">데모용 버튼이에요 — 참여자 한 명이 체크인하지 않는 상황과 디파짓 몰수·분배를 보여드려요.</div>';
-    return wrap;
-  }
-
-  function wireOneHourReminderCard(node) {
-    var attendBtn = node.querySelector('[data-act="reminder-attend"]');
-    var cancelBtn = node.querySelector('[data-act="reminder-cancel"]');
-    attendBtn.addEventListener('click', function () {
-      if (attendBtn.disabled) return;
-      markFeature('reminder');
-      disableCardButtons(node);
-      botSay('좋아요, 이따 뵐게요! 😊').then(function () {
-        proceedToCheckinFlow();
-      });
-    });
-    cancelBtn.addEventListener('click', function () {
-      if (cancelBtn.disabled) return;
-      markFeature('reminder');
-      disableCardButtons(node);
-      var removeIdx = -1;
-      for (var i = state.participants.length - 1; i >= 0; i--) {
-        if (state.participants[i].name.indexOf('나') === -1) { removeIdx = i; break; }
-      }
-      var removed = removeIdx !== -1 ? state.participants.splice(removeIdx, 1)[0] : null;
-      var promoted = WAITLIST_ROSTER[0];
-      if (removed && promoted) state.participants.push(promoted);
-      botSay((removed ? removed.name + '님이 취소했어요.' : '취소를 처리했어요.')).then(function () {
-        return botSayCard(buildWaitlistPromotionCard(removed, promoted));
-      }).then(function () {
-        return wait(reduceMotion ? 0 : 400);
-      }).then(function () {
-        proceedToCheckinFlow();
-      });
-    });
-    var noshowBtn = node.querySelector('[data-act="reminder-noshow-demo"]');
-    if (noshowBtn) {
-      noshowBtn.addEventListener('click', function () {
-        if (noshowBtn.disabled) return;
-        markFeature('reminder');
-        disableCardButtons(node);
-        state.demoNoShow = true;
-        botSay('네, 참석할게요! (데모: 이번엔 참여자 한 명이 체크인하지 않는 상황을 보여드릴게요)').then(function () {
-          proceedToCheckinFlow();
-        });
-      });
-    }
-  }
-
-  function buildWaitlistPromotionCard(removed, promoted) {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">🔁 대기자 자동 승급</div>' +
-      '<div class="note-inline">' + (removed ? removed.name : '참여자') + '님 취소로 빈 자리에 대기 1번 ' + (promoted ? promoted.name : '대기자') + '님이 자동으로 채워졌어요. 정원은 그대로 유지됩니다.</div>' +
-      '<span class="tag good">정원 유지 · ' + state.participants.length + '/' + state.capacity + '명</span>';
-    return wrap;
-  }
-
-  function buildPlaceCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    var places = pickPlacesFor(state.slot.menu);
-    var html = '<div class="card-title">📍 근처 추천 장소</div>';
-    places.forEach(function (p) {
-      html +=
-        '<div class="place-card">' +
-          '<svg class="place-map" viewBox="0 0 54 54" aria-hidden="true">' +
-            '<rect width="54" height="54" fill="#EEF0F3"/>' +
-            '<path d="M4 40 L18 24 L28 32 L40 14 L50 22" stroke="#A9BAD9" stroke-width="2" fill="none"/>' +
-            '<circle cx="' + p.x + '" cy="' + p.y + '" r="4" fill="#33549C"/>' +
-          '</svg>' +
-          '<div class="place-info">' +
-            '<div class="pn">' + p.name + '</div>' +
-            '<div class="pm">' + p.dist + ' · <span class="stars">' + '★'.repeat(p.stars) + '☆'.repeat(5 - p.stars) + '</span> ' + p.rating + ' · ' + p.seat + ' · ' + p.price + '</div>' +
-          '</div>' +
-        '</div>' +
-        '<div class="note-inline">' + p.reason + '</div>' +
-        '<button class="card-btn ghost" style="align-self:flex-start;padding:4px 10px;font-size:10.5px;" data-book="' + p.name + '">예약 링크 열기</button>';
-    });
-    wrap.innerHTML = html;
-    return wrap;
-  }
-
-  function wirePlaceCard(node) {
-    node.querySelectorAll('[data-book]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (btn.disabled) return;
-        btn.disabled = true;
-        btn.textContent = '예약 링크 열림 (SIMULATED) ✓';
-      });
-    });
-  }
-
-  function pickPlacesFor(menu) {
-    var base = menu || '맛집';
-    var names = {
-      '마라탕': ['마라공방 본점', '탕화쿵푸 역삼점', '이연 마라탕', '마라마라 2호점'],
-      '삼겹살': ['옛날 그 삼겹살', '연탄집 본점', '숯불애 삼겹살', '한돈일번지'],
-      '커피챗': ['카페 어라운드', '블랙워터 로스터스', '카페 결', '테라로사 사옥점'],
-      '초밥': ['스시효', '초밥한잔', '스시노', '오마카세 결']
-    };
-    var list = names[base] || ['사내 근처 맛집 A', '사내 근처 맛집 B', '사내 근처 맛집 C', '사내 근처 맛집 D'];
-    var cap = state.capacity || (state.slot && state.slot.count) || 4;
-    var seat = [cap + '인석 여유', cap + '인 단체석 가능', '2~4인석 위주', '룸 예약 가능'];
-    var price = ['₩₩', '₩₩', '₩₩₩', '₩₩'];
-    var reason = [
-      cap + '명 단체석이 넉넉해 대기 없이 바로 입장 가능해요',
-      '평점 대비 가성비가 좋아 ' + (state.workMode === '재택' ? '오랜만에 모이는 팀에도' : '사무실 근처 팀 모임에') + ' 자주 쓰여요',
-      (state.mealPref ? state.mealPref + ' 취향에 맞고, ' : '') + '조용한 룸이 있어 대화하기 좋아요',
-      '정원 ' + cap + '명 기준으로 좌석을 미리 배정해둘 수 있어요'
-    ];
-    return [
-      { name: list[0], dist: '도보 3분', stars: 5, rating: '4.6', x: 30, y: 20, seat: seat[0], price: price[0], reason: reason[0] },
-      { name: list[1], dist: '도보 6분', stars: 4, rating: '4.3', x: 20, y: 34, seat: seat[1], price: price[1], reason: reason[1] },
-      { name: list[2] || list[0], dist: '도보 8분', stars: 4, rating: '4.1', x: 42, y: 28, seat: seat[2], price: price[2], reason: reason[2] },
-      { name: list[3] || list[0], dist: '도보 10분', stars: 4, rating: '4.0', x: 12, y: 12, seat: seat[3], price: price[3], reason: reason[3] }
-    ];
-  }
-
-  /* ================= merge-suggestion side scenario ================= */
-  function maybeSuggestMerge(newSlot) {
-    if (!state.roomActive && state.fsm === 'RECRUITING' && state.slot && sameDaypart(state.slot, newSlot) && similarMenu(state.slot, newSlot)) {
-      return true;
-    }
-    return false;
-  }
-  function sameDaypart(a, b) { return a.daypart && b.daypart && a.daypart === b.daypart; }
-  function similarMenu(a, b) { return a.menu && b.menu && a.menu === b.menu; }
-
-  function showMergeSuggestion(existingSlot, incomingSlot) {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="card-title">🔀 비슷한 모임 발견</div>' +
-      '<div class="note-inline">30분 전 <b>' + fmtSlotTitle(existingSlot) + '</b> 모임이 이미 모집 중이에요. 합칠까요?</div>' +
-      '<div class="card-btn-row">' +
-        '<button class="card-btn primary" data-act="merge-yes" type="button">합치기</button>' +
-        '<button class="card-btn ghost" data-act="merge-no" type="button">따로 만들기</button>' +
-      '</div>';
-    botSayCard(wrap).then(function (row) {
-      var yesBtn = row.querySelector('[data-act="merge-yes"]');
-      var noBtn = row.querySelector('[data-act="merge-no"]');
-      yesBtn.addEventListener('click', function () {
-        disableCardButtons(row);
-        botSay('두 모임을 합쳐 새 방을 만들었어요. (네이버웍스 실연동은 베타 이후 지원 예정이라, 지금은 이 화면에서 합치는 과정만 시뮬레이션할게요)').then(function () {
-          var mergedCount = Math.max(existingSlot.count || 0, incomingSlot.count || 0) || state.capacity;
-          state.capacity = Math.max(2, Math.min(ROSTER.length + 1, mergedCount));
-          updateRecruitCard();
-        });
-      });
-      noBtn.addEventListener('click', function () {
-        disableCardButtons(row);
-        botSay('알겠어요, 별도로 모집을 시작할게요.').then(function () {
-          startRecruiting();
-        });
-      });
-    });
-  }
-
-  /* ================= slot-filling / question loop ================= */
-  var MISSING_QUESTIONS = {
-    count: '몇 분이서 가실까요? 🙂',
-    menu: '무엇을 함께 하고 싶으세요? (메뉴나 활동을 알려주세요)',
-    time: '몇 시쯤이 좋을까요?',
-    date: '언제로 잡을까요? (오늘/내일/모레 또는 요일로 말씀해주세요)'
-  };
-
-  function nextMissingField(slot) {
-    if (!slot.date) return 'date';
-    if (!slot.time) return 'time';
-    if (!slot.menu) return 'menu';
-    if (!slot.count) return 'count';
-    return null;
-  }
-
-  function mergeFollowUp(slot, text) {
-    // try to fill just the pending field from a short follow-up reply
-    var parsed = parseSentence(text);
-    if (state.pendingField === 'count') {
-      var mNum = text.match(/(\d+)\s*(명|인)?/);
-      if (mNum) { slot.count = parseInt(mNum[1], 10); return true; }
-      for (var w in NUM_WORDS) {
-        if (text.indexOf(w) !== -1) { slot.count = NUM_WORDS[w]; return true; }
-      }
-    }
-    if (state.pendingField === 'menu' && parsed.menu) { slot.menu = parsed.menu; slot.menuLabel = parsed.menuLabel; slot.emoji = parsed.emoji; return true; }
-    if (state.pendingField === 'time' && parsed.time) { slot.time = parsed.time; slot.timeLabel = parsed.timeLabel; return true; }
-    if (state.pendingField === 'date' && parsed.date) { slot.date = parsed.date; slot.dateLabel = parsed.dateLabel; return true; }
-    // fallback: merge in whatever the parser found regardless of which field we asked for
-    var merged = false;
-    ['date', 'time', 'menu', 'count'].forEach(function (f) {
-      if (!slot[f] && parsed[f]) { slot[f] = parsed[f]; merged = true; }
-    });
-    if (parsed.dateLabel && !slot.dateLabel) slot.dateLabel = parsed.dateLabel;
-    if (parsed.timeLabel && !slot.timeLabel) slot.timeLabel = parsed.timeLabel;
-    if (parsed.menuLabel && !slot.menuLabel) { slot.menuLabel = parsed.menuLabel; slot.emoji = parsed.emoji; }
-    return merged;
-  }
-
-  /* ================= main input handler ================= */
-  function handleUserInput(rawText) {
-    var text = rawText.trim();
-    if (!text) return;
-    addUserBubble(text);
-    chatInput.value = '';
-
-    if (state.fsm === 'IDLE' || state.fsm === 'CONFIRM' && !state.slot) {
-      tryParseFresh(text);
-      return;
-    }
-
-    if (state.fsm === 'PARSING') {
-      if (!state.slot) { tryParseFresh(text); return; }
-      var filled = mergeFollowUp(state.slot, text);
-      proceedAfterFill();
-      return;
-    }
-
-    if (state.fsm === 'CONFIRM') {
-      // user typed something instead of pressing a button — treat as edit request, re-parse over existing slot
-      var parsedEdit = parseSentence(text);
-      var changed = false;
-      ['date', 'time', 'menu', 'count'].forEach(function (f) {
-        if (parsedEdit[f]) { state.slot[f] = parsedEdit[f]; changed = true; }
-      });
-      if (parsedEdit.dateLabel) state.slot.dateLabel = parsedEdit.dateLabel;
-      if (parsedEdit.timeLabel) state.slot.timeLabel = parsedEdit.timeLabel;
-      if (parsedEdit.menuLabel) { state.slot.menuLabel = parsedEdit.menuLabel; state.slot.emoji = parsedEdit.emoji; }
-      if (changed) {
-        botSayCard(buildConfirmCard(state.slot)).then(wireConfirmCard);
-      } else {
-        botSay('네, 알겠어요! 위 카드의 [모집 시작] 또는 [수정] 버튼을 눌러주세요.');
-      }
-      return;
-    }
-
-    if (state.fsm === 'RECRUITING' || state.fsm === 'FULL') {
-      // check merge scenario trigger
-      var maybeSlot = parseSentence(text);
-      if (maybeSlot.anySignal && maybeSuggestMerge(maybeSlot)) {
-        showMergeSuggestion(state.slot, maybeSlot);
-        return;
-      }
-      botSay('지금 다른 모임이 모집 중이에요. 새 모임은 이번 모집이 끝난 뒤 만들어주세요 🙏');
-      return;
-    }
-
-    if (state.fsm === 'ROOM_CREATED') {
-      botSay('네! 방금 만든 방에서 편하게 이야기 나눠주세요 😊');
-      return;
-    }
-
-    // fallback
-    tryParseFresh(text);
-  }
-
-  function tryParseFresh(text) {
-    var parsed = parseSentence(text);
-    if (!parsed.anySignal) {
-      state.fsm = 'PARSING';
-      botSay('음, 이해하지 못했어요. 예: "내일 점심 마라탕 3명" 처럼 말씀해주세요 🙂');
-      return;
-    }
-    state.slot = parsed;
-    setStage('parse', '문장에서 날짜·시간·메뉴·인원을 추출했습니다. 빠진 항목은 봇이 되물어 채웁니다.');
-    markFeature('nlp');
-    proceedAfterFill();
-  }
-
-  function proceedAfterFill() {
-    var missing = nextMissingField(state.slot);
-    if (missing) {
-      state.fsm = 'PARSING';
-      state.pendingField = missing;
-      botSay(MISSING_QUESTIONS[missing]);
-      return;
-    }
-    state.pendingField = null;
-    state.fsm = 'CONFIRM';
-    logParse(state.slot);
-    botSayCard(buildConfirmCard(state.slot)).then(wireConfirmCard);
-  }
-
-
-  /* ================= room entry (single fixed 김대리/host viewpoint — no persona switching) ================= */
-  // Both the "+" entry points and the left-rail example buttons funnel through
-  // this so the room always opens the same way: switch into the bot room, and if
-  // this is the first time, let the bot ask + offer example chips before anything
-  // else happens (avoids interleaving an auto-sent user bubble before the greeting).
-  function ensureRoomReady() {
-    if (!state.roomEntered) {
-      state.roomEntered = true;
-      showRoomView();
-      return beginRoomFlow();
-    }
-    if (state.view !== 'room') showRoomView();
-    return Promise.resolve();
-  }
-
-  function openSlotPickerFlow() {
-    if (state.fsm === 'IDLE') {
-      state.fsm = 'PARSING';
-      botSay('슬롯 선택 카드를 보여드릴게요 🗓️').then(function () {
-        return botSayCard(buildSlotPickerCard());
-      }).then(function (row) {
-        wireSlotPickerCard(row.querySelector('.card') || row);
-      });
-    } else {
-      botSay('지금 다른 모임이 진행 중이에요. [↺ 처음부터] 버튼으로 초기화한 뒤 다시 시도해주세요.');
-    }
-  }
-
-  /* ================= example buttons (left rail) — open the bot room and act immediately ================= */
-  exampleBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      if (btn.getAttribute('data-special') === 'slot-picker') {
-        ensureRoomReady().then(openSlotPickerFlow);
-        return;
-      }
-      var text = btn.getAttribute('data-example');
-      ensureRoomReady().then(function () { handleUserInput(text); });
-    });
-  });
-
-  /* ================= send handlers ================= */
-  function doSend() {
-    var v = chatInput.value;
-    if (!v.trim()) return;
-    handleUserInput(v);
-  }
-  sendBtn.addEventListener('click', doSend);
-  chatInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { e.preventDefault(); doSend(); }
-  });
-
-  /* ================= reset ================= */
-  /* ================= view: list / room ================= */
-  var DECORATIVE_ROOMS = [
-    { name: '점심조 3반', preview: '내일도 마라탕 콜?', time: '어제', unread: 2, avatars: ['이', '정', '최'] },
-    { name: '커피챗 소모임', preview: '다음 주에 또 뭉쳐요', time: '월', unread: 0, avatars: ['박', '나'] }
-  ];
-
-  /* ================= free navigation: bottom tab bar ================= */
-  function hideAllPanes() {
-    viewList.hidden = true;
-    viewRoom.hidden = true;
-    viewExplore.hidden = true;
-    viewMy.hidden = true;
-  }
-
-  function setActiveTabBtn(tab) {
-    demoTabBtns.forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-tab') === tab); });
-  }
-
-  // switchTab only changes which pane is visible within the current chat sub-state
-  // (list vs room) — it never touches chat history, so mid-scenario conversations
-  // are preserved when the judge browses away and comes back.
-  function switchTab(tab) {
-    state.activeTab = tab;
-    setActiveTabBtn(tab);
-    hideAllPanes();
-    if (tab === 'chat') {
-      if (state.view === 'room') { viewRoom.hidden = false; } else { viewList.hidden = false; renderRoomList(); }
-      roomTitle.textContent = 'OfficeMate';
-      roomSubtitle.textContent = state.view === 'room' ? '개설자 김대리 · 항상 대기중' : '대화방 목록';
-    } else if (tab === 'explore') {
-      markFeature('explore');
-      viewExplore.hidden = false;
-      renderExploreView();
-      roomTitle.textContent = 'OfficeMate';
-      roomSubtitle.textContent = '탐색 피드';
-    } else if (tab === 'my') {
-      markFeature('mypage');
-      viewMy.hidden = false;
-      renderMyView();
-      roomTitle.textContent = 'OfficeMate';
-      roomSubtitle.textContent = '마이페이지';
-    }
-  }
-
-  function renderExploreView() {
-    if (!exploreBody) return;
-    exploreBody.innerHTML = '';
-    var card = buildExploreFeedCard();
-    exploreBody.appendChild(card);
-    wireExploreFeedCard(card);
-  }
-
-  function renderMyView() {
-    if (!myBody) return;
-    myBody.innerHTML = '';
-    var card = buildMyPageCard();
-    myBody.appendChild(card);
-  }
-
-  // cross-tab flow: joining a feed room from 탐색 switches to 채팅 and opens the room
-  function joinFeedRoom(title) {
-    var firstEntry = !state.roomEntered;
-    state.roomEntered = true;
-    showRoomView();
-    if (firstEntry) beginRoomFlow();
-    addDayDivider(title + ' 참여');
-    addGuestBubble({ name: '유대리', cls: 'a2' }, '어서오세요! ' + title + ' 모임에 참여하신 걸 환영해요 🙌');
-  }
-
-  demoTabBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () { switchTab(btn.getAttribute('data-tab')); });
-  });
-
-  /* ================= feature checklist triggers =================
-     Every item is clickable and must actually reach its markFeature() call —
-     if the demo is mid-scenario (fsm !== IDLE) a plain ex-button .click() can
-     silently no-op ("지금 다른 모임이 진행 중이에요" bubble, easy to miss,
-     scrolled past). So slotpicker/merge force a reset first when needed
-     instead of just re-clicking the same button and hoping fsm lines up. */
-  document.querySelectorAll('.feat-item').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var key = btn.getAttribute('data-feat');
-      if (key === 'nlp') {
-        if (state.fsm !== 'IDLE') resetScenario();
-        var ex1 = document.querySelector('.example-btn[data-example="내일 점심 마라탕 3명"]');
-        if (ex1) ex1.click();
-      } else if (key === 'slotpicker') {
-        if (state.fsm !== 'IDLE') resetScenario();
-        ensureRoomReady().then(openSlotPickerFlow);
-      } else if (key === 'merge') {
-        triggerMergeDemo();
-      } else if (key === 'mypage') {
-        switchTab('my');
-      } else if (key === 'explore') {
-        switchTab('explore');
-      }
-      // remaining keys have no standalone trigger (they only make sense mid-scenario) —
-      // their `title` attribute already guides the user to where they appear.
-    });
-  });
-
-  // 체크리스트 클릭 경로용 polling helper — waitForFsm/waitForSelector와 달리
-  // state.demoRunning(= "자동 데모" 버튼 실행 중 플래그)에 묶여있지 않다.
-  // (waitForFsm/waitForSelector를 여기서 그대로 쓰면 demoRunning이 false라서
-  // 첫 tick에 즉시 resolve돼버려 체인이 확인카드를 기다리지 못하고 헛클릭하는
-  // 버그가 있었음 — 그래서 별도로 둔다.)
-  function pollUntil(check, timeoutMs) {
-    return new Promise(function (resolve) {
-      var start = Date.now();
-      var iv = setInterval(function () {
-        if (check() || Date.now() - start > timeoutMs) { clearInterval(iv); resolve(); }
-      }, 150);
-      state.demoTimers.push(iv);
-    });
-  }
-  function pollForSelector(sel, timeoutMs) {
-    return pollUntil(function () { return !!document.querySelector(sel); }, timeoutMs).then(function () {
-      return document.querySelector(sel);
-    });
-  }
-
-  // 병합·방폭 체크리스트 항목: 클릭 즉시 "모집중 + 정원미달" 상태를 만들어 병합
-  // 제안 카드를 바로 띄운다 — 자연 참여(2~5s 간격)가 정원을 먼저 채워버리는
-  // 레이스를 피하기 위해 조인 타이머를 멈추고 카드를 띄운다.
-  function fireMergeSuggestionNow() {
-    if (document.querySelector('[data-act="auto-merge-yes"]')) return; // already showing
-    if (state.joinTimer) { clearTimeout(state.joinTimer); state.joinTimer = null; }
-    if (state.taFastTimer) { clearInterval(state.taFastTimer); state.taFastTimer = null; }
-    state.pendingJoins = [];
-    state.mergeOffered = true;
-    showAutoMergeSuggestion();
-  }
-
-  function triggerMergeDemo() {
-    if (state.fsm === 'RECRUITING' && state.participants.length < state.capacity) {
-      fireMergeSuggestionNow();
-      return;
-    }
-    if (state.fsm !== 'IDLE') resetScenario();
-    // poll for the actual DOM buttons rather than the fsm flag — fsm flips
-    // synchronously but each card only renders after botSayCard's typing-delay
-    // setTimeout, so an fsm-only check resolves before there's anything to click.
-    ensureRoomReady().then(function () {
-      handleUserInput('내일 점심 마라탕 3명');
-      return pollForSelector('#chatBody [data-act="start-recruit"]', 8000);
-    }).then(function (startBtn) {
-      if (startBtn) startBtn.click();
-      return pollForSelector('[data-act="deposit-confirm"]', 8000);
-    }).then(function (depositBtn) {
-      if (depositBtn) depositBtn.click();
-      return pollForSelector('#btnFastForward', 8000);
-    }).then(function () {
-      if (state.fsm !== 'RECRUITING') return;
-      fireMergeSuggestionNow();
-    });
-  }
-
-  function showListView() {
-    state.view = 'list';
-    switchTab('chat');
-  }
-
-  function showRoomView() {
-    state.view = 'room';
-    state.roomListUnread = false;
-    switchTab('chat');
-  }
-
-  function renderRoomList() {
-    if (!roomListEl) return;
-    roomListEl.innerHTML = '';
-    var activeRow = document.createElement('div');
-    activeRow.className = 'room-list-item';
-    activeRow.setAttribute('data-room', 'active');
-    var activeLastMsg = state.roomActive ? '모임방이 활성화되어 있어요' : '"내일 점심 마라탕 3명"처럼 말해보세요';
-    activeRow.innerHTML =
-      '<div class="rli-avatar-wrap">' +
-        '<div class="rli-avatars"><span class="avatar">🍱</span></div>' +
-        (state.roomListUnread ? '<span class="rli-unread-dot"></span>' : '') +
-      '</div>' +
-      '<div class="rli-body">' +
-        '<div class="rli-top-row"><span class="rli-name">OfficeMate 모임방</span><span class="rli-time">지금</span></div>' +
-        '<div class="rli-bottom-row"><span class="rli-preview"></span>' + (state.roomListUnread ? '<span class="rli-badge">N</span>' : '') + '</div>' +
-      '</div>';
-    activeRow.querySelector('.rli-preview').textContent = activeLastMsg;
-    activeRow.addEventListener('click', function () {
-      ensureRoomReady();
-    });
-    roomListEl.appendChild(activeRow);
-
-    DECORATIVE_ROOMS.forEach(function (r) {
-      var row = document.createElement('div');
-      row.className = 'room-list-item';
-      var avatarsHtml = r.avatars.map(function (a) { return '<span class="avatar">' + a + '</span>'; }).join('');
-      row.innerHTML =
-        '<div class="rli-avatar-wrap">' +
-          '<div class="rli-avatars">' + avatarsHtml + '</div>' +
-          (r.unread ? '<span class="rli-unread-dot"></span>' : '') +
-        '</div>' +
-        '<div class="rli-body">' +
-          '<div class="rli-top-row"><span class="rli-name">' + r.name + '</span><span class="rli-time">' + r.time + '</span></div>' +
-          '<div class="rli-bottom-row"><span class="rli-preview"></span>' + (r.unread ? '<span class="rli-badge">' + r.unread + '</span>' : '') + '</div>' +
-        '</div>';
-      row.querySelector('.rli-preview').textContent = r.preview;
-      row.addEventListener('click', function () {
-        botSay('(데모용 방입니다 — 실제 대화는 상단 OfficeMate 모임방에서 진행돼요.)');
-      });
-      roomListEl.appendChild(row);
-    });
-  }
-
-  var ENTRY_EXAMPLES = ['내일 점심 마라탕 3명', '금요일 저녁 삼겹살 먹을 사람', '모레 오후 3시 커피챗 2명'];
-
-  // 방 생성은 폼/시트가 아니라 대화 그 자체 — 봇 방으로 들어오면 봇이 먼저 말을
-  // 걸고, 예시 칩과 슬롯피커 버튼을 채팅 카드로 제안한다. "+"·좌측 예시 버튼 모두
-  // 결국 이 한 곳(대화)으로 모인다.
-  function buildRoomEntryPromptCard() {
-    var wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML =
-      '<div class="note-inline">아래 문장을 눌러보거나 자유롭게 입력해보세요.</div>' +
-      '<div class="entry-chip-row">' +
-        ENTRY_EXAMPLES.map(function (t) { return '<button class="entry-chip" type="button" data-entry-example="' + t + '">' + t + '</button>'; }).join('') +
-      '</div>' +
-      '<div class="card-btn-row" style="margin-top:8px;"><button class="card-btn ghost" type="button" data-act="entry-slotpicker">🎛 직접 선택하기</button></div>';
-    return wrap;
-  }
-
-  function wireRoomEntryPromptCard(node) {
-    node.querySelectorAll('[data-entry-example]').forEach(function (chip) {
-      chip.addEventListener('click', function () {
-        chatInput.value = chip.getAttribute('data-entry-example');
-        chatInput.focus();
-      });
-    });
-    var slotBtn = node.querySelector('[data-act="entry-slotpicker"]');
-    if (slotBtn) slotBtn.addEventListener('click', function () {
-      if (slotBtn.disabled) return;
-      disableCardButtons(node);
-      openSlotPickerFlow();
-    });
-  }
-
-  function beginRoomFlow() {
-    addDayDivider('대화 시작');
-    return botSay('안녕하세요! 저는 OfficeMate예요.').then(function () {
-      return botSay('어떤 모임을 열까요? 한 줄로 말씀해주세요 ✨');
-    }).then(function () {
-      return botSayCard(buildRoomEntryPromptCard());
-    }).then(function (row) {
-      wireRoomEntryPromptCard(row.querySelector('.card') || row);
-      chatInput.focus();
-    });
-  }
-
-  appBackBtn.addEventListener('click', function () {
-    showListView();
-  });
-
-  btnNewRoom.addEventListener('click', function () {
-    if (state.fsm !== 'IDLE') {
-      showRoomView();
-      if (!state.roomEntered) { state.roomEntered = true; beginRoomFlow(); }
-      botSay('지금 진행 중인 모임이 있어요. 이 방에서 이어서 진행해주세요.');
-      return;
-    }
-    ensureRoomReady();
-  });
-
-  // resetScenario: 진행 중인 시나리오만 IDLE로 되돌린다 (체크리스트 진행도는 보존).
-  // "↺ 처음부터" 버튼처럼 전부 지우고 싶을 때는 resetAll()(= resetScenario + 체크리스트 초기화)을 쓴다.
-  // 체크리스트 항목을 눌러 특정 기능을 다시 체험할 때는 이걸 써야 기존에 딴 체크가 안 날아간다.
-  function resetScenario() {
-    stopDemo();
-    stopTimeAttack();
-    state.fsm = 'IDLE';
-    state.slot = null;
-    state.pendingField = null;
-    state.participants = [];
-    state.capacity = 4;
-    state.roomActive = false;
-    state.pendingJoins = [];
-    state.joinTimer = null;
-    state.taFastTimer = null;
-    state.credit = 1200;
-    state.creditLedger = [];
-    state.checkedIn = [];
-    state.checkinDone = false;
-    state.onlineMode = null;
-    state.forcedOnlineMode = null;
-    state.demoNoShow = false;
-    state.noShowList = [];
-    state._noShowIdx = -1;
-    state.splitPerPerson = null;
-    state.settleTotal = 0;
-    state.settleAttendees = null;
-    state.settleReceivedCount = 0;
-    state.slotPicks = [];
-    state.mergeOffered = false;
-    state.deadlineReminded = false;
-    state.inspVirtualSec = 0;
-    resetInspectorLog();
-    chatBody.innerHTML = '';
-    botAvatar.textContent = '🍱';
-    setStage('parse', '입력창에 자연어 한 줄을 입력하면 파서가 날짜·시간·메뉴·인원을 추출합니다. 예시 버튼을 눌러 시작해보세요.');
-    stageItems.forEach(function (el) { el.classList.remove('active', 'done'); });
-    state.roomListUnread = true;
-    state.roomEntered = false;
-    showListView();
-  }
-
-  function resetAll() {
-    resetScenario();
-    resetFeatureChecklist();
-  }
-
-  /* ================= auto demo ================= */
-  function typeIntoInput(text) {
-    return new Promise(function (resolve) {
-      if (reduceMotion) { chatInput.value = text; resolve(); return; }
-      var i = 0;
-      chatInput.value = '';
-      var iv = setInterval(function () {
-        if (!state.demoRunning) { clearInterval(iv); resolve(); return; }
+  var panels = Array.prototype.slice.call(track.querySelectorAll('.screen'));
+  var listBody = document.querySelector('#deviceList .app-body');
+  var chatTimers = [];
+
+  // 단계 → 패널(대화 그룹) 매핑: 0~1 생성자 대화, 2 참여자, 3~6 모임 진행 대화
+  function panelIndexOf(step) { return step <= 1 ? 0 : (step === 2 ? 1 : 2); }
+
+  function clearChatTimers() { chatTimers.forEach(clearTimeout); chatTimers = []; }
+  function makeCue() {
+    var c = document.createElement('div');
+    c.className = 'typing-cue';
+    c.innerHTML = '<span></span><span></span><span></span>';
+    return c;
+  }
+  function removeCue(body) { if (!body) return; var c = body.querySelector('.typing-cue'); if (c) c.remove(); }
+  function scrollBottom(body) { if (body) body.scrollTop = body.scrollHeight; }
+
+  // 메시지를 아래로 하나씩 쌓으며 등장 + 자동 스크롤
+  function playItems(body, items, lead) {
+    if (!body || !items.length) return;
+    if (reduceMotion) { items.forEach(function (el) { el.classList.add('show'); }); scrollBottom(body); return; }
+    var cue = makeCue();
+    var i = 0;
+    function next() {
+      if (i >= items.length) { if (cue.parentNode) cue.remove(); scrollBottom(body); return; }
+      var el = items[i];
+      var quick = el.classList.contains('user-bubble') || el.classList.contains('note');
+      if (!quick) { body.appendChild(cue); scrollBottom(body); }
+      chatTimers.push(setTimeout(function () {
+        if (cue.parentNode) cue.remove();
+        el.classList.add('show');
+        scrollBottom(body);
         i++;
-        chatInput.value = text.slice(0, i);
-        if (i >= text.length) {
-          clearInterval(iv);
-          resolve();
-        }
-      }, 55);
-    });
+        chatTimers.push(setTimeout(next, quick ? 120 : 150));
+      }, quick ? 240 : 470));
+    }
+    chatTimers.push(setTimeout(next, lead || 0));
   }
 
-  function autoWait(ms) {
-    return new Promise(function (resolve) {
-      var t = setTimeout(resolve, ms);
-      state.demoTimers.push(t);
-    });
+  // 방 목록 폰(모든 자식을 순차 등장)
+  function playChat(body, lead) {
+    if (!body) return;
+    removeCue(body);
+    var items = Array.prototype.slice.call(body.children);
+    items.forEach(function (el) { el.classList.add('chat-item'); el.classList.remove('show'); });
+    playItems(body, items, lead);
   }
 
-  function waitForFsm(target, timeoutMs) {
-    return new Promise(function (resolve) {
-      var start = Date.now();
-      var iv = setInterval(function () {
-        if (!state.demoRunning) { clearInterval(iv); resolve(); return; }
-        if (state.fsm === target || Date.now() - start > timeoutMs) {
-          clearInterval(iv);
-          resolve();
-        }
-      }, 150);
-      state.demoTimers.push(iv);
-    });
-  }
-
-  function waitForSelector(sel, timeoutMs) {
-    return new Promise(function (resolve) {
-      var start = Date.now();
-      var iv = setInterval(function () {
-        if (!state.demoRunning) { clearInterval(iv); resolve(null); return; }
-        var el = document.querySelector(sel);
-        if (el || Date.now() - start > timeoutMs) { clearInterval(iv); resolve(el); }
-      }, 150);
-      state.demoTimers.push(iv);
-    });
-  }
-
-  function waitForStage(target, timeoutMs) {
-    return new Promise(function (resolve) {
-      var start = Date.now();
-      var iv = setInterval(function () {
-        if (!state.demoRunning) { clearInterval(iv); resolve(); return; }
-        var el = document.querySelector('.stage-item[data-stage="' + target + '"]');
-        if ((el && el.classList.contains('done')) || Date.now() - start > timeoutMs) {
-          clearInterval(iv);
-          resolve();
-        }
-      }, 150);
-      state.demoTimers.push(iv);
-    });
-  }
-
-  function runAutoDemo() {
-    resetAll();
-    state.demoRunning = true;
-    btnAutoDemo.disabled = true;
-    btnStopDemo.disabled = false;
-    chatInput.disabled = true;
-    sendBtn.disabled = true;
-
-    Promise.resolve()
-      .then(function () { return autoWait(400); })
-      .then(function () {
-        state.roomEntered = true;
-        showRoomView();
-        return beginRoomFlow();
-      })
-      .then(function () { return autoWait(400); })
-      .then(function () { return typeIntoInput('내일 점심 마라탕 3명'); })
-      .then(function () {
-        if (!state.demoRunning) return;
-        handleUserInput('내일 점심 마라탕 3명');
-        return waitForFsm('CONFIRM', 6000);
-      })
-      .then(function () { return autoWait(1200); })
-      .then(function () {
-        if (!state.demoRunning) return;
-        var startBtn = document.querySelector('#chatBody [data-act="start-recruit"]');
-        if (startBtn) startBtn.click();
-        return waitForSelector('[data-act="deposit-confirm"]', 6000);
-      })
-      .then(function (depositBtn) {
-        if (!state.demoRunning) return;
-        if (depositBtn) depositBtn.click();
-        return waitForStage('room', 22000);
-      })
-      .then(function () { return autoWait(600); })
-      .then(function () { return waitForStage('place', 12000); })
-      .then(function () { return autoWait(2000); })
-      .then(function () { return waitForSelector('[data-act="reminder-attend"]', 8000); })
-      .then(function (attendBtn) {
-        if (!state.demoRunning) return;
-        if (attendBtn) attendBtn.click();
-        return autoWait(500);
-      })
-      .then(function () {
-        if (!state.demoRunning) return;
-        return new Promise(function (resolve) {
-          var start = Date.now();
-          var iv = setInterval(function () {
-            if (!state.demoRunning) { clearInterval(iv); resolve(); return; }
-            var btn = document.querySelector('[data-checkin-me]');
-            if (btn || Date.now() - start > 8000) { clearInterval(iv); resolve(); }
-          }, 150);
-          state.demoTimers.push(iv);
-        });
-      })
-      .then(function () { return autoWait(700); })
-      .then(function () {
-        if (!state.demoRunning) return;
-        var checkinBtn = document.querySelector('[data-checkin-me]');
-        if (checkinBtn) checkinBtn.click();
-        return waitForStage('settle', 14000);
-      })
-      .then(function () { return autoWait(1500); })
-      .then(function () {
-        finishDemo();
+  // 현재 단계에 맞춰 대화 패널을 렌더 — 지난 메시지는 위에 쌓아둔 채 새 메시지만 도착
+  function renderChat() {
+    clearChatTimers();
+    var cur = panelIndexOf(idx);
+    panels.forEach(function (p, pi) {
+      var body = p.querySelector('.app-body');
+      if (!body) return;
+      removeCue(body);
+      var items = Array.prototype.slice.call(body.querySelectorAll('[data-step]'));
+      if (pi !== cur) {
+        items.forEach(function (el) { el.classList.add('chat-item'); el.classList.remove('show'); });
+        return;
+      }
+      var toAnimate = [];
+      items.forEach(function (el) {
+        el.classList.add('chat-item');
+        var s = parseInt(el.getAttribute('data-step'), 10);
+        if (s < idx) { el.classList.add('show'); }          // 이미 쌓인 메시지 (즉시 표시)
+        else if (s === idx) { el.classList.remove('show'); toAnimate.push(el); } // 새로 도착
+        else { el.classList.remove('show'); }               // 아직 안 온 메시지
       });
+      scrollBottom(body);
+      playItems(body, toAnimate, reduceMotion ? 0 : 320);
+    });
+    // 참여자 단계: 방 목록 폰
+    if (idx === TWO_UP_INDEX) { playChat(listBody, reduceMotion ? 0 : 520); }
+    else if (listBody) {
+      removeCue(listBody);
+      Array.prototype.forEach.call(listBody.children, function (el) { el.classList.add('chat-item'); el.classList.remove('show'); });
+    }
   }
 
-  function finishDemo() {
-    state.demoRunning = false;
-    btnAutoDemo.disabled = false;
-    btnStopDemo.disabled = true;
-    chatInput.disabled = false;
-    sendBtn.disabled = false;
-  }
-
-  function stopDemo() {
-    state.demoTimers.forEach(function (t) { clearTimeout(t); clearInterval(t); });
-    state.demoTimers = [];
-    state.demoRunning = false;
-    btnAutoDemo.disabled = false;
-    btnStopDemo.disabled = true;
-    chatInput.disabled = false;
-    sendBtn.disabled = false;
-  }
-
-  btnAutoDemo.addEventListener('click', runAutoDemo);
-  btnStopDemo.addEventListener('click', function () {
-    stopDemo();
-    addBotBubble('(자동 데모를 중지했어요. 직접 입력해보세요.)');
+  // 플로우(레일) 생성 — 링크드 리스트: 노드 + 화살표
+  META.forEach(function (m, i) {
+    if (i > 0) {
+      var arw = document.createElement('span');
+      arw.className = 'rail-arrow';
+      arw.setAttribute('aria-hidden', 'true');
+      arw.textContent = '↓';
+      railEl.appendChild(arw);
+    }
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'rail-btn';
+    b.textContent = m.name;
+    b.addEventListener('click', function () { stop(); goTo(i); });
+    railEl.appendChild(b);
   });
-  btnReset.addEventListener('click', resetAll);
+  var railBtns = Array.prototype.slice.call(railEl.querySelectorAll('.rail-btn'));
 
-  /* ================= clock ================= */
-  function tickClock() {
-    var now = new Date();
-    var hh = now.getHours().toString().padStart(2, '0');
-    var mm = now.getMinutes().toString().padStart(2, '0');
-    clockTime.textContent = hh + ':' + mm;
+  function render() {
+    track.style.transform = 'translateX(-' + (panelIndexOf(idx) * 100) + '%)';
+    devices.classList.toggle('two-up', idx === TWO_UP_INDEX);
+    railBtns.forEach(function (b, i) { b.classList.toggle('active', i === idx); });
+    var m = META[idx];
+    var p = PERSONA[m.persona];
+    personaEl.className = 'persona-badge ' + p.cls;
+    personaEl.textContent = p.label;
+    stepEl.textContent = 'STEP ' + (idx + 1) + ' / ' + N + ' · ' + m.name;
+    titleEl.textContent = m.title;
+    capEl.textContent = m.cap;
+    renderChat();
   }
-  tickClock();
-  setInterval(tickClock, 15000);
 
-  /* ================= init ================= */
-  resetAll();
+  function schedule() {
+    clearTimeout(timer);
+    if (!playing) return;
+    timer = setTimeout(function () { goTo(idx + 1); }, DWELL);
+  }
 
+  function goTo(i) {
+    idx = (i % N + N) % N;
+    render();
+    schedule();
+  }
+
+  function play() {
+    playing = true;
+    playBtn.textContent = '⏸ 일시정지';
+    playBtn.setAttribute('aria-pressed', 'true');
+    schedule();
+  }
+
+  function stop() {
+    playing = false;
+    playBtn.textContent = '▶ 자동재생';
+    playBtn.setAttribute('aria-pressed', 'false');
+    clearTimeout(timer);
+  }
+
+  playBtn.addEventListener('click', function () { playing ? stop() : play(); });
+  prevBtn.addEventListener('click', function () { stop(); goTo(idx - 1); });
+  nextBtn.addEventListener('click', function () { stop(); goTo(idx + 1); });
+
+  // 폰 내부 인터랙션(방 클릭·버튼)으로 다음 단계 진행 + 자동재생 정지
+  root.addEventListener('click', function (e) {
+    if (e.target.closest('[data-advance]')) { stop(); goTo(idx + 1); }
+  });
+
+  // 방폭 남은 시간 실시간 카운트다운
+  var timedRooms = Array.prototype.slice.call(root.querySelectorAll('.room-row[data-remain]'));
+  function fmtTime(s) { var m = Math.floor(s / 60), ss = s % 60; return (m < 10 ? '0' : '') + m + ':' + (ss < 10 ? '0' : '') + ss; }
+  function tickCountdown() {
+    timedRooms.forEach(function (r) {
+      var rem = parseInt(r.getAttribute('data-remain'), 10) - 1;
+      var tot = parseInt(r.getAttribute('data-total'), 10);
+      if (rem <= 0) rem = tot; // 데모 루프
+      r.setAttribute('data-remain', rem);
+      var fill = r.querySelector('.gauge-fill');
+      var label = r.querySelector('.gauge-label');
+      if (fill) fill.style.width = Math.max(3, rem / tot * 100).toFixed(1) + '%';
+      if (label) label.textContent = '방폭까지 ' + fmtTime(rem);
+    });
+  }
+  setInterval(tickCountdown, 1000);
+
+  render();
+  play();
 })();
 </script>
 
@@ -3874,7 +1324,7 @@
     var sections = document.querySelectorAll('.page > section');
     sections.forEach(function (sec) { sec.classList.add('reveal-pending'); });
 
-    var omCards = document.querySelectorAll('#om-demo .side-card, #om-demo .phone-col');
+    var omCards = document.querySelectorAll('#om-demo .rail-btn');
     omCards.forEach(function (el, i) {
       el.classList.add('reveal-pending');
       el.style.transitionDelay = (i * 60) + 'ms';
