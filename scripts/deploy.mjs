@@ -161,16 +161,29 @@ async function mcp(name, args) {
   return json.result;
 }
 
-// --- list_pages result normalization --------------------------------------
-// Schema is not confirmed against a live call (no token available while
-// authoring this script) — normalize defensively over the field-name
-// variants seen in comparable MCP tools, and log the raw shape on mismatch
-// so a real run's error output can be used to correct this.
+// --- MCP result unwrapping -------------------------------------------------
+// Live schema (confirmed 2026-07-09): tool results arrive MCP-wrapped as
+// { content: [{ type: "text", text: "<json or plain text>" }] }. Unwrap the
+// text parts and parse JSON when possible.
+function unwrapResult(result) {
+  if (result && Array.isArray(result.content)) {
+    const text = result.content
+      .filter((c) => c && c.type === "text" && typeof c.text === "string")
+      .map((c) => c.text)
+      .join("\n");
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
+  return result;
+}
+
 function normalizePagesList(result) {
-  if (Array.isArray(result)) return result;
-  if (result && Array.isArray(result.pages)) return result.pages;
-  if (result && Array.isArray(result.items)) return result.items;
-  if (result && Array.isArray(result.data)) return result.data;
+  const unwrapped = unwrapResult(result);
+  if (Array.isArray(unwrapped)) return unwrapped;
+  if (unwrapped && Array.isArray(unwrapped.pages)) return unwrapped.pages;
   console.warn(`  list_pages: unrecognized result shape, raw: ${JSON.stringify(result).slice(0, 1000)}`);
   return [];
 }
@@ -259,9 +272,21 @@ async function main() {
       }
       console.log(`  matched existing page id=${id} (slug/title match)`);
     } else {
-      console.log(`  no match found — creating page (title="${t.title}", slug="${t.slug}")`);
+      // Live schema: create_page takes `path` (e.g. "/landing"), not `slug`.
+      const pagePath = t.slug === "index" ? "/" : `/${t.slug}`;
+      console.log(`  no match found — creating page (title="${t.title}", path="${pagePath}")`);
       try {
-        const created = await mcp("create_page", { title: t.title, slug: t.slug });
+        const created = unwrapResult(await mcp("create_page", { title: t.title, path: pagePath, inMenu: true }));
+        // Live behavior (confirmed): page creation itself enters the admin
+        // approval queue — the response is a plain-text "Pending approval..."
+        // notice, not a page object. Treat that as submitted, not failed:
+        // once approved, the next run matches the page via list_pages and
+        // pushes the HTML.
+        if (typeof created === "string" && created.includes("Pending approval")) {
+          console.log(`  create_page submitted for admin approval — HTML will be pushed on the next run after approval.`);
+          summary.push(`${t.file}: page creation awaiting admin approval (approve in namo admin UI, then re-run)`);
+          continue;
+        }
         id = pageId(created) ?? pageId(created?.page ?? {});
         if (id === null) {
           console.error(`  create_page succeeded but response had no recognizable id. raw: ${JSON.stringify(created).slice(0, 1000)}`);
