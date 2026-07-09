@@ -145,8 +145,16 @@ function extractStylesheetHrefs(haystack) {
 // the <body> inner content.
 function buildPayload(raw, file) {
   const head = extractTag(raw, "head");
-  const body = extractTag(raw, "body");
-  if (!body) throw new Error(`${file}: <body> not found`);
+  let body = extractTag(raw, "body");
+  if (!body) {
+    // Fragment fallback: some files may be committed artifact-style (starting
+    // with <title>, no html/head/body wrapper). Treat the whole file minus the
+    // <title> tag as the body so a fragment never kills the deploy.
+    const t = extractTag(raw, "title");
+    const inner = t ? raw.slice(0, t.outerStart) + raw.slice(t.outerEnd) : raw;
+    console.warn(`  ${file}: no <body> tag — treating file as a fragment (title stripped)`);
+    body = { inner: inner.trim() };
+  }
   const title = head ? extractTag(head.inner, "title") : extractTag(raw, "title");
   const titleText = title ? title.inner.trim() : file;
   const styleBlocks = head ? extractAllStyleBlocks(head.inner) : [];
