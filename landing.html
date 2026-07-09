@@ -1032,7 +1032,7 @@
   });
   var railBtns = Array.prototype.slice.call(railEl.querySelectorAll('.rail-btn'));
 
-  function render() {
+  function renderMeta() {
     track.style.transform = 'translateX(-' + (panelIndexOf(idx) * 100) + '%)';
     devices.classList.toggle('two-up', idx === TWO_UP_INDEX);
     railBtns.forEach(function (b, i) { b.classList.toggle('active', i === idx); });
@@ -1043,6 +1043,19 @@
     stepEl.textContent = 'STEP ' + (idx + 1) + ' / ' + N + ' · ' + m.name;
     titleEl.textContent = m.title;
     capEl.textContent = m.cap;
+  }
+  function hideAllChat() {
+    clearChatTimers();
+    panels.forEach(function (p) {
+      var body = p.querySelector('.app-body');
+      if (!body) return;
+      removeCue(body);
+      Array.prototype.forEach.call(body.querySelectorAll('[data-step]'), function (el) { el.classList.add('chat-item'); el.classList.remove('show'); });
+    });
+    if (listBody) { removeCue(listBody); Array.prototype.forEach.call(listBody.children, function (el) { el.classList.add('chat-item'); el.classList.remove('show'); }); }
+  }
+  function render() {
+    renderMeta();
     renderChat();
   }
 
@@ -1098,8 +1111,36 @@
   }
   setInterval(tickCountdown, 1000);
 
-  render();
-  play();
+  // 스크롤로 스토리보드가 화면에 들어올 때 재생 시작 (로드 즉시 X)
+  renderMeta();
+  hideAllChat();
+  stop(); // 초기엔 일시정지 상태 (버튼: ▶ 자동재생)
+  var started = false;
+  var wasInView = false;
+  var stageEl = document.querySelector('#om-demo .story-stage');
+  function inView() {
+    if (!stageEl) return true;
+    var r = stageEl.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.top < vh * 0.8 && r.bottom > vh * 0.2;
+  }
+  function syncPlayback() {
+    var v = inView();
+    if (v === wasInView) return; // 진입/이탈 전환에서만 반응 (스크롤 중 타이머 리셋 방지)
+    wasInView = v;
+    if (v) {
+      if (!started) { started = true; idx = 0; render(); play(); } // 처음 보일 때 재생 시작
+      else if (playing) { schedule(); }                            // 다시 보이면 재개 (수동 정지면 무시)
+    } else {
+      clearTimeout(timer); // 화면 밖: 자동 진행 멈춤 (재생 의도는 유지)
+    }
+  }
+  if ('IntersectionObserver' in window && stageEl) {
+    new IntersectionObserver(function () { syncPlayback(); }, { threshold: 0.25 }).observe(stageEl);
+  }
+  window.addEventListener('scroll', syncPlayback, { passive: true });
+  window.addEventListener('resize', syncPlayback);
+  syncPlayback(); // 로드 시 이미 보이는 상태면 즉시 시작
 })();
 </script>
 
