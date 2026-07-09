@@ -1,0 +1,40 @@
+name: Deploy to namo.site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}   # manual "deploy everything" button in the Actions tab
+
+# Avoid overlapping deploys if you push twice quickly.
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2   # need the previous commit to diff changed files
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Compute changed files
+        id: diff
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "changed=ALL" >> "$GITHUB_OUTPUT"
+          else
+            files=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- '*.html' | tr '\n' ' ')
+            echo "changed=${files}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy
+        env:
+          SB_TOKEN: ${{ secrets.SB_TOKEN }}
+          SB_SITE_ID: ${{ secrets.SB_SITE_ID }}
+          CHANGED: ${{ steps.diff.outputs.changed }}
+        run: node scripts/deploy.mjs
