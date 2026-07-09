@@ -361,6 +361,22 @@ async function main() {
       }
     }
 
+    // Stateless sync: read the remote page's stored HTML and skip identical
+    // content. This makes every run converge repo state → site state, so a
+    // cancelled/failed earlier run can never permanently lose a change, and
+    // unchanged pages don't spam the approval queue.
+    try {
+      const remote = unwrapResult(await mcp("read_page", { pageId: id }));
+      const remoteHtml = typeof remote === "object" && remote !== null && typeof remote.html === "string" ? remote.html : null;
+      if (remoteHtml !== null && remoteHtml.trim() === t.payload.trim()) {
+        console.log(`  remote content identical — skipping`);
+        summary.push(`${t.file}: unchanged (skipped)`);
+        continue;
+      }
+    } catch (e) {
+      console.warn(`  read_page failed (${e.message.slice(0, 200)}) — submitting anyway`);
+    }
+
     try {
       await mcp("update_page_html", { pageId: id, html: t.payload });
       const bytes = Buffer.byteLength(t.payload, "utf8");
