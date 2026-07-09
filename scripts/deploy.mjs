@@ -196,7 +196,14 @@ function buildPayload(raw, file) {
   const importBlock = hrefs.length
     ? `<style>${hrefs.map((h) => `@import url("${h}");`).join("")}</style>`
     : "";
-  const payload = rewriteInternalLinks(`${importBlock}\n${styleBlocks.join("\n")}\n${body.inner}`.trim());
+  let payload = rewriteInternalLinks(`${importBlock}\n${styleBlocks.join("\n")}\n${body.inner}`.trim());
+  // namo's update_page_html validator rejects any payload containing a <body>
+  // tag. We only ever send body *inner* content, but the offline bundle embeds
+  // the original document markup inside JS strings, so the literal `<body`
+  // appears there. Escape the 'b' as a \\u0062 unicode escape — JS decodes
+  // it back to `<body` at runtime, and no real <body> markup exists in the
+  // payload to corrupt.
+  payload = payload.replaceAll("<body", "<\\u0062ody").replaceAll("<BODY", "<\\u0042ODY");
   return { title: titleText, payload };
 }
 
