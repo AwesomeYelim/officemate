@@ -37,12 +37,13 @@ const SB_TOKEN = process.env.SB_TOKEN || "";
 const SB_SITE_ID = process.env.SB_SITE_ID || "";
 const DRY_RUN = process.env.DRY_RUN === "1";
 
-// Public base path of the published namo site. namo serves this site under
-// https://namo.site/ba4/<slug> (SPA shell, subpath routing), while the repo's
-// internal links are root-absolute ("/biz-plan") so Vercel and local preview
-// keep working untouched. At deploy time we rewrite those links with this
-// prefix so they don't escape to namo.site/<slug>. SB_PUBLIC_BASE="" disables.
-const SB_PUBLIC_BASE = process.env.SB_PUBLIC_BASE ?? "/ba4";
+// Optional base-path prefix for internal links, applied at deploy time.
+// The published namo site (https://b66e438c2dbe4ec486c7.namo.site) serves
+// pages at root paths (/biz-plan, /landing, ...) — same as Vercel — so the
+// default is "" (no rewriting). namo.site/ba4 is only the builder preview,
+// NOT the published URL: prefixing links for it 404s on the real subdomain.
+// Set SB_PUBLIC_BASE only if the site ever moves under a subpath.
+const SB_PUBLIC_BASE = process.env.SB_PUBLIC_BASE ?? "";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 

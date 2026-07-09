@@ -1498,5 +1498,26 @@
   setupScrollReveal();
 })();
 </script>
+
+<!-- 앵커 이동 시 URL에 #해시(#demo 등)가 남지 않도록: 기본 내비게이션을 가로채 스크롤만 수행 -->
+<script>
+(function () {
+  "use strict";
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    var id = a.getAttribute('href').slice(1);
+    var el = id && document.getElementById(id);
+    if (!el) return;
+    e.preventDefault();
+    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+  });
+  // 구 링크(/landing#demo 등)로 진입해 해시가 붙어 온 경우: 스크롤 위치는 유지하고 주소만 정리
+  if (location.hash && window.history && history.replaceState) {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+})();
+</script>
 </body>
 </html>
