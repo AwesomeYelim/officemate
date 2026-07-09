@@ -37,6 +37,13 @@ const SB_TOKEN = process.env.SB_TOKEN || "";
 const SB_SITE_ID = process.env.SB_SITE_ID || "";
 const DRY_RUN = process.env.DRY_RUN === "1";
 
+// Public base path of the published namo site. namo serves this site under
+// https://namo.site/ba4/<slug> (SPA shell, subpath routing), while the repo's
+// internal links are root-absolute ("/biz-plan") so Vercel and local preview
+// keep working untouched. At deploy time we rewrite those links with this
+// prefix so they don't escape to namo.site/<slug>. SB_PUBLIC_BASE="" disables.
+const SB_PUBLIC_BASE = process.env.SB_PUBLIC_BASE ?? "/ba4";
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 // --- page registry -----------------------------------------------------
@@ -140,6 +147,22 @@ function extractStylesheetHrefs(haystack) {
   return hrefs;
 }
 
+// Rewrites root-absolute internal links for the namo subpath. Only known page
+// slugs (plus the bare home link) are touched — external URLs, anchors, and
+// asset paths pass through unchanged. Exact-string replacement, no regex.
+function rewriteInternalLinks(html) {
+  if (!SB_PUBLIC_BASE) return html;
+  let out = html;
+  for (const p of PAGES) {
+    // covers href="/slug" and href="/slug#anchor"
+    out = out
+      .replaceAll(`href="/${p.slug}"`, `href="${SB_PUBLIC_BASE}/${p.slug}"`)
+      .replaceAll(`href="/${p.slug}#`, `href="${SB_PUBLIC_BASE}/${p.slug}#`);
+  }
+  out = out.replaceAll(`href="/"`, `href="${SB_PUBLIC_BASE}"`);
+  return out;
+}
+
 // Builds { title, payload } for one HTML file: payload = head stylesheet
 // links (as @import), head <style> blocks (verbatim, including tags), then
 // the <body> inner content.
@@ -162,7 +185,7 @@ function buildPayload(raw, file) {
   const importBlock = hrefs.length
     ? `<style>${hrefs.map((h) => `@import url("${h}");`).join("")}</style>`
     : "";
-  const payload = `${importBlock}\n${styleBlocks.join("\n")}\n${body.inner}`.trim();
+  const payload = rewriteInternalLinks(`${importBlock}\n${styleBlocks.join("\n")}\n${body.inner}`.trim());
   return { title: titleText, payload };
 }
 
