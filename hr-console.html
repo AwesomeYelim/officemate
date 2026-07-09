@@ -4,10 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>OfficeMate — HR 콘솔</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..700,0..1,-50..200&display=block">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>body{margin:0}</style>
 <style>
-.msi{font-family:'Material Symbols Outlined';font-weight:400;font-style:normal;font-size:15px;line-height:1;display:inline-block;vertical-align:-3px;letter-spacing:normal;white-space:nowrap;word-wrap:normal;direction:ltr;font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 20}
+/* 클래식 Material Icons — Win/Mac(구형 Safari 포함) 전 브라우저 호환. liga 강제 적용으로 아이콘명이 글자로 노출되는 문제 방지 */
+.msi{font-family:'Material Icons';font-weight:normal;font-style:normal;font-size:15px;line-height:1;display:inline-block;vertical-align:-3px;letter-spacing:normal;text-transform:none;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-feature-settings:'liga';font-feature-settings:'liga';-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 </style>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -112,7 +114,7 @@ input,select{font-family:inherit}
 .mc-sub{font-size:10.5px;color:var(--muted);margin-top:6px;cursor:help;display:inline-block;border-bottom:1px dotted transparent}
 .mc-sub:hover{border-bottom-color:currentColor}
 .mc-sub.up{color:var(--good-text)}
-.mc-sub.down{color:var(--good-text)}
+.mc-sub.down{color:var(--danger-text)}
 .mc-spark{margin-top:8px;height:26px}
 .two-col{display:grid;grid-template-columns:1fr 320px;gap:16px}
 
@@ -304,19 +306,19 @@ input,select{font-family:inherit}
   </div>
   <div class="nav-wrap">
     <div class="nav-group">개요</div>
-    <div class="nav-item active" onclick="nav('dashboard',this)"><span class="msi">dashboard</span> 대시보드</div>
+    <div class="nav-item active" data-page="dashboard" role="button" tabindex="0" onclick="nav('dashboard',this)"><span class="msi">dashboard</span> 대시보드</div>
     <div class="nav-group">인사이트</div>
-    <div class="nav-item" onclick="nav('ona',this)"><span class="msi">hub</span> 부서 연결 (ONA)</div>
-    <div class="nav-item" onclick="nav('engagement',this)"><span class="msi">monitoring</span> 참여 현황</div>
-    <div class="nav-item" onclick="nav('signals',this)"><span class="msi">auto_awesome</span> AI 시그널 <span class="nav-badge">5</span></div>
+    <div class="nav-item" data-page="ona" role="button" tabindex="0" onclick="nav('ona',this)"><span class="msi">device_hub</span> 부서 연결 (ONA)</div>
+    <div class="nav-item" data-page="engagement" role="button" tabindex="0" onclick="nav('engagement',this)"><span class="msi">bar_chart</span> 참여 현황</div>
+    <div class="nav-item" data-page="signals" role="button" tabindex="0" onclick="nav('signals',this)"><span class="msi">auto_awesome</span> AI 시그널 <span class="nav-badge" id="signalBadge">5</span></div>
     <div class="nav-group">운영</div>
-    <div class="nav-item" onclick="nav('points',this)"><span class="msi">toll</span> 포인트 관리</div>
-    <div class="nav-item" onclick="nav('budget',this)"><span class="msi">account_balance_wallet</span> 예산·정산</div>
-    <div class="nav-item" onclick="nav('sponsors',this)"><span class="msi">storefront</span> 스폰서 관리 <span class="nav-badge good">1</span></div>
-    <div class="nav-item" onclick="nav('report',this)"><span class="msi">lab_profile</span> 리포트 생성</div>
+    <div class="nav-item" data-page="points" role="button" tabindex="0" onclick="nav('points',this)"><span class="msi">toll</span> 포인트 관리</div>
+    <div class="nav-item" data-page="budget" role="button" tabindex="0" onclick="nav('budget',this)"><span class="msi">account_balance_wallet</span> 예산·정산</div>
+    <div class="nav-item" data-page="sponsors" role="button" tabindex="0" onclick="nav('sponsors',this)"><span class="msi">storefront</span> 스폰서 관리 <span class="nav-badge good">1</span></div>
+    <div class="nav-item" data-page="report" role="button" tabindex="0" onclick="nav('report',this)"><span class="msi">description</span> 리포트 생성</div>
     <div class="nav-group">설정</div>
-    <div class="nav-item" onclick="nav('policy',this)"><span class="msi">settings</span> 정책 설정</div>
-    <div class="nav-item" onclick="nav('vendor',this)"><span class="msi">support_agent</span> 제공사 문의</div>
+    <div class="nav-item" data-page="policy" role="button" tabindex="0" onclick="nav('policy',this)"><span class="msi">settings</span> 정책 설정</div>
+    <div class="nav-item" data-page="vendor" role="button" tabindex="0" onclick="nav('vendor',this)"><span class="msi">support_agent</span> 제공사 문의</div>
   </div>
   <div class="priv-badge"><span class="msi" style="font-size:12px">lock</span> 개인 식별 불가 · 부서 단위 집계</div>
   <div class="sidebar-bottom">
@@ -336,7 +338,7 @@ input,select{font-family:inherit}
     </div>
     <div class="tb-right">
       <div class="period-wrap">
-        <button class="period-pill" id="periodPill" onclick="togglePeriodMenu(event)"><span class="msi" style="font-size:13px">calendar_month</span> <span id="periodLabel">2026.06</span> ▾</button>
+        <button class="period-pill" id="periodPill" aria-haspopup="true" aria-expanded="false" onclick="togglePeriodMenu(event)"><span class="msi" style="font-size:13px">calendar_today</span> <span id="periodLabel">2026.06</span> ▾</button>
         <div class="period-menu" id="periodMenu">
           <div class="period-opt" id="periodOpt-2026-06" onclick="selectPeriod('2026-06')">2026.06 <span class="period-tag">이번 달</span></div>
           <div class="period-opt" id="periodOpt-2026-05" onclick="selectPeriod('2026-05')">2026.05</div>
@@ -344,7 +346,7 @@ input,select{font-family:inherit}
       </div>
       <span class="priv-chip"><span class="msi" style="font-size:12px">lock</span> 부서 단위 집계</span>
       <button class="btn btn-outline" onclick="toast('최신 데이터로 새로고침했습니다.')"><span class="msi" style="font-size:14px">refresh</span> 새로고침</button>
-      <button class="btn btn-brand" onclick="nav('report',document.querySelectorAll('.nav-item')[7])"><span class="msi" style="font-size:14px">lab_profile</span> 리포트 생성</button>
+      <button class="btn btn-brand" onclick="navTo('report')"><span class="msi" style="font-size:14px">description</span> 리포트 생성</button>
     </div>
   </div>
   <div class="content">
@@ -354,7 +356,7 @@ input,select{font-family:inherit}
       <div class="alert-bar warn">
         <div class="dot dot-warn"></div>
         <span id="alertBarText"><b>주의</b> — 플랫폼개발본부, 4주 연속 참여율 하위 10% · 팀 슬롯 개설 권장</span>
-        <div class="alert-action" onclick="nav('signals',document.querySelectorAll('.nav-item')[3])">AI 시그널 보기 →</div>
+        <div class="alert-action" onclick="navTo('signals')">AI 시그널 보기 →</div>
       </div>
       <div class="metric-row">
         <div class="mc">
@@ -420,7 +422,7 @@ input,select{font-family:inherit}
           <div class="ona-detail" id="onaDetailBox">부서 노드를 클릭하면 연결 상세(연결 부서 목록·모임 수)가 표시됩니다.</div>
         </div>
         <div class="panel" style="margin-bottom:0">
-          <div class="ph"><div class="ph-title">부서 쌍 · 이번 달 모임 수</div></div>
+          <div class="ph"><div class="ph-title">부서 쌍 · 모임 수</div><div class="ph-meta" id="onaPairMeta"></div></div>
           <table class="dt" style="border:none;border-radius:0">
             <thead><tr><th>부서 A</th><th>부서 B</th><th>모임 수</th><th>전월비</th></tr></thead>
             <tbody id="onaPairBody"></tbody>
@@ -432,7 +434,7 @@ input,select{font-family:inherit}
     <!-- ━━ 3. 참여 현황 ━━ -->
     <div id="page-engagement" class="page">
       <div class="panel">
-        <div class="ph"><div class="ph-title"><span class="msi">calendar_view_week</span> 시간대 × 요일 슬롯 히트맵</div><div class="ph-meta">최근 4주 평균 · 슬롯 채움율(%)</div></div>
+        <div class="ph"><div class="ph-title"><span class="msi">date_range</span> 시간대 × 요일 슬롯 히트맵</div><div class="ph-meta">최근 4주 평균 · 슬롯 채움율(%)</div></div>
         <div style="padding:16px 18px;overflow-x:auto">
           <table class="heat-table" id="heatTable"></table>
           <div class="heat-legend"><span>낮음</span><div class="heat-legend-bar"></div><span>높음 (채움율)</span></div>
@@ -447,7 +449,7 @@ input,select{font-family:inherit}
           <div class="ph"><div class="ph-title"><span class="msi">show_chart</span> 8주 참여 추이</div></div>
           <div style="padding:16px 18px">
             <svg id="trendChart" viewBox="0 0 280 120" style="width:100%;height:150px"></svg>
-            <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);font-family:var(--mono)"><span>8주 전</span><span>이번 달</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:9.5px;color:var(--muted);font-family:var(--mono)"><span>7주 전</span><span>이번 주</span></div>
           </div>
         </div>
       </div>
@@ -470,7 +472,7 @@ input,select{font-family:inherit}
         <div class="mc"><div class="mc-lbl">포인트 구매 결제</div><div class="mc-val" style="color:var(--brand-text)" id="kpiBudgetSpent">₩1,119,000</div><div class="mc-sub" id="kpiBudgetSpentSub">포인트 충전용 · HR 연결 카드</div></div>
         <div class="mc"><div class="mc-lbl">개별 카드 결제</div><div class="mc-val" style="color:var(--ink)" id="kpiCardSpent">₩459,000</div><div class="mc-sub" id="kpiCardSpentSub">포인트 부족·비제휴사 현장 결제</div></div>
         <div class="mc"><div class="mc-lbl">페이백 지급 (현금)</div><div class="mc-val" style="color:var(--good-text)" id="kpiPayback">₩30,150</div><div class="mc-sub">개인 카드 결제 환급 · 포인트 풀에서 차감</div></div>
-        <div class="mc"><div class="mc-lbl">증빙 완료율</div><div class="mc-val" style="color:var(--good-text)" id="kpiProofRate">100%</div><div class="mc-sub">전 건 자동 수집</div></div>
+        <div class="mc"><div class="mc-lbl">증빙 완료율</div><div class="mc-val" style="color:var(--good-text)" id="kpiProofRate">100%</div><div class="mc-sub">결제 완료 건 기준 · 자동 수집</div></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
         <div class="panel" style="margin-bottom:0">
@@ -478,7 +480,7 @@ input,select{font-family:inherit}
           <div style="padding:14px 18px" id="purchaseCardBox"></div>
         </div>
         <div class="panel" style="margin-bottom:0">
-          <div class="ph"><div class="ph-title"><span class="msi">wallet</span> 개별 결제 카드 — 부서 · 팀 · 개인</div><button class="btn-sm bsm-brand" onclick="toast('개별 결제 카드 등록 화면으로 이동합니다.')"><span class="msi" style="font-size:13px">add</span> 카드 등록</button></div>
+          <div class="ph"><div class="ph-title"><span class="msi">account_balance_wallet</span> 개별 결제 카드 — 부서 · 팀 · 개인</div><button class="btn-sm bsm-brand" onclick="toast('개별 결제 카드 등록 화면으로 이동합니다.')"><span class="msi" style="font-size:13px">add</span> 카드 등록</button></div>
           <div id="memberCardList"></div>
         </div>
       </div>
@@ -503,7 +505,7 @@ input,select{font-family:inherit}
     <div id="page-points" class="page">
       <div class="alert-bar good">
         <div class="dot dot-good"></div>
-        <span><b>포인트 운영 안내</b> — 구매한 포인트는 <b>직원 지급 → 모임 적립 → 장소 결제</b>로 순환하며, 지급은 항상 <b>가용 포인트 안에서만</b> 집행됩니다</span>
+        <span><b>포인트 운영 안내</b> — 구매한 포인트는 <b>직원 지급 → 모임 적립 → 장소 결제</b>로 순환하며, 지급은 항상 <b>가용 포인트 안에서만</b> 집행됩니다 · 모임·참여 데이터는 부서 단위 <b>익명 집계</b>만 사용하고, 포인트 지급·정산은 복리후생 집행을 위해 <b>실명 기준</b>으로 관리됩니다</span>
       </div>
       <div class="metric-row">
         <div class="mc"><div class="mc-lbl">포인트 풀 잔액</div><div class="mc-val" style="color:var(--brand-text)" id="kpiPtPool">980,000P</div><div class="mc-sub" id="kpiPtPoolSub">이번 달 618,000P 충전</div></div>
@@ -549,7 +551,7 @@ input,select{font-family:inherit}
 
       <!-- 디파짓 · 페이백 정책 (정책 설정에서 이동) -->
       <div class="panel" style="margin-top:16px;margin-bottom:0">
-        <div class="ph"><div class="ph-title"><span class="msi">shield</span> 디파짓 · 페이백 정책</div></div>
+        <div class="ph"><div class="ph-title"><span class="msi">security</span> 디파짓 · 페이백 정책</div></div>
         <div style="padding:14px 18px">
           <div class="policy-card active">
             <span class="msi" style="font-size:22px;color:var(--brand-text)">savings</span>
@@ -573,7 +575,7 @@ input,select{font-family:inherit}
             </div>
           </div>
           <div class="policy-card active" style="margin-bottom:0">
-            <span class="msi" style="font-size:22px;color:var(--brand-text)">currency_exchange</span>
+            <span class="msi" style="font-size:22px;color:var(--brand-text)">swap_horiz</span>
             <div class="policy-info">
               <div class="policy-name">개인 카드 페이백 비율</div><div class="policy-desc">개인 카드 결제액 중 현금으로 환급하는 비율 · 재원은 포인트 풀에서 차감</div>
               <div><span class="mini-stat" id="paybackEstimate">예상 페이백 계산 중…</span></div>
@@ -638,17 +640,17 @@ input,select{font-family:inherit}
         <div class="policy-card active">
           <span class="msi" style="font-size:22px;color:var(--brand-text)">location_on</span>
           <div class="policy-info"><div class="policy-name">온·오프 자동 판별</div><div class="policy-desc">체크인 후 30분 이내 미체류 시 노쇼 자동 판정</div></div>
-          <button class="tg-switch on" onclick="this.classList.toggle('on');toast('자동 판별 규칙이 변경되었습니다.')"></button>
+          <button class="tg-switch on" role="switch" aria-checked="true" aria-label="온·오프 자동 판별" onclick="toggleSwitch(this,'자동 판별 규칙이 변경되었습니다.')"></button>
         </div>
         <div class="policy-card">
           <span class="msi" style="font-size:22px;color:var(--ink-soft)">notifications</span>
           <div class="policy-info"><div class="policy-name">참여율 급락 알림</div><div class="policy-desc">팀 참여율이 4주 연속 하위 10%일 때 HR 담당자에게 알림</div></div>
-          <button class="tg-switch on" onclick="this.classList.toggle('on');toast('알림 규칙이 변경되었습니다.')"></button>
+          <button class="tg-switch on" role="switch" aria-checked="true" aria-label="참여율 급락 알림" onclick="toggleSwitch(this,'알림 규칙이 변경되었습니다.')"></button>
         </div>
         <div class="policy-card">
           <span class="msi" style="font-size:22px;color:var(--ink-soft)">event</span>
           <div class="policy-info"><div class="policy-name">주간 요약 리포트 자동 발송</div><div class="policy-desc">매주 월요일 09:00, 경영진 요약 리포트 자동 메일 발송</div></div>
-          <button class="tg-switch" onclick="this.classList.toggle('on');toast('알림 규칙이 변경되었습니다.')"></button>
+          <button class="tg-switch" role="switch" aria-checked="false" aria-label="주간 요약 리포트 자동 발송" onclick="toggleSwitch(this,'알림 규칙이 변경되었습니다.')"></button>
         </div>
         <div style="margin-top:18px;display:flex;gap:8px">
           <button class="btn btn-brand" onclick="toast('정책이 저장되었습니다.')">정책 저장</button>
@@ -678,16 +680,16 @@ input,select{font-family:inherit}
 
 <!-- ══ 모임 상세 Modal ══ -->
 <div class="ov" id="meetingOv" onclick="if(event.target===this)closeMeeting()">
-  <div class="modal">
-    <div class="modal-hd"><div><div class="modal-title" id="mtTitle"></div><div style="margin-top:6px;display:flex;gap:5px" id="mtBadges"></div></div><button class="modal-close" onclick="closeMeeting()"><span class="msi" style="font-size:17px">close</span></button></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtTitle">
+    <div class="modal-hd"><div><div class="modal-title" id="mtTitle"></div><div style="margin-top:6px;display:flex;gap:5px" id="mtBadges"></div></div><button class="modal-close" aria-label="닫기" onclick="closeMeeting()"><span class="msi" style="font-size:17px">close</span></button></div>
     <div class="modal-body" id="mtBody"></div>
   </div>
 </div>
 
 <!-- ══ AI 시그널 상세 Modal ══ -->
 <div class="ov" id="signalOv" onclick="if(event.target===this)closeSignal()">
-  <div class="modal">
-    <div class="modal-hd"><div><div class="modal-title" id="sgTitle"></div><div style="margin-top:6px;display:flex;gap:5px" id="sgBadges"></div></div><button class="modal-close" onclick="closeSignal()"><span class="msi" style="font-size:17px">close</span></button></div>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="sgTitle">
+    <div class="modal-hd"><div><div class="modal-title" id="sgTitle"></div><div style="margin-top:6px;display:flex;gap:5px" id="sgBadges"></div></div><button class="modal-close" aria-label="닫기" onclick="closeSignal()"><span class="msi" style="font-size:17px">close</span></button></div>
     <div class="modal-body" id="sgBody"></div>
   </div>
 </div>
@@ -747,6 +749,25 @@ const DATA={
         [20,28,90,40,52],
         [15,26,80,35,18],
       ],
+      // 부서 간 모임 수 매트릭스 (onaDepts 순서) · prev = 전월 매트릭스 (전월비 계산용)
+      ona:{
+        matrix:[
+          [0,8,5,14,3,22],
+          [8,0,4,11,6,3],
+          [5,4,0,7,9,4],
+          [14,11,7,0,5,18],
+          [3,6,9,5,0,2],
+          [22,3,4,18,2,0],
+        ],
+        prev:[
+          [0,6,4,11,3,17],
+          [6,0,4,9,5,3],
+          [4,4,0,6,7,3],
+          [11,9,6,0,4,15],
+          [3,5,7,4,0,2],
+          [17,3,3,15,2,0],
+        ],
+      },
       budget:{
         proofRate:100,
         purchaseCard:{name:'비즈플레이 법인카드', num:'****-4821', next:'2026.08.01 · 월 정기 충전'},
@@ -822,6 +843,24 @@ const DATA={
         [16,22,72,32,41],
         [12,21,64,28,14],
       ],
+      ona:{
+        matrix:[
+          [0,6,4,11,3,17],
+          [6,0,4,9,5,3],
+          [4,4,0,6,7,3],
+          [11,9,6,0,4,15],
+          [3,5,7,4,0,2],
+          [17,3,3,15,2,0],
+        ],
+        prev:[
+          [0,5,4,9,2,13],
+          [5,0,3,8,5,2],
+          [4,3,0,5,6,3],
+          [9,8,5,0,4,12],
+          [2,5,6,4,0,1],
+          [13,2,3,12,1,0],
+        ],
+      },
       budget:{
         proofRate:100,
         purchaseCard:{name:'비즈플레이 법인카드', num:'****-4821', next:'2026.07.01 · 월 정기 충전'},
@@ -906,6 +945,7 @@ function nav(id, el){
   document.getElementById('tbTitle').textContent=info.title;
   document.getElementById('tbSub').textContent=info.sub;
   if(id!=='ona')stopOnaLoop();
+  if(id==='dashboard')startLiveTimer(); else stopLiveTimer(); // 라이브 피드는 대시보드에서만 구동
   if(id==='ona')renderOna();
   if(id==='engagement')renderEngagementAll();
   if(id==='signals')renderSignals();
@@ -915,14 +955,23 @@ function nav(id, el){
   if(id==='sponsors')renderSponsors();
   if(id==='report')renderReportCards();
 }
+// 메뉴 순서에 의존하지 않는 페이지 이동 (data-page 기준)
+function navTo(id){
+  const el=document.querySelector(`.nav-item[data-page="${id}"]`);
+  if(el)nav(id,el);
+}
 
 // ── 기간 토글 ──
 function togglePeriodMenu(e){
   e.stopPropagation();
-  document.getElementById('periodMenu').classList.toggle('show');
+  const m=document.getElementById('periodMenu');
+  m.classList.toggle('show');
+  const pill=document.getElementById('periodPill');
+  if(pill)pill.setAttribute('aria-expanded',m.classList.contains('show'));
 }
 function closePeriodMenu(){
   const m=document.getElementById('periodMenu');if(m)m.classList.remove('show');
+  const pill=document.getElementById('periodPill');if(pill)pill.setAttribute('aria-expanded','false');
 }
 function selectPeriod(key){
   if(!DATA.periods[key])return;
@@ -936,6 +985,10 @@ function selectPeriod(key){
   renderEngagementAll();
   renderBudget();
   renderPoints();
+  syncOnaData();       // 기간별 ONA 매트릭스 교체
+  deselectOnaDept();   // 이전 기간 기준 선택 상태 해제
+  renderOnaPairs();
+  onaStaticRedraw();
   updateNoShowEstimate(depositValue);
   updatePaybackEstimate();
   const info=pageInfo[currentPageId]||{title:'',sub:''};
@@ -1069,19 +1122,30 @@ function renderKpiSparklines(){
 }
 
 // ── 1. 대시보드 ──
+// KPI 증감 표기: delta 부호에 따라 ▲/▼과 색을 결정. goodWhenDown=true면 감소가 개선(예: 노쇼율)
+function setDeltaSub(id,delta,unit,opts){
+  opts=opts||{};
+  const el=document.getElementById(id);if(!el)return;
+  const up=delta>=0;
+  const good=opts.goodWhenDown?!up:up;
+  const note=opts.goodWhenDown?(up?' (악화)':' (개선)'):'';
+  el.textContent=`${up?'▲':'▼'} ${Math.abs(delta)}${unit} 전월 대비${note}`;
+  el.classList.toggle('up',good);
+  el.classList.toggle('down',!good);
+}
 function renderDashboardKPIs(){
   const p=curP();
   countUp(document.getElementById('kpiParticipation'), p.weeklyParticipation, {suffix:'%'});
-  setText('kpiParticipationSub', `▲ ${p.weeklyParticipationDelta}%p 전월 대비`);
+  setDeltaSub('kpiParticipationSub', p.weeklyParticipationDelta, '%p');
   bindTip(document.getElementById('kpiParticipationSub'), `전월 참여율 ${p.weeklyParticipation-p.weeklyParticipationDelta}%`);
   countUp(document.getElementById('kpiMatchSuccess'), p.matchSuccessRate, {suffix:'%'});
-  setText('kpiMatchSuccessSub', `▲ ${p.matchSuccessDelta}%p 전월 대비`);
+  setDeltaSub('kpiMatchSuccessSub', p.matchSuccessDelta, '%p');
   bindTip(document.getElementById('kpiMatchSuccessSub'), `전월 매칭 성사율 ${p.matchSuccessRate-p.matchSuccessDelta}%`);
   countUp(document.getElementById('kpiNoShow'), p.noShowRate, {suffix:'%',decimals:1});
-  setText('kpiNoShowSub', `▼ ${Math.abs(p.noShowDelta)}%p 전월 대비 (개선)`);
+  setDeltaSub('kpiNoShowSub', p.noShowDelta, '%p', {goodWhenDown:true});
   bindTip(document.getElementById('kpiNoShowSub'), `전월 노쇼율 ${Math.round((p.noShowRate-p.noShowDelta)*10)/10}%`);
   countUp(document.getElementById('kpiConnections'), p.newConnections, {});
-  setText('kpiConnectionsSub', `▲ ${p.newConnectionsDelta}건 전월 대비`);
+  setDeltaSub('kpiConnectionsSub', p.newConnectionsDelta, '건');
   bindTip(document.getElementById('kpiConnectionsSub'), `전월 신규 연결 ${p.newConnections-p.newConnectionsDelta}건`);
   renderKpiSparklines();
 }
@@ -1210,6 +1274,7 @@ function openMeeting(id){
       <button class="btn btn-brand" onclick="toast('모임 확정 처리되었습니다.');closeMeeting()">확정 처리</button>
     </div>`;
   document.getElementById('meetingOv').classList.add('show');
+  const mc=document.querySelector('#meetingOv .modal-close');if(mc)mc.focus();
 }
 function closeMeeting(){document.getElementById('meetingOv').classList.remove('show')}
 
@@ -1239,13 +1304,18 @@ function pushLive(){
   const e=liveEvents[liveIdx%liveEvents.length];liveIdx++;
   pushLiveEntry(e);
 }
+function startLiveTimer(){
+  if(reducedMotion||liveInterval)return;
+  liveInterval=setInterval(pushLive,4200);
+}
+function stopLiveTimer(){
+  if(liveInterval){clearInterval(liveInterval);liveInterval=null;}
+}
 function startLiveFeed(){
-  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   pushLive();pushLive();pushLive();
   const tag=document.getElementById('liveTag');
-  if(reduced){if(tag)tag.textContent='정적 피드 (모션 감소 설정)';return;}
-  if(liveInterval)clearInterval(liveInterval);
-  liveInterval=setInterval(pushLive,4200);
+  if(reducedMotion){if(tag)tag.textContent='정적 피드 (모션 감소 설정)';return;}
+  startLiveTimer();
 }
 
 // ── 2. ONA 네트워크 (살아있는 인터랙티브 그래프) ──
@@ -1259,15 +1329,10 @@ function shadeColor(hex,pct){
   const b=Math.max(0,Math.min(255,(n&255)+pct));
   return `rgb(${r},${g},${b})`;
 }
-const onaMatrix=[
-  [0,8,5,14,3,22],
-  [8,0,4,11,6,3],
-  [5,4,0,7,9,4],
-  [14,11,7,0,5,18],
-  [3,6,9,5,0,2],
-  [22,3,4,18,2,0],
-];
-// 상위 5개 엣지(모임 수 기준) — 상시 라벨 표시 대상, 정적 데이터 기준 1회 계산
+// 기간별 매트릭스는 DATA.periods[*].ona에 있고, syncOnaData()가 현재 기간 것으로 교체한다
+let onaMatrix=[], onaPrevMatrix=[];
+let ONA_TOP5_EDGES=new Set();
+// 상위 5개 엣지(모임 수 기준) — 상시 라벨 표시 대상, 기간 전환 시 재계산
 function computeOnaTop5EdgeKeys(){
   const edges=[];
   for(let i=0;i<onaDepts.length;i++)for(let j=i+1;j<onaDepts.length;j++){
@@ -1276,7 +1341,12 @@ function computeOnaTop5EdgeKeys(){
   edges.sort((a,b)=>b.v-a.v);
   return new Set(edges.slice(0,5).map(e=>`${e.i}-${e.j}`));
 }
-const ONA_TOP5_EDGES=computeOnaTop5EdgeKeys();
+function syncOnaData(){
+  const o=curP().ona;
+  onaMatrix=o.matrix;
+  onaPrevMatrix=o.prev;
+  ONA_TOP5_EDGES=computeOnaTop5EdgeKeys();
+}
 let onaPts=[]; // 매 프레임 갱신되는 현재 렌더 좌표 (hit-test용, 논리(CSS) 픽셀 단위)
 let onaCustomPos={}; // 드래그로 고정된 좌표 {name:{x,y}} — 논리 픽셀 단위
 let onaSelectedNode=null, onaSelectedEdge=null; // 클릭으로 고정된 선택 상태
@@ -1317,9 +1387,9 @@ function initOnaResizeObserver(){
   const cv=document.getElementById('onaCanvas');if(!cv||cv._roBound)return;
   cv._roBound=true;
   if(window.ResizeObserver){
-    new ResizeObserver(()=>resizeOnaCanvas()).observe(cv);
+    new ResizeObserver(()=>{if(resizeOnaCanvas())onaStaticRedraw();}).observe(cv);
   }
-  window.addEventListener('resize',()=>resizeOnaCanvas());
+  window.addEventListener('resize',()=>{if(resizeOnaCanvas())onaStaticRedraw();});
 }
 
 // 노드의 "정착 목표" 좌표 — 드래그로 고정된 위치가 있으면 그것, 없으면 원형 배치 (논리 픽셀 기준)
@@ -1478,8 +1548,13 @@ function onaTick(now){
   drawOnaFrame(now-onaAnimStart);
   onaRafId=requestAnimationFrame(onaTick);
 }
-function startOnaLoop(){ if(onaRafId===null)onaRafId=requestAnimationFrame(onaTick); }
+function startOnaLoop(){
+  // 모션 감소 설정에서는 상시 rAF 루프 대신 정적 1프레임만 그리고, 상호작용 시 onaStaticRedraw()로 갱신
+  if(reducedMotion){ drawOnaFrame(1e9); return; }
+  if(onaRafId===null)onaRafId=requestAnimationFrame(onaTick);
+}
 function stopOnaLoop(){ if(onaRafId!==null){cancelAnimationFrame(onaRafId);onaRafId=null;} }
+function onaStaticRedraw(){ if(reducedMotion&&currentPageId==='ona')drawOnaFrame(1e9); }
 
 function canvasCoordsFromEvent(ev){
   const cv=document.getElementById('onaCanvas');
@@ -1511,6 +1586,7 @@ function syncOnaRowHighlight(){
     const i=+tr.dataset.i,j=+tr.dataset.j;
     tr.classList.toggle('hl-row',!!(active&&i===active.i&&j===active.j));
   });
+  onaStaticRedraw(); // 모션 감소 모드에선 상태 변화마다 수동 재그리기
 }
 function selectOnaDept(name){
   onaSelectedNode=name;
@@ -1519,7 +1595,7 @@ function selectOnaDept(name){
   const rows=onaDepts.map((d,j)=>({name:d,v:onaMatrix[idx][j]})).filter(r=>r.name!==name&&r.v>0).sort((a,b)=>b.v-a.v);
   const total=rows.reduce((s,r)=>s+r.v,0);
   const el=document.getElementById('onaDetailBox');
-  if(el)el.innerHTML=`<div style="font-weight:700;color:var(--ink);margin-bottom:6px">${name}팀 연결 상세 · 이번 달 총 ${total}건</div>`+
+  if(el)el.innerHTML=`<div style="font-weight:700;color:var(--ink);margin-bottom:6px">${name}팀 연결 상세 · ${curP().label} 총 ${total}건</div>`+
     rows.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0"><span>${r.name}팀</span><span style="font-weight:700;color:var(--ink)">${r.v}건</span></div>`).join('');
   syncOnaRowHighlight();
 }
@@ -1536,7 +1612,7 @@ function selectOnaPair(i,j){
   const a=onaDepts[i],b=onaDepts[j],v=onaMatrix[i][j];
   const totalA=onaMatrix[i].reduce((s,x)=>s+x,0), totalB=onaMatrix[j].reduce((s,x)=>s+x,0);
   const el=document.getElementById('onaDetailBox');
-  if(el)el.innerHTML=`<div style="font-weight:700;color:var(--ink);margin-bottom:6px">${a}팀 ↔ ${b}팀 · 이번 달 ${v}건</div>
+  if(el)el.innerHTML=`<div style="font-weight:700;color:var(--ink);margin-bottom:6px">${a}팀 ↔ ${b}팀 · ${curP().label} ${v}건</div>
     <div style="display:flex;justify-content:space-between;padding:4px 0"><span>${a}팀 전체 연결</span><span style="font-weight:700;color:var(--ink)">${totalA}건</span></div>
     <div style="display:flex;justify-content:space-between;padding:4px 0"><span>${b}팀 전체 연결</span><span style="font-weight:700;color:var(--ink)">${totalB}건</span></div>`;
   syncOnaRowHighlight();
@@ -1565,6 +1641,7 @@ function initOnaCanvasEvents(){
       const {x,y}=canvasCoordsFromEvent(ev);
       onaDragPos={x,y};
       if(Math.hypot(x-onaDragStart.x,y-onaDragStart.y)>3)onaDragMoved=true;
+      onaStaticRedraw();
       return;
     }
     const {x,y}=canvasCoordsFromEvent(ev);
@@ -1601,6 +1678,7 @@ function initOnaCanvasEvents(){
     const {x,y}=canvasCoordsFromEvent(ev);
     onaDragPos={x,y};
     if(Math.hypot(x-onaDragStart.x,y-onaDragStart.y)>3)onaDragMoved=true;
+    onaStaticRedraw();
   });
   window.addEventListener('mouseup',()=>{
     if(!onaDragName)return;
@@ -1624,6 +1702,7 @@ function initOnaCanvasEvents(){
     if(!moved){
       if(onaSelectedNode===name)deselectOnaDept();else selectOnaDept(name);
     }
+    onaStaticRedraw();
   });
 }
 function renderOnaPairs(){
@@ -1633,19 +1712,25 @@ function renderOnaPairs(){
   rows.sort((x,y)=>y.v-x.v);
   const body=document.getElementById('onaPairBody');if(!body)return;
   body.innerHTML=rows.map(r=>{
-    const delta=Math.round((Math.random()*30-8));
+    // 전월 매트릭스 대비 실제 증감률 — 결정적 (Math.random 금지)
+    const prev=onaPrevMatrix[r.i]?onaPrevMatrix[r.i][r.j]:0;
+    const delta=prev>0?Math.round((r.v-prev)/prev*100):(r.v>0?100:0);
     const up=delta>=0;
+    const deltaCell=delta===0
+      ?`<td style="color:var(--muted);font-weight:700">—</td>`
+      :`<td style="color:${up?'var(--good-text)':'var(--danger-text)'};font-weight:700">${up?'▲':'▼'} ${Math.abs(delta)}%</td>`;
     return `<tr data-i="${r.i}" data-j="${r.j}" style="cursor:pointer" onmouseenter="onaRowHover(${r.i},${r.j},true)" onmouseleave="onaRowHover(${r.i},${r.j},false)" onclick="onaRowClick(${r.i},${r.j})"><td>${r.a}팀</td><td>${r.b}팀</td><td style="font-weight:700">${r.v}건</td>
-    <td style="color:${up?'var(--good-text)':'var(--danger-text)'};font-weight:700">${up?'▲':'▼'} ${Math.abs(delta)}%</td></tr>`;
+    ${deltaCell}</tr>`;
   }).join('');
+  const meta=document.getElementById('onaPairMeta');
+  if(meta)meta.textContent=`${curP().label} 기준`;
   syncOnaRowHighlight();
 }
-let onaRendered=false;
 function renderOna(){
   initOnaCanvasEvents();
   resizeOnaCanvas(); // 페이지 진입 시 표시 크기 기준으로 즉시 동기화 (왜곡/블러 방지)
   renderOnaLegend();
-  if(!onaRendered){renderOnaPairs();onaRendered=true;}
+  renderOnaPairs();
   startOnaLoop();
 }
 
@@ -1714,7 +1799,7 @@ function renderTrendChart(){
       const marker=document.getElementById('trendMarker');
       if(marker){marker.setAttribute('cx',xs[idx]);marker.setAttribute('cy',ys[idx]);marker.setAttribute('r','5');marker.setAttribute('opacity','1');}
       const weeksAgo=arr.length-1-idx;
-      const label=weeksAgo===0?'이번 달':`${weeksAgo}주 전`;
+      const label=weeksAgo===0?'이번 주':`${weeksAgo}주 전`;
       showTip(ev.clientX,ev.clientY,`${label} · 참여율 ${arr[idx]}%`);
     });
     dot.addEventListener('mouseleave',()=>{
@@ -1779,19 +1864,31 @@ function openSignal(id){
   document.getElementById('sgBody').innerHTML=`
     <div class="info-row"><span class="info-lbl">감지 근거</span><span class="info-val" style="font-size:11px;text-align:right;max-width:320px">${s.evidence}</span></div>
     <div class="info-row"><span class="info-lbl">제안 조치</span><span class="info-val">${s.action}</span></div>
-    <div style="margin-top:14px"><div style="font-size:12px;font-weight:700;margin-bottom:6px"><span class="msi" style="font-size:13px">smart_toy</span> AI 분석 상세</div>
+    <div style="margin-top:14px"><div style="font-size:12px;font-weight:700;margin-bottom:6px"><span class="msi" style="font-size:13px">android</span> AI 분석 상세</div>
     <div class="ai-reason">${s.detail(curP())}</div></div>
     <div style="margin-top:14px;display:flex;gap:6px">
       <button class="btn btn-outline" onclick="toast('시그널을 무시 처리했습니다.');closeSignal()">무시</button>
       ${modalActionBtn}
     </div>`;
   document.getElementById('signalOv').classList.add('show');
+  const sc=document.querySelector('#signalOv .modal-close');if(sc)sc.focus();
 }
 function closeSignal(){document.getElementById('signalOv').classList.remove('show')}
+// 사이드바 배지·서브타이틀을 signals 배열 상태에서 파생 — 데이터와 표기가 어긋나지 않도록
+function updateSignalBadge(){
+  const n=signals.filter(s=>!s.proposed).length;
+  const el=document.getElementById('signalBadge');
+  if(el){el.textContent=n;el.style.display=n?'':'none';}
+  pageInfo.signals.sub=`AI 자동 감지 ${signals.length}건 · 미처리 ${n}건 · 부서/그룹 단위 제안`;
+  if(currentPageId==='signals'){
+    const sub=document.getElementById('tbSub');if(sub)sub.textContent=pageInfo.signals.sub;
+  }
+}
 function proposeSignal(id){
   const s=signals.find(x=>x.id===id);if(!s||s.proposed)return;
   s.proposed=true;
   renderSignals();
+  updateSignalBadge();
   toast(`${s.action} — 담당자에게 전달되었습니다.`);
   pushLiveEntry({icon:'check_circle',color:'var(--brand)',title:'AI 제안 실행',desc:`${s.target} — ${s.action}`});
 }
@@ -1878,13 +1975,13 @@ const MATE_GRADES=[
   {name:'번개', icon:'bolt', color:'var(--muted)', bg:'#EEF0F3', cond:'누적 3회', reward:20},
   {name:'푸른 번개', icon:'bolt', color:'var(--brand-text)', bg:'#E7ECF6', cond:'누적 5회', reward:50},
   {name:'레드 번개', icon:'bolt', color:'var(--danger-text)', bg:'#F8EBE9', cond:'누적 10회', reward:80},
-  {name:'자이언트 제트', icon:'thunderstorm', color:'var(--warn-text)', bg:'#F8EEE1', cond:'누적 20회 · 최고 등급', reward:150},
+  {name:'자이언트 제트', icon:'offline_bolt', color:'var(--warn-text)', bg:'#F8EEE1', cond:'누적 20회 · 최고 등급', reward:150},
 ];
 // 행동별 포인트 규칙 — 값·활성화를 HR이 설정
 const PT_ACTION_RULES=[
   {icon:'check_circle', name:'모임 참여 완료', desc:'체크인 확인 시 적립', val:30, on:true},
-  {icon:'handshake', name:'재만남 보너스', desc:'다른 부서 동료와 재매칭 시 적립', val:50, on:true},
-  {icon:'edit_note', name:'방 개설 예치금', desc:'개설 시 예치 → 모임 완료 시 회수(반환)', val:100, on:true},
+  {icon:'repeat', name:'재만남 보너스', desc:'다른 부서 동료와 재매칭 시 적립', val:50, on:true},
+  {icon:'edit', name:'방 개설 예치금', desc:'개설 시 예치 → 모임 완료 시 회수(반환)', val:100, on:true},
   {icon:'confirmation_number', name:'참여 예치금', desc:'참여 신청 시 예치 → 모임 완료 시 회수(반환)', val:500, on:true},
   {icon:'block', name:'노쇼 페널티', desc:'무단 불참 시 예치금 미반환 · 보상 미지급', val:null, on:true},
 ];
@@ -1962,7 +2059,7 @@ function renderVendor(){
       <button class="btn-sm bsm-brand" onclick="toast('${msg}')">${btn}</button></div>`;
     acts.innerHTML=
       row('request_quote','대량 구매 견적','100만P 이상 대량 구매 맞춤 견적','견적 요청','제공사에 대량 구매 견적을 요청했습니다.')+
-      row('handshake','단가 협의','연간 계약·정기 충전 단가 협의','상담 예약','단가 협의 상담을 예약했습니다.')+
+      row('forum','단가 협의','연간 계약·정기 충전 단가 협의','상담 예약','단가 협의 상담을 예약했습니다.')+
       row('redeem','도입 상담','최초 도입 100만P 무료 프로모션 안내','상담 요청','도입 프로모션 상담을 요청했습니다.');
   }
 }
@@ -2027,7 +2124,7 @@ function renderRules(){
     <span class="msi" style="font-size:17px;color:var(--ink-soft)">${r.icon}</span>
     <div class="row-content"><div class="row-title">${r.name}</div><div class="row-desc">${r.desc}</div></div>
     ${r.val===null?'':`<input class="pt-input" type="number" value="${r.val}" min="0" step="10" onchange="PT_ACTION_RULES[${i}].val=+this.value"><span style="font-size:11px;color:var(--muted)">P</span>`}
-    <button class="tg-switch ${r.on?'on':''}" onclick="PT_ACTION_RULES[${i}].on=!PT_ACTION_RULES[${i}].on;this.classList.toggle('on')"></button></div>`).join('');
+    <button class="tg-switch ${r.on?'on':''}" role="switch" aria-checked="${r.on}" aria-label="${r.name}" onclick="PT_ACTION_RULES[${i}].on=!PT_ACTION_RULES[${i}].on;toggleSwitch(this)"></button></div>`).join('');
 }
 function saveRules(){toast('행동별 포인트 규칙이 저장되었습니다.');}
 
@@ -2101,6 +2198,12 @@ function genReport(){
 }
 
 // ── 8. 정책 세그먼트 ──
+// 토글 스위치 공용: on 클래스와 aria-checked를 함께 갱신
+function toggleSwitch(el,msg){
+  el.classList.toggle('on');
+  el.setAttribute('aria-checked',el.classList.contains('on'));
+  if(msg)toast(msg);
+}
 function segPick(el,groupId){
   document.getElementById(groupId).querySelectorAll('.seg-opt').forEach(o=>o.classList.remove('on'));
   el.classList.add('on');
@@ -2130,8 +2233,22 @@ function updateNoShowEstimate(deposit){
   if(el)el.innerHTML=`다음 달 예상 노쇼율: <b>${est}%</b>`;
 }
 
+// ── 키보드 접근성: 사이드바 Enter/Space 활성화 · Escape로 모달/메뉴 닫기 ──
+document.querySelectorAll('.nav-item').forEach(n=>{
+  n.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();n.click();}
+  });
+});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  closePeriodMenu();
+  document.querySelectorAll('.ov.show').forEach(o=>o.classList.remove('show'));
+});
+
 // ── Init ──
+syncOnaData();
 refreshPageInfo();
+updateSignalBadge();
 renderMeetingList();
 renderDashboardAll();
 renderEngagementAll();
