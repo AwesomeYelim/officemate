@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OfficeMate — UX 플로우 목업</title>
+<style>body{margin:0}</style>
+<style>
+  :root {
+    --ink: #1D1B24;
+    --ink-soft: #4A4959;
+    --paper: #EEF0F3;
+    --paper-raised: #FFFFFF;
+    --line: #D8DAE1;
+
+    --brand: #33549C;
+    --brand-deep: #24397A;
+    --brand-text: #2A4784;
+
+    --morning: #6F92C4;
+    --lunch: #C99334;
+    --dinner: #7A4F76;
+
+    --good: #3F8F6B;
+    --good-text: #2E6B4F;
+    --warn: #C97A2E;
+    --warn-text: #9C5A1E;
+    --danger: #B4483F;
+    --danger-text: #8C3A32;
+
+    --muted: #6B6A78;
+    --panel: #16151D;
+    --panel-line: #2C2B36;
+    --panel-muted: #B2B1BE;
+
+    --font-body: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+      "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --font-serif: Georgia, "Iowan Old Style", "Noto Serif KR", serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+    --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-5) var(--sp-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-8);
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead { display: flex; flex-direction: column; gap: var(--sp-4); max-width: 760px; }
+
+  .wordmark {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    color: var(--brand-text);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(28px, 3.6vw, 42px);
+    line-height: 1.22;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Day arc ---------- */
+  .day-arc-wrap { max-width: 760px; }
+  .day-arc {
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      var(--morning) 0%, var(--morning) 33%,
+      var(--lunch) 33%, var(--lunch) 66%,
+      var(--dinner) 66%, var(--dinner) 100%
+    );
+  }
+  .day-arc-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .day-arc-labels span b { color: var(--ink); font-weight: 700; }
+
+  /* ---------- Storyboard panel ---------- */
+  .storyboard {
+    background: var(--panel);
+    border-radius: 28px;
+    padding: var(--sp-7) var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-7);
+  }
+
+  .storyboard-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    border-bottom: 1px solid var(--panel-line);
+    padding-bottom: var(--sp-5);
+  }
+
+  .storyboard-head h2 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    color: #fff;
+  }
+  .storyboard-head .sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--panel-muted);
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: var(--sp-5) var(--sp-5); }
+  .legend-item { display: flex; align-items: center; gap: var(--sp-2); font-size: 12px; color: var(--panel-muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  .frame-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(226px, 242px));
+    justify-content: center;
+    gap: var(--sp-7) var(--sp-5);
+  }
+
+  .frame { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
+
+  .frame-title {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    color: #fff;
+  }
+  .frame-num { font-family: var(--font-serif); font-style: italic; font-size: 17px; color: var(--morning); }
+  .frame-title h3 { margin: 0; font-size: 14.5px; font-weight: 700; }
+
+  .frame-caption {
+    margin: 0;
+    max-width: 226px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--panel-muted);
+  }
+
+  /* ---------- Phone mockup ---------- */
+  .phone { width: 226px; flex: none; }
+  .phone-bezel {
+    background: linear-gradient(160deg, #201f29, #0b0a10);
+    border-radius: 32px;
+    padding: 9px;
+    box-shadow: 0 22px 40px -14px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.05);
+    position: relative;
+  }
+  .phone-notch {
+    position: absolute;
+    top: 9px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 62px;
+    height: 16px;
+    background: #0b0a10;
+    border-radius: 0 0 12px 12px;
+    z-index: 2;
+  }
+  .phone-screen {
+    background: var(--paper-raised);
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 452px;
+    position: relative;
+  }
+
+  .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 9px 16px 0; }
+  .status-time { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .status-icons { display: flex; align-items: center; gap: 4px; }
+  .signal-bars { display: flex; align-items: flex-end; gap: 1.5px; height: 8px; }
+  .signal-bars span { width: 2.5px; background: var(--ink); border-radius: 1px; }
+  .signal-bars span:nth-child(1) { height: 3px; }
+  .signal-bars span:nth-child(2) { height: 5px; }
+  .signal-bars span:nth-child(3) { height: 6.5px; }
+  .signal-bars span:nth-child(4) { height: 8px; }
+  .battery { width: 17px; height: 9px; border: 1px solid var(--ink); border-radius: 2px; padding: 1px; position: relative; }
+  .battery::after { content: ""; position: absolute; right: -3px; top: 2.5px; width: 2px; height: 4px; background: var(--ink); border-radius: 0 1px 1px 0; }
+  .battery-fill { height: 100%; width: 78%; background: var(--ink); border-radius: 1px; }
+
+  .app-header { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 14px 10px; border-bottom: 1px solid var(--line); }
+  .bot-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; flex: none; }
+  .app-header-text .name { font-size: 12px; font-weight: 700; line-height: 1.2; }
+  .app-header-text .subtitle { font-size: 10px; color: var(--muted); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-left: auto; flex: none; }
+
+  .app-body { flex: 1; padding: 12px 12px 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; font-size: 11.8px; line-height: 1.5; }
+
+  .bubble { background: var(--paper); border-radius: 13px 13px 13px 3px; padding: 8px 11px; max-width: 90%; align-self: flex-start; }
+
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 13px; padding: 10px 11px; display: flex; flex-direction: column; gap: 7px; }
+  .card.compact { padding: 8px 10px; gap: 5px; }
+
+  .tag { display: inline-flex; align-self: flex-start; padding: 2.5px 8px; border-radius: 999px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.01em; }
+  .tag.good { background: rgba(63,143,107,.13); color: var(--good-text); }
+  .tag.warn { background: rgba(201,122,46,.13); color: var(--warn-text); }
+  .tag.danger { background: rgba(180,72,63,.13); color: var(--danger-text); }
+  .tag.brand { background: rgba(51,84,156,.13); color: var(--brand-text); }
+
+  .tabs { display: flex; gap: 5px; }
+  .tab { flex: 1; text-align: center; padding: 5px 0; border-radius: 999px; font-size: 10px; font-weight: 700; background: var(--paper); color: var(--muted); }
+  .tab.active.morning { background: var(--morning); color: #fff; }
+  .tab.active.lunch { background: var(--lunch); color: #241a06; }
+  .tab.active.dinner { background: var(--dinner); color: #fff; }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { padding: 5px 9px; border-radius: 999px; border: 1px solid var(--line); font-size: 10px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .chip.selected { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .chip-sm { padding: 3px 8px; border-radius: 999px; background: var(--paper); font-size: 9.5px; color: var(--ink-soft); }
+
+  .gauge { display: flex; flex-direction: column; gap: 4px; }
+  .gauge-track { height: 6px; border-radius: 999px; background: var(--paper); overflow: hidden; }
+  .gauge-fill { height: 100%; border-radius: 999px; background: var(--brand); }
+  .gauge-fill.good { background: var(--good); }
+  .gauge-label { font-size: 9.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .btn-primary {
+    background: var(--brand); color: #fff; border: none; border-radius: 11px;
+    padding: 9px; font-weight: 700; font-size: 11.5px; text-align: center;
+    cursor: pointer; transition: transform 0.15s ease, background 0.15s ease;
+    font-family: inherit;
+  }
+  .btn-primary:hover { background: var(--brand-deep); transform: translateY(-1px); }
+  .btn-primary:focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 2px; }
+
+  .note { font-size: 9.5px; color: var(--muted); font-style: italic; line-height: 1.4; }
+
+  .avatar-stack { display: flex; align-items: center; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; margin-left: -8px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; }
+  .avatar:first-child { margin-left: 0; }
+  .avatar.a1 { background: var(--brand); }
+  .avatar.a2 { background: var(--lunch); }
+  .avatar.a3 { background: var(--dinner); }
+  .avatar.empty { background: #fff; border: 1.5px dashed var(--line); color: var(--muted); font-weight: 600; }
+
+  .countdown { font-family: var(--font-mono); font-size: 21px; font-weight: 700; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .blink { animation: blink 1.4s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0.25; } }
+
+  .toast { background: var(--ink); color: #fff; border-radius: 11px; padding: 9px 11px; font-size: 10.5px; display: flex; align-items: center; gap: 7px; }
+
+  .qr-box { width: 56px; height: 56px; border-radius: 8px; background: repeating-conic-gradient(var(--ink) 0% 25%, #fff 0% 50%); background-size: 10px 10px; align-self: center; border: 1px solid var(--line); }
+
+  /* ---------- Footer ---------- */
+  .diff-footer { display: flex; flex-direction: column; gap: var(--sp-4); }
+  .diff-footer h2 { margin: 0; font-size: 13px; font-weight: 700; color: var(--ink-soft); }
+  .diff-row { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
+  .diff-chip { border: 1px solid var(--line); border-radius: 999px; padding: 8px 15px; font-size: 12.5px; color: var(--ink-soft); background: var(--paper-raised); }
+  .disclaimer { margin: 0; font-size: 11.5px; font-style: italic; color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="wordmark"><a href="index.html" style="color:inherit;text-decoration:none">OfficeMate</a></div>
+    <div class="eyebrow">오피스챗 부착형 AI 매칭 어시스턴트 · UX 플로우 목업</div>
+    <h1>슬롯 선택부터 체크인까지, 7단계로 보는 매칭 플로우</h1>
+    <p class="lede">아침·점심·저녁 슬롯 안에서 30분 단위로 예약하고, 정원이 차면 확정, 안 차면 자동으로 정리됩니다. 화면 흐름을 오피스챗 봇 UI로 재구성했습니다.</p>
+    <div class="day-arc-wrap">
+      <div class="day-arc"></div>
+      <div class="day-arc-labels">
+        <span><b>아침</b> · 07:30–09:30</span>
+        <span><b>점심</b> · 11:30–13:30</span>
+        <span><b>저녁</b> · 18:00–20:00</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="storyboard">
+    <div class="storyboard-head">
+      <h2>Flow</h2>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--good)"></span>확정</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--warn)"></span>타임어택 / 임박</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>방폭 / 환급</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--brand)"></span>온라인 확정</div>
+      </div>
+      <div class="sub">7 screens · office-chat bot</div>
+    </div>
+
+    <div class="frame-grid">
+
+      <!-- 1. 슬롯 선택 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">①</span><h3>슬롯 선택</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">11:42</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">슬롯 선택</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">오늘 점심 같이 하실 분 계신가요? 🙋</div>
+                <div class="card">
+                  <div class="tabs">
+                    <span class="tab morning">아침</span>
+                    <span class="tab active lunch">점심</span>
+                    <span class="tab dinner">저녁</span>
+                  </div>
+                  <div class="chip-row">
+                    <span class="chip">11:30</span>
+                    <span class="chip selected">12:00</span>
+                    <span class="chip selected">12:30</span>
+                    <span class="chip">13:00</span>
+                    <span class="chip">13:30</span>
+                  </div>
+                  <div class="gauge">
+                    <div class="gauge-track"><div class="gauge-fill" style="width:50%"></div></div>
+                    <div class="gauge-label">12:00 · 2/4명 모집중</div>
+                  </div>
+                </div>
+                <button class="btn-primary" type="button">선택 완료 (2개 슬롯)</button>
+                <p class="note">2개 이상 선택하면 매칭 확률이 올라가요</p>
+                <div class="card compact">
+                  <span class="tag brand">AI 자연어 개설</span>
+                  <div class="note" style="font-style:normal;">"목요일 점심에 매운 거 먹을 사람 3명" — 한 줄이면 슬롯·인원·취향을 AI가 채워요</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">탭으로 고르거나 자연어 한 줄로 개설 — LLM이 슬롯·인원·취향을 파싱해 방을 엽니다</p>
+      </article>
+
+      <!-- 2. 온오프 자동판별 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">②</span><h3>온·오프 자동판별</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">11:43</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">매칭 방식 확인</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">12:00 슬롯은 30분이라 온라인으로 진행할게요</div>
+                <div class="card">
+                  <span class="tag brand">온라인 확정</span>
+                  <div style="font-weight:700;">12:00 · 30분 슬롯</div>
+                  <div class="note" style="font-style:normal;">이동시간 없이 바로 대화할 수 있도록 화상으로 연결돼요. Meet 링크 자동 생성.</div>
+                </div>
+                <div class="card compact">
+                  <span class="tag warn">근무형태 기반 배정</span>
+                  <div style="font-weight:700;">18:00 · 60분 슬롯</div>
+                  <div class="note" style="font-style:normal;">혼합 근무팀 → 온라인 우선 제안, 이후 오프라인 옵션 노출</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">슬롯 길이 ≤30분은 무조건 온라인 — 이동시간이 대화시간을 넘는 비효율 제거</p>
+      </article>
+
+      <!-- 3. 디파짓 확인 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">③</span><h3>디파짓 확인</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">11:44</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">디파짓</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">참여 확정을 위해 포인트를 예치해주세요</div>
+                <div class="card">
+                  <div style="font-weight:700;font-size:13px;">예치 포인트 500P</div>
+                  <div class="chip-sm">정상 참석 → 전액 환급 +50P</div>
+                  <div class="chip-sm">사전취소(2시간 전) → 페널티 없음</div>
+                  <div class="chip-sm">무단 노쇼 → 몰수</div>
+                </div>
+                <button class="btn-primary" type="button">500P 예치하고 참여 확정</button>
+                <p class="note">최초 3회는 예치 없이 체험 가능해요</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">실제 화폐 대신 사내 포인트 예치 — 노무 리스크는 피하고 심리적 구속력은 유지</p>
+      </article>
+
+      <!-- 4. 매칭 게이지 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">④</span><h3>매칭 게이지</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">11:58</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">매칭 현황</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">지금까지 3명이 참여했어요</div>
+                <div class="card">
+                  <div class="avatar-stack">
+                    <span class="avatar a1">김</span>
+                    <span class="avatar a2">이</span>
+                    <span class="avatar a3">박</span>
+                    <span class="avatar empty">대기</span>
+                  </div>
+                  <div class="gauge">
+                    <div class="gauge-track"><div class="gauge-fill" style="width:75%"></div></div>
+                    <div class="gauge-label">3/4명 · AI 매칭중 · 태그+프로필 유사도</div>
+                  </div>
+                  <div class="chip-row">
+                    <span class="chip-sm">#등산</span>
+                    <span class="chip-sm">#주식공부</span>
+                    <span class="chip-sm">#디자인</span>
+                  </div>
+                </div>
+                <div class="countdown">마감까지 00:42<span class="blink">:</span>11</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">태그가 안 겹쳐도 프로필 소개글의 결이 비슷하면 AI가 이어줍니다 — 하이브리드 매칭</p>
+      </article>
+
+      <!-- 5. 확정/방폭 분기 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">⑤</span><h3>확정 / 방폭 분기</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">12:00</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">결과 안내</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="card compact">
+                  <span class="tag good">확정</span>
+                  <div style="font-weight:700;">4/4명 모집 완료 🎉</div>
+                  <div class="note" style="font-style:normal;">AI 아이스브레이커: "이번 주 가장 몰입했던 순간은?"</div>
+                </div>
+                <div class="card compact">
+                  <span class="tag warn">인접 슬롯 병합 제안</span>
+                  <div style="font-weight:700;">08:00 · 3/4명 · 마감</div>
+                  <div class="note" style="font-style:normal;">"08:30에 합류하시겠어요?"</div>
+                </div>
+                <div class="card compact">
+                  <span class="tag danger">방폭</span>
+                  <div class="note" style="font-style:normal;">그래도 미달 시 자동 취소 · 500P 전액 환급</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">정원 충족 → 즉시 확정 · 미달은 인접 슬롯 병합 제안 후에도 안 되면 방폭(전액 환급)</p>
+      </article>
+
+      <!-- 6. 개설형 방 타임어택 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">⑥</span><h3>개설형 방 타임어택</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">09:15</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">모임 모집</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">'주식 스터디' 모집이 시작됐어요</div>
+                <div class="card">
+                  <span class="tag warn">마감임박 리마인드 예정</span>
+                  <div class="countdown">D-2 14:32<span class="blink">:</span>10</div>
+                  <div class="gauge">
+                    <div class="gauge-track"><div class="gauge-fill" style="width:60%"></div></div>
+                    <div class="gauge-label">3/5명 모집</div>
+                  </div>
+                  <div class="note" style="font-style:normal;">72시간 내 미달 시 자동 폭파 · 전액 환급</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">개설 즉시 72시간 카운트다운 — 마감기한 없는 "죽은 방" 누적을 방지</p>
+      </article>
+
+      <!-- 7. 체크인 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">⑦</span><h3>체크인</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">12:03</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">체크인</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">모임에 도착하셨나요?</div>
+                <div class="card" style="align-items:center;">
+                  <div class="qr-box"></div>
+                  <div class="note" style="font-style:normal;">QR 체크인 또는 화상 접속 자동 확인</div>
+                </div>
+                <div class="toast">✅ 체크인 완료 · 500P 환급 + 50P 적립</div>
+                <div class="gauge">
+                  <div class="gauge-track"><div class="gauge-fill good" style="width:92%"></div></div>
+                  <div class="gauge-label">신뢰도 점수 92</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">출석 확인 후 포인트 환급·적립 — 신뢰도 점수에 누적돼 매칭 우선순위에 반영</p>
+      </article>
+
+    </div>
+  </section>
+
+  <footer class="diff-footer">
+    <p class="disclaimer">* 실제 UI는 오피스챗 플랫폼(잔디 · 카카오워크 · 네이버웍스) SDK 제약에 따라 조정될 수 있음</p>
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -1,4 +1,10 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>OfficeMate — HR 콘솔</title>
+<style>body{margin:0}</style>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -268,16 +274,18 @@ input,select{font-family:inherit}
   .modal{width:94vw}
 }
 </style>
+</head>
+<body>
 
 <div class="app">
 
 <!-- ══ SIDEBAR ══ -->
 <div class="sidebar">
   <div class="logo-area">
-    <div class="logo">
+    <a href="index.html" style="display:flex;color:inherit;text-decoration:none" class="logo">
       <div class="logo-mark">OM</div>
       <div><div class="logo-text">OfficeMate</div><div class="logo-sub">HR CONSOLE v2.4</div></div>
-    </div>
+    </a>
   </div>
   <div class="nav-wrap">
     <div class="nav-group">개요</div>
@@ -1661,3 +1669,5 @@ renderBudget();
 updateNoShowEstimate(depositValue);
 startLiveFeed();
 </script>
+</body>
+</html>

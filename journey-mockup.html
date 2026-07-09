@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OfficeMate — 사용자 여정 목업</title>
+<style>body{margin:0}</style>
+<style>
+  :root {
+    --ink: #1D1B24;
+    --ink-soft: #4A4959;
+    --paper: #EEF0F3;
+    --paper-raised: #FFFFFF;
+    --line: #D8DAE1;
+
+    --brand: #33549C;
+    --brand-deep: #24397A;
+    --brand-text: #2A4784;
+
+    --morning: #6F92C4;
+    --lunch: #C99334;
+    --dinner: #7A4F76;
+
+    --good: #3F8F6B;
+    --good-text: #2E6B4F;
+    --warn: #C97A2E;
+    --warn-text: #9C5A1E;
+    --danger: #B4483F;
+    --danger-text: #8C3A32;
+
+    --muted: #6B6A78;
+    --panel: #16151D;
+    --panel-line: #2C2B36;
+    --panel-muted: #B2B1BE;
+
+    --font-body: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+      "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    --font-serif: Georgia, "Iowan Old Style", "Noto Serif KR", serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+
+    --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px;
+    --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--sp-8) var(--sp-5) var(--sp-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-8);
+  }
+
+  /* ---------- Masthead ---------- */
+  .masthead { display: flex; flex-direction: column; gap: var(--sp-4); max-width: 760px; }
+
+  .wordmark {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    color: var(--brand-text);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    font-size: 11.5px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(28px, 3.6vw, 42px);
+    line-height: 1.22;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .lede {
+    margin: 0;
+    max-width: 62ch;
+    font-size: 15.5px;
+    line-height: 1.65;
+    color: var(--ink-soft);
+  }
+
+  /* ---------- Journey arc ---------- */
+  .day-arc-wrap { max-width: 760px; }
+  .day-arc {
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      var(--brand) 0%, var(--brand) 20%,
+      var(--good) 20%, var(--good) 40%,
+      var(--warn) 40%, var(--warn) 60%,
+      var(--morning) 60%, var(--morning) 80%,
+      var(--lunch) 80%, var(--lunch) 100%
+    );
+  }
+  .day-arc-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .day-arc-labels span b { color: var(--ink); font-weight: 700; }
+
+  /* ---------- Storyboard panel ---------- */
+  .storyboard {
+    background: var(--panel);
+    border-radius: 28px;
+    padding: var(--sp-7) var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-7);
+  }
+
+  .storyboard-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    border-bottom: 1px solid var(--panel-line);
+    padding-bottom: var(--sp-5);
+  }
+
+  .storyboard-head h2 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 22px;
+    color: #fff;
+  }
+  .storyboard-head .sub {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--panel-muted);
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: var(--sp-5) var(--sp-5); }
+  .legend-item { display: flex; align-items: center; gap: var(--sp-2); font-size: 12px; color: var(--panel-muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  .frame-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(226px, 242px));
+    justify-content: center;
+    gap: var(--sp-7) var(--sp-5);
+  }
+
+  .frame { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); }
+
+  .frame-title {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    color: #fff;
+  }
+  .frame-num { font-family: var(--font-serif); font-style: italic; font-size: 17px; color: var(--morning); }
+  .frame-title h3 { margin: 0; font-size: 14.5px; font-weight: 700; }
+
+  .frame-caption {
+    margin: 0;
+    max-width: 226px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--panel-muted);
+  }
+
+  /* ---------- Phone mockup ---------- */
+  .phone { width: 226px; flex: none; }
+  .phone-bezel {
+    background: linear-gradient(160deg, #201f29, #0b0a10);
+    border-radius: 32px;
+    padding: 9px;
+    box-shadow: 0 22px 40px -14px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.05);
+    position: relative;
+  }
+  .phone-notch {
+    position: absolute;
+    top: 9px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 62px;
+    height: 16px;
+    background: #0b0a10;
+    border-radius: 0 0 12px 12px;
+    z-index: 2;
+  }
+  .phone-screen {
+    background: var(--paper-raised);
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 452px;
+    position: relative;
+  }
+
+  .status-bar { display: flex; align-items: center; justify-content: space-between; padding: 9px 16px 0; }
+  .status-time { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .status-icons { display: flex; align-items: center; gap: 4px; }
+  .signal-bars { display: flex; align-items: flex-end; gap: 1.5px; height: 8px; }
+  .signal-bars span { width: 2.5px; background: var(--ink); border-radius: 1px; }
+  .signal-bars span:nth-child(1) { height: 3px; }
+  .signal-bars span:nth-child(2) { height: 5px; }
+  .signal-bars span:nth-child(3) { height: 6.5px; }
+  .signal-bars span:nth-child(4) { height: 8px; }
+  .battery { width: 17px; height: 9px; border: 1px solid var(--ink); border-radius: 2px; padding: 1px; position: relative; }
+  .battery::after { content: ""; position: absolute; right: -3px; top: 2.5px; width: 2px; height: 4px; background: var(--ink); border-radius: 0 1px 1px 0; }
+  .battery-fill { height: 100%; width: 78%; background: var(--ink); border-radius: 1px; }
+
+  .app-header { display: flex; align-items: center; gap: var(--sp-2); padding: 8px 14px 10px; border-bottom: 1px solid var(--line); }
+  .bot-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10.5px; font-weight: 700; flex: none; }
+  .app-header-text .name { font-size: 12px; font-weight: 700; line-height: 1.2; }
+  .app-header-text .subtitle { font-size: 10px; color: var(--muted); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--good); margin-left: auto; flex: none; }
+
+  .app-body { flex: 1; padding: 12px 12px 14px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; font-size: 11.8px; line-height: 1.5; }
+
+  .bubble { background: var(--paper); border-radius: 13px 13px 13px 3px; padding: 8px 11px; max-width: 90%; align-self: flex-start; }
+
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 13px; padding: 10px 11px; display: flex; flex-direction: column; gap: 7px; }
+  .card.compact { padding: 8px 10px; gap: 5px; }
+
+  .tag { display: inline-flex; align-self: flex-start; padding: 2.5px 8px; border-radius: 999px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.01em; }
+  .tag.good { background: rgba(63,143,107,.13); color: var(--good-text); }
+  .tag.warn { background: rgba(201,122,46,.13); color: var(--warn-text); }
+  .tag.danger { background: rgba(180,72,63,.13); color: var(--danger-text); }
+  .tag.brand { background: rgba(51,84,156,.13); color: var(--brand-text); }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip { padding: 5px 9px; border-radius: 999px; border: 1px solid var(--line); font-size: 10px; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .chip.selected { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .chip-sm { padding: 3px 8px; border-radius: 999px; background: var(--paper); font-size: 9.5px; color: var(--ink-soft); }
+
+  .gauge { display: flex; flex-direction: column; gap: 4px; }
+  .gauge-track { height: 6px; border-radius: 999px; background: var(--paper); overflow: hidden; }
+  .gauge-fill { height: 100%; border-radius: 999px; background: var(--brand); }
+  .gauge-fill.good { background: var(--good); }
+  .gauge-label { font-size: 9.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .btn-primary {
+    background: var(--brand); color: #fff; border: none; border-radius: 11px;
+    padding: 9px; font-weight: 700; font-size: 11.5px; text-align: center;
+    cursor: pointer; transition: transform 0.15s ease, background 0.15s ease;
+    font-family: inherit;
+  }
+  .btn-primary:hover { background: var(--brand-deep); transform: translateY(-1px); }
+  .btn-primary:focus-visible { outline: 2px solid var(--brand-deep); outline-offset: 2px; }
+  .btn-ghost {
+    background: #fff; color: var(--ink-soft); border: 1px solid var(--line); border-radius: 11px;
+    padding: 8px; font-weight: 700; font-size: 11px; text-align: center; cursor: pointer; font-family: inherit;
+  }
+
+  .note { font-size: 9.5px; color: var(--muted); font-style: italic; line-height: 1.4; }
+
+  .avatar-stack { display: flex; align-items: center; }
+  .avatar { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; margin-left: -8px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; }
+  .avatar:first-child { margin-left: 0; }
+  .avatar.a1 { background: var(--brand); }
+  .avatar.a2 { background: var(--lunch); }
+  .avatar.a3 { background: var(--dinner); }
+  .avatar.empty { background: #fff; border: 1.5px dashed var(--line); color: var(--muted); font-weight: 600; }
+
+  .countdown { font-family: var(--font-mono); font-size: 21px; font-weight: 700; letter-spacing: 0.01em; font-variant-numeric: tabular-nums; color: var(--ink); }
+  .blink { animation: blink 1.4s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0.25; } }
+
+  .toast { background: var(--ink); color: #fff; border-radius: 11px; padding: 9px 11px; font-size: 10.5px; display: flex; align-items: center; gap: 7px; }
+
+  /* ---------- Rings & donuts (마이페이지) ---------- */
+  .ring-row { display: flex; justify-content: center; gap: var(--sp-4); }
+  .ring { width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
+  .ring.trust { background: conic-gradient(var(--good) 0 331deg, var(--paper) 331deg 360deg); }
+  .ring.dept { background: conic-gradient(var(--brand) 0 40%, var(--lunch) 40% 65%, var(--dinner) 65% 85%, var(--morning) 85% 100%); }
+  .ring-hole { width: 56px; height: 56px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; }
+  .ring-hole .v { font-family: var(--font-mono); font-size: 14px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .ring-hole .k { font-size: 8px; color: var(--muted); }
+  .ring-legend { display: flex; flex-wrap: wrap; gap: 4px 8px; justify-content: center; }
+  .ring-legend .li { display: flex; align-items: center; gap: 4px; font-size: 8.5px; color: var(--muted); }
+  .ring-legend .sw { width: 7px; height: 7px; border-radius: 2px; flex: none; }
+
+  /* ---------- Footer ---------- */
+  .diff-footer { display: flex; flex-direction: column; gap: var(--sp-4); }
+  .disclaimer { margin: 0; font-size: 11.5px; font-style: italic; color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="masthead">
+    <div class="wordmark"><a href="index.html" style="color:inherit;text-decoration:none">OfficeMate</a></div>
+    <div class="eyebrow">오피스챗 부착형 AI 매칭 어시스턴트 · 사용자 여정 목업</div>
+    <h1>프로필 등록부터 모임 탐색까지, 5개 화면으로 보는 사용자 여정</h1>
+    <p class="lede">매칭 플로우(별첨)의 앞뒤를 잇는 다섯 장면입니다. 프로필을 만들고, 확정된 모임에서 공통점과 장소를 추천받고, 리마인더로 노쇼를 막고, 신뢰도와 연결이 자산으로 쌓입니다.</p>
+    <div class="day-arc-wrap">
+      <div class="day-arc"></div>
+      <div class="day-arc-labels">
+        <span><b>프로필</b></span>
+        <span><b>확정</b></span>
+        <span><b>리마인드</b></span>
+        <span><b>자산화</b></span>
+        <span><b>탐색</b></span>
+      </div>
+    </div>
+  </header>
+
+  <section class="storyboard">
+    <div class="storyboard-head">
+      <h2>Journey</h2>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--good)"></span>확정 / 집행</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--warn)"></span>리마인더 / 대기 승급</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--brand)"></span>프로필 / 데이터</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--lunch)"></span>스폰서드</div>
+      </div>
+      <div class="sub">5 screens · before &amp; after the match</div>
+    </div>
+
+    <div class="frame-grid">
+
+      <!-- 1. 온보딩 프로필 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">①</span><h3>온보딩 프로필</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">09:12</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">프로필 설정 · 1분</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">반가워요! 잘 맞는 동료를 찾도록 몇 가지만 알려주세요.</div>
+                <div class="card compact">
+                  <span class="tag brand">관심사</span>
+                  <div class="chip-row">
+                    <span class="chip selected">#등산</span>
+                    <span class="chip selected">#보드게임</span>
+                    <span class="chip">#주식</span>
+                    <span class="chip">#러닝</span>
+                    <span class="chip">#커피</span>
+                  </div>
+                  <div class="note" style="font-style:normal;">✍️ 한 줄 소개 "주말마다 북한산 가요" — 태그에 없는 취향은 AI가 소개글에서 읽어요</div>
+                </div>
+                <div class="card compact">
+                  <span class="tag brand">식사 취향 · 근무형태</span>
+                  <div class="chip-row">
+                    <span class="chip selected">한식</span>
+                    <span class="chip">일식</span>
+                    <span class="chip">비건</span>
+                    <span class="chip selected">주 3일 출근</span>
+                  </div>
+                </div>
+                <div class="card compact">
+                  <span class="tag good">프라이버시</span>
+                  <div style="font-size:10.5px; line-height:1.5;">매칭에는 이 프로필만 사용해요. <b>사적 대화는 분석하지 않아요.</b></div>
+                  <div class="chip-row"><span class="chip selected">동의하고 시작</span></div>
+                </div>
+                <button class="btn-primary" type="button">프로필 저장</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">1분 온보딩 — 매칭 재료는 선택형 프로필뿐, 메시지 내용은 건드리지 않음</p>
+      </article>
+
+      <!-- 2. 확정 그룹방 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">②</span><h3>확정 그룹방</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">11:58</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">목요 점심 4인방</div>
+                  <div class="subtitle">12:00 · 확정됨</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">매칭이 확정됐어요 🎉 서로 이런 공통점이 있어요.</div>
+                <div class="card compact">
+                  <span class="tag brand">AI 공통점 브리핑</span>
+                  <div class="avatar-stack">
+                    <span class="avatar a1">김</span><span class="avatar a2">박</span><span class="avatar a3">이</span><span class="avatar a1" style="background:var(--good)">최</span>
+                  </div>
+                  <div class="chip-row">
+                    <span class="chip-sm">네 분 모두 #등산</span>
+                    <span class="chip-sm">셋은 커피 애호가</span>
+                    <span class="chip-sm">부서는 전부 다름</span>
+                  </div>
+                  <div class="note" style="font-style:normal;">💬 AI 대화 스타터 — "요즘 가장 가고 싶은 산은 어디예요?"</div>
+                </div>
+                <div class="card compact">
+                  <span class="tag brand">AI 장소 추천</span>
+                  <div style="font-weight:700;">🍲 광화문 김치찌개</div>
+                  <div class="chip-row">
+                    <span class="chip-sm">도보 5분</span>
+                    <span class="chip-sm">4인석</span>
+                    <span class="chip-sm">1인 12,000원</span>
+                  </div>
+                  <div class="chip-row"><span class="tag good">네이버 예약 완료 · 12:00</span></div>
+                </div>
+                <div class="toast">📅 캘린더 등록 · 💳 식대 자동 집행 예약 48,000원</div>
+                <p class="note">모임비는 법인카드로 자동 집행되고 증빙까지 처리돼요</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">AI 공통점 브리핑·대화 스타터 + 장소 추천 — 예약·캘린더·식대 집행까지 한 번에</p>
+      </article>
+
+      <!-- 3. 리마인더 & 사전취소 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">③</span><h3>리마인더 · 사전취소</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">11:02</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">리마인더</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">1시간 뒤 점심 모임이에요. 참석하시나요?</div>
+                <div class="card" style="align-items:center;">
+                  <span class="countdown">00:58<span class="blink">:</span>12</span>
+                  <div class="note" style="font-style:normal;">모임 시작까지</div>
+                </div>
+                <button class="btn-primary" type="button">참석해요 👍</button>
+                <button class="btn-ghost" type="button">취소할게요</button>
+                <p class="note">시작 2시간 전까지 취소하면 페널티가 없어요. 이후 노쇼는 디파짓 500P가 몰수돼요.</p>
+                <div class="card compact">
+                  <span class="tag warn">1명 취소 발생</span>
+                  <div style="font-size:10.5px;">대기 1번 <b>정</b>님이 자동 승급됐어요</div>
+                  <div class="gauge">
+                    <div class="gauge-track"><div class="gauge-fill good" style="width:100%"></div></div>
+                    <div class="gauge-label">4/4명 · 정원 유지</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">사전취소는 무페널티, 빈자리는 대기자 자동 승급 — 방은 끝까지 정원을 지킴</p>
+      </article>
+
+      <!-- 4. 마이페이지 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">④</span><h3>마이페이지</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">18:24</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">내 활동</div>
+                  <div class="subtitle">김솔닥 · 보안개발팀</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="ring-row">
+                  <div style="display:flex; flex-direction:column; gap:5px; align-items:center;">
+                    <div class="ring trust"><div class="ring-hole"><span class="v">92</span><span class="k">신뢰도</span></div></div>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:5px; align-items:center;">
+                    <div class="ring dept"><div class="ring-hole"><span class="v">4</span><span class="k">부서</span></div></div>
+                    <div class="ring-legend">
+                      <span class="li"><span class="sw" style="background:var(--brand)"></span>개발</span>
+                      <span class="li"><span class="sw" style="background:var(--lunch)"></span>영업</span>
+                      <span class="li"><span class="sw" style="background:var(--dinner)"></span>인사</span>
+                      <span class="li"><span class="sw" style="background:var(--morning)"></span>기획</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="card compact">
+                  <span class="tag brand">포인트 지갑</span>
+                  <div style="font-family:var(--font-mono); font-size:16px; font-weight:700;">1,250P</div>
+                  <div class="chip-row">
+                    <span class="chip-sm">+50P 체크인 보너스</span>
+                    <span class="chip-sm">+500P 환급</span>
+                  </div>
+                </div>
+                <div class="card compact">
+                  <span class="tag good">이번 달</span>
+                  <div class="chip-row">
+                    <span class="chip-sm">모임 6회</span>
+                    <span class="chip-sm">노쇼 0회</span>
+                    <span class="chip-sm">새 동료 9명</span>
+                  </div>
+                </div>
+                <p class="note">최근 한 달, 4개 부서 동료와 식사했어요</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">신뢰도 링 + 포인트 지갑 + 부서 다양성 도넛 — 참여가 개인의 자산으로 쌓임</p>
+      </article>
+
+      <!-- 5. 개설형 방 탐색 피드 -->
+      <article class="frame">
+        <div class="frame-title"><span class="frame-num">⑤</span><h3>모임 탐색 피드</h3></div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">17:41</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">모임 탐색</div>
+                  <div class="subtitle">개설형 방 · 72시간 타임어택</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="card compact">
+                  <span class="tag warn">스폰서드 · ○○스포츠</span>
+                  <div style="font-weight:700;">🏃 퇴근 후 한강 러닝크루</div>
+                  <div class="chip-row"><span class="chip-sm">참가자 전원 음료 쿠폰</span><span class="chip-sm">4/6명</span></div>
+                  <div class="gauge">
+                    <div class="gauge-track"><div class="gauge-fill" style="width:66%"></div></div>
+                    <div class="gauge-label">마감까지 31:20:44</div>
+                  </div>
+                </div>
+                <div class="card compact">
+                  <span class="tag warn">스폰서드 · 회사앞 파스타집</span>
+                  <div style="font-weight:700;">🍝 금요 점심 파스타 모임</div>
+                  <div class="chip-row"><span class="chip-sm">4인 테이블 2만 원 지원</span><span class="chip-sm">2/4명</span></div>
+                </div>
+                <div class="card compact">
+                  <span class="tag brand">일반 모임</span>
+                  <div style="font-weight:700;">📈 점심 주식 스터디</div>
+                  <div class="chip-row"><span class="chip-sm">매주 화</span><span class="chip-sm">5/6명</span></div>
+                </div>
+                <button class="btn-primary" type="button">+ 새 모임 만들기</button>
+                <p class="note">스폰서 쿠폰은 참여 확정 시 자동 적용돼요</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="frame-caption">개설형 방 피드 — 스폰서드 배지가 붙은 모임은 쿠폰·지원금이 자동 적용</p>
+      </article>
+
+    </div>
+  </section>
+
+  <footer class="diff-footer">
+    <p class="disclaimer">* 실제 UI는 오피스챗 플랫폼(잔디 · 카카오워크 · 네이버웍스) SDK 제약에 따라 조정될 수 있음</p>
+  </footer>
+
+</div>
+
+</body>
+</html>
