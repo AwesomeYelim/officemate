@@ -38,7 +38,7 @@ const SB_SITE_ID = process.env.SB_SITE_ID || "";
 const DRY_RUN = process.env.DRY_RUN === "1";
 
 // Optional base-path prefix for internal links, applied at deploy time.
-// The published namo site (https://b66e438c2dbe4ec486c7.namo.site) serves
+// The published namo site (https://officemate.namo.site) serves
 // pages at root paths (/biz-plan, /landing, ...) — same as Vercel — so the
 // default is "" (no rewriting). namo.site/ba4 is only the builder preview,
 // NOT the published URL: prefixing links for it 404s on the real subdomain.
