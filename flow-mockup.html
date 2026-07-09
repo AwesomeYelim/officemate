@@ -333,11 +333,11 @@
   .qr-box { width: 56px; height: 56px; border-radius: 8px; background: repeating-conic-gradient(var(--ink) 0% 25%, #fff 0% 50%); background-size: 10px 10px; align-self: center; border: 1px solid var(--line); }
 
   /* ---------- Footer ---------- */
-  .diff-footer { display: flex; flex-direction: column; gap: var(--sp-4); }
-  .diff-footer h2 { margin: 0; font-size: 13px; font-weight: 700; color: var(--ink-soft); }
-  .diff-row { display: flex; flex-wrap: wrap; gap: var(--sp-3); }
-  .diff-chip { border: 1px solid var(--line); border-radius: 999px; padding: 8px 15px; font-size: 12.5px; color: var(--ink-soft); background: var(--paper-raised); }
+  .diff-footer { display: flex; flex-direction: column; gap: var(--sp-3); }
   .disclaimer { margin: 0; font-size: 11.5px; font-style: italic; color: var(--muted); }
+  .see-also { margin: 0; font-size: 12.5px; color: var(--ink-soft); }
+  .see-also a { color: var(--brand-text); font-weight: 700; text-decoration: none; border-bottom: 1px solid var(--brand-soft, #A9BAD9); }
+  .see-also a:hover, .see-also a:focus-visible { border-bottom-color: var(--brand); }
 
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
@@ -372,7 +372,7 @@
         <div class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>방폭 / 환급</div>
         <div class="legend-item"><span class="legend-dot" style="background:var(--brand)"></span>온라인 확정</div>
       </div>
-      <div class="sub">tab 1 · overview + features 01–06</div>
+      <div class="sub">tab 1 · overview + features 01–08</div>
     </div>
 
     <div class="frame-grid">
@@ -555,13 +555,13 @@
         </div>
       </article>
 
-      <!-- 3. 디파짓 확인 -->
+      <!-- 3. 참가 신청 · 포인트 예치 -->
       <article class="frame">
         <div class="step-head">
           <span class="step-num">03</span>
           <div>
             <div class="step-kicker">FEATURE 03</div>
-            <h3>디파짓 (포인트 예치)</h3>
+            <h3>참가 신청 (포인트 예치)</h3>
           </div>
         </div>
         <div class="phone">
@@ -579,28 +579,28 @@
                 <div class="bot-avatar">OM</div>
                 <div class="app-header-text">
                   <div class="name">OfficeMate 봇</div>
-                  <div class="subtitle">디파짓</div>
+                  <div class="subtitle">참가 신청</div>
                 </div>
                 <span class="status-dot"></span>
               </div>
               <div class="app-body">
                 <div class="bubble">참여 확정을 위해 포인트를 예치해주세요</div>
                 <div class="card">
-                  <div style="font-weight:700;font-size:13px;">예치 포인트 500P</div>
-                  <div class="chip-sm">정상 참석 → 전액 환급 +50P</div>
+                  <div style="font-weight:700;font-size:13px;">참여 예치금 500P</div>
+                  <div class="chip-sm">참석 완료 → 전액 환급 + 30P 적립</div>
                   <div class="chip-sm">사전취소(2시간 전) → 페널티 없음</div>
-                  <div class="chip-sm">무단 노쇼 → 몰수</div>
+                  <div class="chip-sm">무단 노쇼 → 예치금 미반환 · 보상 미지급</div>
                 </div>
                 <button class="btn-primary" type="button">500P 예치하고 참여 확정</button>
-                <p class="note">최초 3회는 예치 없이 체험 가능해요</p>
+                <p class="note">신규 입사자는 최초 1회 예치가 면제돼요 (조직 설정 0~2회)</p>
               </div>
             </div>
           </div>
         </div>
         <div class="spec-card">
-          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v">참여 확정 시 <b>사내 포인트 예치</b>로 노쇼 방지 (실제 화폐 아님)</span></div>
-          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">정상 참석 → 전액 환급 +50P · 사전취소(2h 전) → 무페널티 · 무단 노쇼 → 몰수</span></div>
-          <div class="spec-row"><span class="spec-k">예외</span><span class="spec-v">최초 3회는 예치 없이 체험 가능</span></div>
+          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v">참여 신청 시 <b>500P 예치</b>로 노쇼 방지 (사내 포인트 · 실제 화폐 아님)</span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">참석 완료 → 전액 환급 + 30P 적립 · 사전취소(2h 전) → 무페널티 · 노쇼 → 미반환 + 보상 미지급</span></div>
+          <div class="spec-row"><span class="spec-k">설정</span><span class="spec-v">노쇼 디파짓은 조직 설정 0/300/500P(기본 300P) · 신규 입사자 최초 1회 면제(0~2회)</span></div>
         </div>
       </article>
 
@@ -717,13 +717,65 @@
         </div>
       </article>
 
-
-      <!-- 7. 체크인 -->
+      <!-- 6. 장소 추천·예약 -->
       <article class="frame">
         <div class="step-head">
           <span class="step-num">06</span>
           <div>
             <div class="step-kicker">FEATURE 06</div>
+            <h3>장소 추천 · 예약</h3>
+          </div>
+        </div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">12:01</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">장소 추천</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">확정 완료! 네 분 취향을 종합해 장소를 추천할게요</div>
+                <div class="card">
+                  <span class="tag brand">AI 장소 추천</span>
+                  <div style="font-weight:700;">🍲 광화문 김치찌개</div>
+                  <div class="chip-row">
+                    <span class="chip-sm">도보 5분</span>
+                    <span class="chip-sm">4인석</span>
+                    <span class="chip-sm">1인 12,000원</span>
+                  </div>
+                  <div class="note" style="font-style:normal;">전원 한식 선호 + 12:00 슬롯 · 도보 5분 이내 — 추천 사유를 함께 설명해요</div>
+                </div>
+                <div class="chip-row"><span class="tag good">네이버 예약 완료 · 12:00</span></div>
+                <div class="toast">📅 참가자 전원 캘린더 자동 등록</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v">그룹 전체의 취향·제약을 종합한 <b>설명 가능한 AI 장소 추천</b></span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">오프라인 확정 → 네이버 예약 연동 · 참가자 캘린더 자동 등록</span></div>
+          <div class="spec-row"><span class="spec-k">비고</span><span class="spec-v">온라인 모임은 Meet 링크 자동 생성으로 대체</span></div>
+        </div>
+      </article>
+
+      <!-- 7. 체크인 -->
+      <article class="frame">
+        <div class="step-head">
+          <span class="step-num">07</span>
+          <div>
+            <div class="step-kicker">FEATURE 07</div>
             <h3>체크인 · 신뢰도</h3>
           </div>
         </div>
@@ -752,7 +804,7 @@
                   <div class="qr-box"></div>
                   <div class="note" style="font-style:normal;">QR 체크인 또는 화상 접속 자동 확인</div>
                 </div>
-                <div class="toast">✅ 체크인 완료 · 500P 환급 + 50P 적립</div>
+                <div class="toast">✅ 체크인 완료 · 500P 환급 + 30P 적립</div>
                 <div class="gauge">
                   <div class="gauge-track"><div class="gauge-fill good" style="width:92%"></div></div>
                   <div class="gauge-label">신뢰도 점수 92</div>
@@ -763,8 +815,57 @@
         </div>
         <div class="spec-card">
           <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v"><b>QR 또는 화상 접속</b>으로 출석 자동 확인</span></div>
-          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">체크인 완료 → 500P 환급 + 50P 적립</span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">체크인 완료 → 예치금 500P 환급 + 30P 적립 · 타부서 재만남 보너스 +50P</span></div>
           <div class="spec-row"><span class="spec-k">출력</span><span class="spec-v">신뢰도 점수 누적 → 다음 매칭 우선순위에 반영</span></div>
+        </div>
+      </article>
+
+      <!-- 8. 페이백·정산 -->
+      <article class="frame">
+        <div class="step-head">
+          <span class="step-num">08</span>
+          <div>
+            <div class="step-kicker">FEATURE 08</div>
+            <h3>페이백 · 정산</h3>
+          </div>
+        </div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">13:05</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">페이백 신청</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">모임은 어떠셨나요? 영수증을 올리면 페이백을 신청할 수 있어요</div>
+                <div class="card">
+                  <span class="tag brand">영수증 업로드</span>
+                  <div style="font-weight:700;">🧾 광화문 김치찌개 · 48,000원</div>
+                  <div class="chip-row"><span class="chip-sm">개인카드 결제</span><span class="chip-sm">4인 모임</span></div>
+                </div>
+                <button class="btn-primary" type="button">인사팀에 페이백 신청</button>
+                <div class="toast">💳 페이백 완료 · 4,800P 지급 (10%)</div>
+                <p class="note">포인트 정산이 끝나면 모임이 종료돼요</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v">개인카드 결제 영수증으로 <b>인사팀 페이백 신청</b></span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">기본 10% 페이백 (조직 설정 5/10/15/20%) · 재원은 조직 포인트 풀에서 차감</span></div>
+          <div class="spec-row"><span class="spec-k">출력</span><span class="spec-v">포인트 정산 완료 → 모임 종료 · 활동 기록은 마이 탭에 누적</span></div>
         </div>
       </article>
 
@@ -774,7 +875,7 @@
   <section class="storyboard">
     <div class="storyboard-head">
       <h2>🔍 탐색 — 열린 모임 참여</h2>
-      <div class="sub">tab 2 · overview + feature 07</div>
+      <div class="sub">tab 2 · overview + feature 09</div>
     </div>
 
     <div class="frame-grid">
@@ -821,6 +922,11 @@
                   <div style="font-weight:700;">🏃 월요일 아침 · 조기 러닝크루</div>
                   <div class="chip-row"><span class="chip-sm">4명 모집중</span><span class="chip-sm">오프라인 30분</span><span class="chip selected" style="font-size:9px;">참여 신청</span></div>
                 </div>
+                <div class="card compact">
+                  <span class="tag brand">🔓 상시 · 방폭 없음</span>
+                  <div style="font-weight:700;">📈 점심 주식 스터디</div>
+                  <div class="chip-row"><span class="chip-sm">매주 화</span><span class="chip-sm">5/6명</span><span class="chip selected" style="font-size:9px;">참여 신청</span></div>
+                </div>
                 <p class="note">참여 신청만으로도 신뢰도 +2점이 반영돼요</p>
               </div>
               <div class="demo-tabbar">
@@ -833,17 +939,17 @@
         </div>
         <div class="spec-card">
           <div class="spec-row"><span class="spec-k">역할</span><span class="spec-v">동료들이 열어둔 모임을 둘러보는 <b>추천 피드</b> · [참여 신청]으로 합류</span></div>
-          <div class="spec-row"><span class="spec-k">구성</span><span class="spec-v">스폰서드 슬롯 + 일반 모임 카드 · 모집 현황·추천 조건 표시</span></div>
+          <div class="spec-row"><span class="spec-k">구성</span><span class="spec-v">스폰서드·일반·상시방(방폭 없음) 카드 · <b>방폭 임박순 정렬</b> + 실시간 카운트다운</span></div>
           <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">신청 시 신뢰도 +2 · 스폰서드는 쿠폰 자동 적용 · 확정 시 채팅 탭에 그룹방 생성</span></div>
         </div>
       </article>
 
-      <!-- 7. 개설형 방 타임어택 -->
+      <!-- 9. 개설형 방 타임어택 -->
       <article class="frame">
         <div class="step-head">
-          <span class="step-num">07</span>
+          <span class="step-num">09</span>
           <div>
-            <div class="step-kicker">FEATURE 07</div>
+            <div class="step-kicker">FEATURE 09</div>
             <h3>개설형 방 타임어택</h3>
           </div>
         </div>
@@ -875,6 +981,7 @@
                     <div class="gauge-track"><div class="gauge-fill" style="width:60%"></div></div>
                     <div class="gauge-label">3/5명 모집</div>
                   </div>
+                  <div class="chip-sm">개설 예치금 100P — 완료 시 반환</div>
                   <div class="note" style="font-style:normal;">72시간 내 미달 시 자동 폭파 · 전액 환급</div>
                 </div>
               </div>
@@ -883,8 +990,8 @@
         </div>
         <div class="spec-card">
           <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v">사용자가 직접 연 모임에 <b>72시간 카운트다운</b> 부여 · 탐색 피드에 노출</span></div>
-          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">72시간 내 정원 미달 → 자동 폭파·전액 환급</span></div>
-          <div class="spec-row"><span class="spec-k">목적</span><span class="spec-v">마감기한 없는 "죽은 방" 누적 방지 · 마감임박 리마인드 발송</span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">개설 시 <b>100P 예치</b>(완료 시 반환) · 72시간 내 정원 미달 → 자동 폭파·전액 환급</span></div>
+          <div class="spec-row"><span class="spec-k">목적</span><span class="spec-v">마감기한 없는 "죽은 방" 누적 방지 · 마감임박 리마인드 발송 (상시방은 방폭 없음)</span></div>
         </div>
       </article>
 
@@ -935,7 +1042,12 @@
                 <div class="card compact">
                   <span class="tag brand">포인트 지갑</span>
                   <div style="font-family:var(--font-mono); font-size:16px; font-weight:700;">1,200P</div>
-                  <div class="chip-row"><span class="chip-sm">참석 환급 +500P</span><span class="chip-sm">체크인 +50P</span></div>
+                  <div class="chip-row"><span class="chip-sm">참석 환급 +500P</span><span class="chip-sm">참여 적립 +30P</span><span class="chip-sm">재만남 +50P</span></div>
+                </div>
+                <div class="card compact">
+                  <span class="tag warn">메이트 등급</span>
+                  <div style="font-weight:700;">⚡ 푸른 번개 <span style="font-weight:400;font-size:9.5px;color:var(--muted);">· 누적 5회</span></div>
+                  <div class="chip-row"><span class="chip-sm">번개 +20P</span><span class="chip-sm">푸른 번개 +50P</span><span class="chip-sm">레드 번개 +80P</span><span class="chip-sm">자이언트 제트 +150P</span></div>
                 </div>
                 <p class="note">서로 다른 부서 동료와 만날수록 다양성 지수가 올라가요</p>
               </div>
@@ -949,7 +1061,8 @@
         </div>
         <div class="spec-card">
           <div class="spec-row"><span class="spec-k">역할</span><span class="spec-v">신뢰도·포인트·부서 다양성을 보여주는 <b>개인 현황판</b></span></div>
-          <div class="spec-row"><span class="spec-k">구성</span><span class="spec-v">신뢰도 링 · 다양성 도넛 · 포인트 지갑 · 월간 활동 요약</span></div>
+          <div class="spec-row"><span class="spec-k">구성</span><span class="spec-v">신뢰도 링 · 다양성 도넛 · 포인트 지갑 · 메이트 등급 · 월간 활동 요약</span></div>
+          <div class="spec-row"><span class="spec-k">등급</span><span class="spec-v">누적 참여 3/5/10/20회 → 번개·푸른 번개·레드 번개·자이언트 제트 (+20/50/80/150P)</span></div>
           <div class="spec-row"><span class="spec-k">상태</span><span class="spec-v">프로필 미작성 시 빈 화면 → 첫 모임 진행 시 온보딩으로 채워짐</span></div>
         </div>
       </article>
@@ -958,6 +1071,7 @@
   </section>
 
   <footer class="diff-footer">
+    <p class="see-also">📚 함께 보기 — <a href="/journey-mockup">시작 가이드 (튜토리얼)</a> · <a href="/biz-plan">사업계획서</a> · <a href="/">라이브 데모</a></p>
     <p class="disclaimer">* 실제 UI는 오피스챗 플랫폼(잔디 · 카카오워크 · 네이버웍스) SDK 제약에 따라 조정될 수 있음</p>
   </footer>
 
