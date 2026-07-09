@@ -31,6 +31,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { gunzipSync } from "node:zlib";
 
 const SB_URL = process.env.SB_URL || "https://asia-northeast3-sunbisites.cloudfunctions.net/mcp_code_server";
 const SB_TOKEN = process.env.SB_TOKEN || "";
@@ -174,35 +175,113 @@ function rewriteInternalLinks(html) {
   return out;
 }
 
+// Collects every `<script ...>...</script>` block within `haystack`
+// (left to right, non-overlapping), mirroring extractAllStyleBlocks.
+function extractAllScriptBlocks(haystack) {
+  const blocks = [];
+  let cursor = 0;
+  while (true) {
+    const openStart = haystack.indexOf("<script", cursor);
+    if (openStart === -1) break;
+    const openEnd = haystack.indexOf(">", openStart);
+    if (openEnd === -1) break;
+    const closeStart = haystack.indexOf("</script>", openEnd + 1);
+    if (closeStart === -1) break;
+    const closeEnd = closeStart + "</script>".length;
+    blocks.push(haystack.slice(openStart, closeEnd));
+    cursor = closeEnd;
+  }
+  return blocks;
+}
+
+// --- offline-bundle unbundling -------------------------------------------
+// The redesigned pages are ~4.3MB self-contained bundles: the real document
+// lives as a JSON string in <script type="__bundler/template">, fonts + the
+// dc-runtime app JS live uuid-keyed in <script type="__bundler/manifest">.
+// namo's backend rejects multi-MB payloads (Firestore-style entity limit),
+// so for deployment we reconstruct the original ~130KB document: inline the
+// app JS (gunzip), and swap the uuid-src @font-face blocks for the same
+// fonts loaded from their CDNs. The dc-runtime supports running unbundled —
+// without window.__resources it loads React from unpkg by itself.
+function extractBundlerBlock(raw, type) {
+  const marker = `<script type="__bundler/${type}">`;
+  const start = raw.indexOf(marker);
+  if (start === -1) return null;
+  const end = raw.indexOf("</script>", start);
+  if (end === -1) return null;
+  return raw.slice(start + marker.length, end).trim();
+}
+
+const PRETENDARD_IMPORT =
+  '<style>@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");</style>';
+const MATERIAL_IMPORT =
+  '<style>@import url("https://fonts.googleapis.com/icon?family=Material+Icons");</style>';
+
+function unbundle(raw, file) {
+  const tplRaw = extractBundlerBlock(raw, "template");
+  const manRaw = extractBundlerBlock(raw, "manifest");
+  if (!tplRaw || !manRaw) return null;
+  let tpl = JSON.parse(tplRaw);
+  const manifest = JSON.parse(manRaw);
+  // 1) local JS resources referenced as <script src="<uuid>"> → inline them
+  for (const [uuid, res] of Object.entries(manifest)) {
+    const tag = `<script src="${uuid}"></script>`;
+    if (res.mime !== "text/javascript" || !tpl.includes(tag)) continue;
+    let buf = Buffer.from(res.data, "base64");
+    if (res.compressed) buf = gunzipSync(buf);
+    const js = buf.toString("utf8").split("</script").join("<\\/script");
+    tpl = tpl.replace(tag, `<script>\n${js}\n</script>`);
+  }
+  // 2) uuid-src font blocks → same fonts via CDN
+  for (const block of extractAllStyleBlocks(tpl)) {
+    if (!block.includes("format('woff2')")) continue;
+    if (block.includes("Pretendard")) tpl = tpl.replace(block, PRETENDARD_IMPORT);
+    else if (block.includes("Material Icons")) tpl = tpl.replace(block, MATERIAL_IMPORT);
+  }
+  console.log(`  ${file}: unbundled offline bundle -> ${Buffer.byteLength(tpl, "utf8")} bytes document`);
+  return tpl;
+}
+
 // Builds { title, payload } for one HTML file: payload = head stylesheet
 // links (as @import), head <style> blocks (verbatim, including tags), then
 // the <body> inner content.
 function buildPayload(raw, file) {
-  const head = extractTag(raw, "head");
-  let body = extractTag(raw, "body");
+  // Bundled pages: deploy the reconstructed original document instead of the
+  // 4.3MB bundle. The page <title> stays on the outer document, so read it
+  // from `raw` in both cases.
+  const unbundled = unbundle(raw, file);
+  const doc = unbundled ?? raw;
+  const head = extractTag(doc, "head");
+  let body = extractTag(doc, "body");
   if (!body) {
     // Fragment fallback: some files may be committed artifact-style (starting
     // with <title>, no html/head/body wrapper). Treat the whole file minus the
     // <title> tag as the body so a fragment never kills the deploy.
-    const t = extractTag(raw, "title");
-    const inner = t ? raw.slice(0, t.outerStart) + raw.slice(t.outerEnd) : raw;
+    const t = extractTag(doc, "title");
+    const inner = t ? doc.slice(0, t.outerStart) + doc.slice(t.outerEnd) : doc;
     console.warn(`  ${file}: no <body> tag — treating file as a fragment (title stripped)`);
     body = { inner: inner.trim() };
   }
-  const title = head ? extractTag(head.inner, "title") : extractTag(raw, "title");
+  const outerHead = unbundled ? extractTag(raw, "head") : head;
+  const title = outerHead ? extractTag(outerHead.inner, "title") : extractTag(raw, "title");
   const titleText = title ? title.inner.trim() : file;
   const styleBlocks = head ? extractAllStyleBlocks(head.inner) : [];
   const hrefs = head ? extractStylesheetHrefs(head.inner) : [];
   const importBlock = hrefs.length
     ? `<style>${hrefs.map((h) => `@import url("${h}");`).join("")}</style>`
     : "";
-  let payload = rewriteInternalLinks(`${importBlock}\n${styleBlocks.join("\n")}\n${body.inner}`.trim());
+  // Unbundled docs keep the dc-runtime app <script> in <head>; namo pages
+  // have no head, so append those scripts after the body content. The
+  // runtime boots on readyState!=="loading", so running late is fine.
+  const headScripts = unbundled && head ? extractAllScriptBlocks(head.inner) : [];
+  let payload = rewriteInternalLinks(
+    `${importBlock}\n${styleBlocks.join("\n")}\n${body.inner}\n${headScripts.join("\n")}`.trim()
+  );
   // namo's update_page_html validator rejects any payload containing a <body>
-  // tag. We only ever send body *inner* content, but the offline bundle embeds
-  // the original document markup inside JS strings, so the literal `<body`
-  // appears there. Escape the 'b' as a \\u0062 unicode escape — JS decodes
-  // it back to `<body` at runtime, and no real <body> markup exists in the
-  // payload to corrupt.
+  // tag. We only ever send body *inner* content, but bundled/simulated pages
+  // may carry the literal `<body` inside JS strings. Escape the 'b' as a
+  // \\u0062 unicode escape — JS decodes it back to `<body` at runtime, and no
+  // real <body> markup exists in the payload to corrupt.
   payload = payload.replaceAll("<body", "<\\u0062ody").replaceAll("<BODY", "<\\u0042ODY");
   return { title: titleText, payload };
 }
