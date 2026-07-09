@@ -39,9 +39,9 @@ DRY_RUN=1 node scripts/deploy.mjs
 | [/](https://officemate-five.vercel.app/) | 랜딩페이지 + 라이브 데모 (메인 · `#demo` 앵커로 데모 섹션 진입, 하단 `#deliverables`에 제출물 링크) |
 | [/landing](https://officemate-five.vercel.app/landing) | `/`로 리다이렉트 (구 링크 호환용) |
 | [/biz-plan](https://officemate-five.vercel.app/biz-plan) | 사업계획서 — 3층 수익구조·리텐션 가설·SOM 모델 |
-| [/flow-mockup](https://officemate-five.vercel.app/flow-mockup) | 핵심 매칭 플로우 목업 (7화면) |
-| [/journey-mockup](https://officemate-five.vercel.app/journey-mockup) | 사용자 여정 목업 (5화면) |
-| [/hr-console](https://officemate-five.vercel.app/hr-console) | HR 콘솔 시뮬레이터 (8페이지 인터랙티브) |
+| [/flow-mockup](https://officemate-five.vercel.app/flow-mockup) | 핵심 매칭 플로우 목업 (12개 폰 화면 + 스펙 카드) |
+| [/journey-mockup](https://officemate-five.vercel.app/journey-mockup) | 사용자 여정 목업 (5단계 시작 가이드) |
+| [/hr-console](https://officemate-five.vercel.app/hr-console) | HR 콘솔 시뮬레이터 (10페이지 인터랙티브 대시보드) |
 
 ## 라이브 데모 주요 기능
 
@@ -54,7 +54,8 @@ DRY_RUN=1 node scripts/deploy.mjs
 
 ## 개발 메모
 
-- 순수 정적 HTML — 빌드 단계 없음, 외부 네트워크 요청 없음(전부 클라이언트 사이드 시뮬레이션)
+- 완전 독립형(오프라인) HTML 번들 — 폰트·아이콘·인터랙션이 파일 안에 인라인되어 더블클릭만으로 열림. 본문은 JS가 렌더하므로 JS 비활성 환경에선 표시되지 않음. 파일당 ~4.3MB
+- 디자인 시스템: 블루 계열 Senti/Halo — 밝은 뉴트럴 배경 + 딥네이비 몰입 패널, Pretendard Variable, Material Icons
 - 로컬 확인: 리포 루트에서 `python -m http.server 8936` → http://localhost:8936
 - 디자인 토큰: 브랜드 블루 `#33549C` 계열, Pretendard/시스템 폰트 — 전 페이지 공통
 - `vercel.json`의 `cleanUrls`로 `.html` 없는 경로 사용

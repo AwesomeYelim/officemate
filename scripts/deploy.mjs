@@ -148,12 +148,22 @@ function extractStylesheetHrefs(haystack) {
   return hrefs;
 }
 
-// Rewrites root-absolute internal links for the namo subpath. Only known page
-// slugs (plus the bare home link) are touched — external URLs, anchors, and
-// asset paths pass through unchanged. Exact-string replacement, no regex.
+// Rewrites internal links for namo. Two concerns:
+//  1. The offline bundle links pages as `href="<slug>.html"` so double-clicked
+//     files work — namo routes are extensionless (/biz-plan), so rewrite them.
+//     Bundled pages also carry the same links escaped inside JS strings
+//     (`href=\"biz-plan.html\"`); both forms are covered.
+//  2. If SB_PUBLIC_BASE is set (site under a subpath), prefix root-absolute
+//     links too. Only known page slugs are touched — external URLs, anchors,
+//     and asset paths pass through unchanged. Exact-string replacement.
 function rewriteInternalLinks(html) {
-  if (!SB_PUBLIC_BASE) return html;
   let out = html;
+  for (const p of PAGES) {
+    out = out
+      .replaceAll(`href="${p.slug}.html"`, `href="${SB_PUBLIC_BASE}/${p.slug}"`)
+      .replaceAll(`href=\\"${p.slug}.html\\"`, `href=\\"${SB_PUBLIC_BASE}/${p.slug}\\"`);
+  }
+  if (!SB_PUBLIC_BASE) return out;
   for (const p of PAGES) {
     // covers href="/slug" and href="/slug#anchor"
     out = out
