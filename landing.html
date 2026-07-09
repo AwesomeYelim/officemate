@@ -1020,12 +1020,12 @@
             </div>
             <div class="feat-list" id="featList">
               <button class="feat-item" data-feat="nlp" type="button" title="예시 1~3 버튼으로 체험"><span class="feat-check">○</span>자연어 개설</button>
-              <button class="feat-item" data-feat="slotpicker" type="button" title="예시 4 버튼으로 체험"><span class="feat-check">○</span>슬롯 직접 선택</button>
+              <button class="feat-item" data-feat="slotpicker" type="button" title="클릭하면 슬롯피커가 바로 열려요 — 슬롯 1개 이상 선택 후 '선택 완료'를 누르면 체크됩니다"><span class="feat-check">○</span>슬롯 직접 선택</button>
               <button class="feat-item" data-feat="onoff" type="button" title="모집을 진행하면 자동으로 표시돼요"><span class="feat-check">○</span>온·오프 자동판별</button>
               <button class="feat-item" data-feat="deposit" type="button" title="모집 시작 후 디파짓 카드에서 체험"><span class="feat-check">○</span>디파짓</button>
               <button class="feat-item" data-feat="gauge" type="button" title="디파짓 확인 후 모집 카드에서 표시돼요"><span class="feat-check">○</span>매칭 게이지</button>
               <button class="feat-item" data-feat="confirm" type="button" title="정원이 차면 자동으로 표시돼요"><span class="feat-check">○</span>확정·아이스브레이커</button>
-              <button class="feat-item" data-feat="merge" type="button" title="⏩ 빨리 감기 또는 💥 인원 미달로 마감 버튼으로 체험"><span class="feat-check">○</span>병합·방폭</button>
+              <button class="feat-item" data-feat="merge" type="button" title="클릭하면 모집 시나리오를 빠르게 진행해 병합 제안 카드까지 자동으로 보여드려요"><span class="feat-check">○</span>병합·방폭</button>
               <button class="feat-item" data-feat="timeattack" type="button" title="모집을 시작하면 자동으로 표시돼요"><span class="feat-check">○</span>72h 타임어택</button>
               <button class="feat-item" data-feat="checkin" type="button" title="장소 추천 이후 체크인 카드에서 체험"><span class="feat-check">○</span>체크인(QR·온라인)</button>
               <button class="feat-item" data-feat="reminder" type="button" title="모임 1시간 전 카드에서 체험"><span class="feat-check">○</span>리마인더·대기승급</button>
@@ -1963,8 +1963,8 @@
       '<span class="tag brand">모집중</span>' +
       '<div class="ta-row" id="taRow">⏳ <span class="ta-clock" id="taClock">72:00:00</span> 남음 · 72시간 타임어택</div>' +
       '<div class="ta-controls" id="taControls">' +
-        '<button class="ta-btn" id="btnFastForward" type="button">⏩ 빨리 감기(시연)</button>' +
-        '<button class="ta-btn danger" id="btnForceDissolve" type="button">💥 인원 미달로 마감(시연)</button>' +
+        '<button class="ta-btn" id="btnFastForward" type="button">⏩ (데모) 마감 임박으로 건너뛰기</button>' +
+        '<button class="ta-btn danger" id="btnForceDissolve" type="button">💥 (데모) 인원 미달로 마감</button>' +
       '</div>' +
       '<div class="avatar-stack" id="avatarStack">' + renderAvatars() + '</div>' +
       '<div class="chip-row">' + state.profileTags.slice(0, 3).map(function (t) { return '<span class="chip-sm">#' + t + '</span>'; }).join('') + (state.slot.menuLabel ? '<span class="chip-sm">#' + state.slot.menuLabel + '</span>' : '') + '</div>' +
@@ -3235,16 +3235,24 @@
     btn.addEventListener('click', function () { switchTab(btn.getAttribute('data-tab')); });
   });
 
-  /* ================= feature checklist triggers ================= */
+  /* ================= feature checklist triggers =================
+     Every item is clickable and must actually reach its markFeature() call —
+     if the demo is mid-scenario (fsm !== IDLE) a plain ex-button .click() can
+     silently no-op ("지금 다른 모임이 진행 중이에요" bubble, easy to miss,
+     scrolled past). So slotpicker/merge force a reset first when needed
+     instead of just re-clicking the same button and hoping fsm lines up. */
   document.querySelectorAll('.feat-item').forEach(function (btn) {
     btn.addEventListener('click', function () {
       var key = btn.getAttribute('data-feat');
       if (key === 'nlp') {
+        if (state.fsm !== 'IDLE') resetScenario();
         var ex1 = document.querySelector('.example-btn[data-example="내일 점심 마라탕 3명"]');
         if (ex1) ex1.click();
       } else if (key === 'slotpicker') {
-        var ex4 = document.querySelector('.example-btn[data-special="slot-picker"]');
-        if (ex4) ex4.click();
+        if (state.fsm !== 'IDLE') resetScenario();
+        ensureRoomReady().then(openSlotPickerFlow);
+      } else if (key === 'merge') {
+        triggerMergeDemo();
       } else if (key === 'mypage') {
         switchTab('my');
       } else if (key === 'explore') {
@@ -3254,6 +3262,62 @@
       // their `title` attribute already guides the user to where they appear.
     });
   });
+
+  // 체크리스트 클릭 경로용 polling helper — waitForFsm/waitForSelector와 달리
+  // state.demoRunning(= "자동 데모" 버튼 실행 중 플래그)에 묶여있지 않다.
+  // (waitForFsm/waitForSelector를 여기서 그대로 쓰면 demoRunning이 false라서
+  // 첫 tick에 즉시 resolve돼버려 체인이 확인카드를 기다리지 못하고 헛클릭하는
+  // 버그가 있었음 — 그래서 별도로 둔다.)
+  function pollUntil(check, timeoutMs) {
+    return new Promise(function (resolve) {
+      var start = Date.now();
+      var iv = setInterval(function () {
+        if (check() || Date.now() - start > timeoutMs) { clearInterval(iv); resolve(); }
+      }, 150);
+      state.demoTimers.push(iv);
+    });
+  }
+  function pollForSelector(sel, timeoutMs) {
+    return pollUntil(function () { return !!document.querySelector(sel); }, timeoutMs).then(function () {
+      return document.querySelector(sel);
+    });
+  }
+
+  // 병합·방폭 체크리스트 항목: 클릭 즉시 "모집중 + 정원미달" 상태를 만들어 병합
+  // 제안 카드를 바로 띄운다 — 자연 참여(2~5s 간격)가 정원을 먼저 채워버리는
+  // 레이스를 피하기 위해 조인 타이머를 멈추고 카드를 띄운다.
+  function fireMergeSuggestionNow() {
+    if (document.querySelector('[data-act="auto-merge-yes"]')) return; // already showing
+    if (state.joinTimer) { clearTimeout(state.joinTimer); state.joinTimer = null; }
+    if (state.taFastTimer) { clearInterval(state.taFastTimer); state.taFastTimer = null; }
+    state.pendingJoins = [];
+    state.mergeOffered = true;
+    showAutoMergeSuggestion();
+  }
+
+  function triggerMergeDemo() {
+    if (state.fsm === 'RECRUITING' && state.participants.length < state.capacity) {
+      fireMergeSuggestionNow();
+      return;
+    }
+    if (state.fsm !== 'IDLE') resetScenario();
+    // poll for the actual DOM buttons rather than the fsm flag — fsm flips
+    // synchronously but each card only renders after botSayCard's typing-delay
+    // setTimeout, so an fsm-only check resolves before there's anything to click.
+    ensureRoomReady().then(function () {
+      handleUserInput('내일 점심 마라탕 3명');
+      return pollForSelector('#chatBody [data-act="start-recruit"]', 8000);
+    }).then(function (startBtn) {
+      if (startBtn) startBtn.click();
+      return pollForSelector('[data-act="deposit-confirm"]', 8000);
+    }).then(function (depositBtn) {
+      if (depositBtn) depositBtn.click();
+      return pollForSelector('#btnFastForward', 8000);
+    }).then(function () {
+      if (state.fsm !== 'RECRUITING') return;
+      fireMergeSuggestionNow();
+    });
+  }
 
   function showListView() {
     state.view = 'list';
@@ -3367,7 +3431,10 @@
     ensureRoomReady();
   });
 
-  function resetAll() {
+  // resetScenario: 진행 중인 시나리오만 IDLE로 되돌린다 (체크리스트 진행도는 보존).
+  // "↺ 처음부터" 버튼처럼 전부 지우고 싶을 때는 resetAll()(= resetScenario + 체크리스트 초기화)을 쓴다.
+  // 체크리스트 항목을 눌러 특정 기능을 다시 체험할 때는 이걸 써야 기존에 딴 체크가 안 날아간다.
+  function resetScenario() {
     stopDemo();
     stopTimeAttack();
     state.fsm = 'IDLE';
@@ -3397,7 +3464,6 @@
     state.deadlineReminded = false;
     state.inspVirtualSec = 0;
     resetInspectorLog();
-    resetFeatureChecklist();
     chatBody.innerHTML = '';
     botAvatar.textContent = '🍱';
     setStage('parse', '입력창에 자연어 한 줄을 입력하면 파서가 날짜·시간·메뉴·인원을 추출합니다. 예시 버튼을 눌러 시작해보세요.');
@@ -3405,6 +3471,11 @@
     state.roomListUnread = true;
     state.roomEntered = false;
     showListView();
+  }
+
+  function resetAll() {
+    resetScenario();
+    resetFeatureChecklist();
   }
 
   /* ================= auto demo ================= */
