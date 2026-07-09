@@ -186,6 +186,16 @@ input,select{font-family:inherit}
 .seg-opt{font-size:11.5px;padding:6px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:600;color:var(--muted)}
 .seg-opt.on{background:var(--brand);color:#fff;border-color:var(--brand)}
 
+/* ── 포인트 관리 (관리자 설정) ── */
+.pt-input{width:82px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;font-family:var(--mono);font-size:11px;text-align:right;background:#fff}
+.pt-input:focus{border-color:var(--brand-soft);outline:none}
+.tree-row{display:flex;align-items:center;gap:10px;padding:9px 18px;border-bottom:1px solid #F0F1F4;cursor:pointer;transition:background .12s}
+.tree-row:hover{background:#F7F8FA}
+.tree-chev{width:14px;font-size:9px;color:var(--muted);transition:transform .15s;flex-shrink:0}
+.tree-row.open .tree-chev{transform:rotate(90deg)}
+.tree-kids{display:none}
+.tree-kids.show{display:block}
+
 /* ── Timeline / Live feed ── */
 .tl-item{display:flex;gap:11px;margin-bottom:13px;animation:fadeIn .4s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
@@ -465,56 +475,54 @@ input,select{font-family:inherit}
     <div id="page-points" class="page">
       <div class="alert-bar good">
         <div class="dot dot-good"></div>
-        <span>포인트는 회사가 직원에게 지급하는 <b>복지 자산</b> · <b>구매 → 제공 → 인센티브로 순환</b> · 직원은 소소하게 벌고, 기업은 방 생성 계약금으로 소비됩니다</span>
+        <span><b>돈의 사이클</b> — HR 포인트 구매 → 직원 지급 → 모임 생성·참여로 적립 → 장소 결제 → 재충전 · 지급은 항상 <b>가용 포인트 안에서만</b> 이뤄집니다</span>
       </div>
       <div class="metric-row">
-        <div class="mc"><div class="mc-lbl">포인트 풀 잔액</div><div class="mc-val" style="color:var(--brand-text)" id="kpiPtPool">980,000P</div><div class="mc-sub" id="kpiPtPoolSub">이번 달 좌석 구독료 618,000P</div></div>
+        <div class="mc"><div class="mc-lbl">포인트 풀 잔액</div><div class="mc-val" style="color:var(--brand-text)" id="kpiPtPool">980,000P</div><div class="mc-sub" id="kpiPtPoolSub">이번 달 618,000P 충전</div></div>
         <div class="mc"><div class="mc-lbl">직원 지급</div><div class="mc-val" style="color:var(--good-text)" id="kpiPtDist">540,000P</div><div class="mc-sub" id="kpiPtDistSub">380 / 412명 · 지급률 87%</div></div>
-        <div class="mc"><div class="mc-lbl">사용자 획득 (인센티브)</div><div class="mc-val" style="color:var(--ink)" id="kpiPtEarned">46,000P</div><div class="mc-sub">참여·재만남·방 완주 보상</div></div>
-        <div class="mc"><div class="mc-lbl">방 생성 소비 (계약금)</div><div class="mc-val" style="color:var(--dinner)" id="kpiPtSpent">118,000P</div><div class="mc-sub">개설 예치 · 성사 시 환급</div></div>
+        <div class="mc"><div class="mc-lbl">예치 중 포인트</div><div class="mc-val" style="color:var(--lunch)" id="kpiPtEscrow">22,000P</div><div class="mc-sub">방 개설·참여 계약금 (진행 중)</div></div>
+        <div class="mc"><div class="mc-lbl">회수 포인트</div><div class="mc-val" style="color:var(--ink)" id="kpiPtRecovered">96,000P</div><div class="mc-sub">모임 정상 완료 → 예치금 반환</div></div>
       </div>
 
       <!-- ① 포인트 구매 -->
-      <div class="two-col">
-        <div class="panel" style="margin-bottom:16px">
-          <div class="ph"><div class="ph-title">① 포인트 구매</div><div class="ph-meta">단위별 간편 구입 · 카드 결제 연결</div></div>
-          <div style="padding:16px 18px">
-            <div id="ptPacks" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px"></div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)">
-              <span style="white-space:nowrap">직접 입력</span>
-              <input id="ptCustom" type="number" placeholder="100000" style="flex:1;min-width:0;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:var(--mono)">
-              <span>P</span>
-              <button class="btn-sm bsm-brand" onclick="buyCustomPoints()">구매</button>
-            </div>
-            <p style="font-size:10.5px;color:var(--muted);margin-top:10px">* 결제는 <b>예산·정산</b>의 등록 카드로 처리되며 증빙이 자동 수집됩니다.</p>
-          </div>
-        </div>
-        <div class="panel" style="margin-bottom:16px">
-          <div class="ph"><div class="ph-title">제공사 문의</div></div>
-          <div style="padding:14px 18px" id="ptVendor"></div>
-        </div>
-      </div>
-
-      <!-- ② 포인트 제공 -->
       <div class="panel">
-        <div class="ph"><div class="ph-title">② 포인트 제공 (부서·팀·개인)</div><button class="btn-sm bsm-brand" onclick="openGrant()">＋ 포인트 지급</button></div>
-        <div style="padding:14px 18px 6px" id="ptGrantBar"></div>
-        <table class="dt" style="border:none;border-radius:0">
-          <thead><tr><th>팀</th><th>인원</th><th>1인 지급</th><th>총 지급</th><th>사용률</th><th></th></tr></thead>
-          <tbody id="ptTeamBody"></tbody>
-        </table>
+        <div class="ph"><div class="ph-title">① 포인트 구매</div><div class="ph-meta">결제는 예산·정산의 등록 카드로 연결 · 증빙 자동 수집</div></div>
+        <div style="padding:16px 18px">
+          <div id="ptPacks" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);flex-wrap:wrap">
+            <span style="white-space:nowrap;font-weight:600">직접 입력</span>
+            <input id="ptCustom" type="number" placeholder="100000" oninput="calcCustomCost()" style="width:130px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;font-family:var(--mono)">
+            <span>P</span>
+            <span id="ptCustomCost" style="font-family:var(--mono);color:var(--brand-text);font-weight:700">= ₩0 (1P = ₩1.00)</span>
+            <button class="btn-sm bsm-brand" onclick="buyCustomPoints()">카드 결제</button>
+          </div>
+          <p style="font-size:10.5px;color:var(--muted);margin-top:10px">🎁 도입 프로모션: 최초 도입 시 <b>100만P 무료 제공</b> · 50만P 이상 1% · 100만P 이상 3% 할인 단가 자동 적용</p>
+        </div>
       </div>
 
-      <!-- ③ 인센티브 -->
-      <div class="two-col">
+      <!-- ② 포인트 제공: 부서 > 팀 > 개인 트리 -->
+      <div class="panel">
+        <div class="ph"><div class="ph-title">② 포인트 제공 — 부서 · 팀 · 개인</div><button class="btn-sm bsm-brand" onclick="openGrant()">＋ 일괄 지급</button></div>
+        <div style="padding:12px 18px 6px" id="ptGrantBar"></div>
+        <div id="ptOrgTree"></div>
+      </div>
+
+      <!-- ③ 등급 · 규칙 설정 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
         <div class="panel" style="margin-bottom:0">
-          <div class="ph"><div class="ph-title">③ 방 등급별 인센티브</div><div class="ph-meta">번개 → 푸른 → 붉은</div></div>
+          <div class="ph"><div class="ph-title">③ 메이트 등급별 보상 설정</div><button class="btn-sm bsm-good" onclick="saveGrades()">저장</button></div>
           <div id="ptGrades"></div>
         </div>
         <div class="panel" style="margin-bottom:0">
-          <div class="ph"><div class="ph-title">행동별 포인트 규칙</div><div class="ph-meta">획득 ↔ 소비</div></div>
+          <div class="ph"><div class="ph-title">행동별 포인트 규칙 설정</div><button class="btn-sm bsm-good" onclick="saveRules()">저장</button></div>
           <div id="ptRules"></div>
         </div>
+      </div>
+
+      <!-- 제공사 문의 (별도) -->
+      <div class="panel" style="margin-top:16px;margin-bottom:0">
+        <div class="ph"><div class="ph-title">제공사 문의 — 대량 구매 · 단가 협의</div></div>
+        <div style="padding:14px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap" id="ptVendor"></div>
       </div>
     </div>
 
@@ -687,7 +695,7 @@ const DATA={
           {name:'신한 법인카드', num:'****-1130', brand:'신한', primary:false, month:0},
         ],
         payments:[
-          {desc:'좌석 구독료 정기 구매 · 412명', pt:618000, won:618000, card:'****-4821', proof:'완료'},
+          {desc:'월 정기 포인트 충전 (자동)', pt:618000, won:618000, card:'****-4821', proof:'완료'},
           {desc:'포인트 팩 추가 구입 (50만P)', pt:500000, won:495000, card:'****-4821', proof:'완료'},
           {desc:'신규 입사 웰컴 포인트 충전 · 4명', pt:6000, won:6000, card:'****-4821', proof:'완료'},
         ],
@@ -697,7 +705,7 @@ const DATA={
         purchased:618000, poolBalance:980000,
         distributed:540000, distributedTargets:380, perCapita:1420, distributedRate:87,
         used:372000, refunded:364000, forfeited:8000, usageRate:69,
-        earned:46000, spentOnRooms:118000,
+        escrow:22000, recovered:96000,
         nextBilling:'2026.08.01', bizplayCard:'비즈플레이 법인카드 ****-4821', bizplayLinked:true,
         teams:[
           {name:'인프라팀',hc:20,per:1500,dist:30000,usage:22},
@@ -752,7 +760,7 @@ const DATA={
           {name:'신한 법인카드', num:'****-1130', brand:'신한', primary:false, month:0},
         ],
         payments:[
-          {desc:'좌석 구독료 정기 구매 · 412명', pt:618000, won:618000, card:'****-4821', proof:'완료'},
+          {desc:'월 정기 포인트 충전 (자동)', pt:618000, won:618000, card:'****-4821', proof:'완료'},
           {desc:'신규 입사 웰컴 포인트 충전 · 2명', pt:3000, won:3000, card:'****-4821', proof:'완료'},
         ],
       },
@@ -761,7 +769,7 @@ const DATA={
         purchased:618000, poolBalance:742000,
         distributed:470000, distributedTargets:352, perCapita:1330, distributedRate:81,
         used:286000, refunded:279000, forfeited:11000, usageRate:61,
-        earned:31000, spentOnRooms:86000,
+        escrow:18000, recovered:68000,
         nextBilling:'2026.07.01', bizplayCard:'비즈플레이 법인카드 ****-4821', bizplayLinked:true,
         teams:[
           {name:'인프라팀',hc:20,per:1400,dist:28000,usage:15},
@@ -806,7 +814,7 @@ function refreshPageInfo(){
   pageInfo.dashboard.sub=p.dateNote;
   pageInfo.budget.sub=`이번 달 카드 결제 ₩${p.budget.cardPaymentTotal.toLocaleString()} · 증빙 완료율 ${p.budget.proofRate}%`;
   pageInfo.engagement.sub=`전사 42개 팀 · 4주 이동평균 기준 · 주간 참여율 ${p.weeklyParticipation}%`;
-  if(p.points)pageInfo.points.sub=`풀 잔액 ${p.points.poolBalance.toLocaleString()}P · 지급률 ${p.points.distributedRate}% · 좌석 구독료 기반`;
+  if(p.points)pageInfo.points.sub=`풀 잔액 ${p.points.poolBalance.toLocaleString()}P · 지급률 ${p.points.distributedRate}% · 가용 포인트 내 지급`;
 }
 
 function nav(id, el){
@@ -1691,92 +1699,174 @@ function renderBudget(){
   if(meta)meta.textContent=`최근 ${b.payments.length}건 · 포인트 구매 결제 기준`;
 }
 
-// ── 5.5 포인트 관리 (구매 · 제공 · 인센티브) ──
+// ── 5.5 포인트 관리 (구매 · 제공 · 등급/규칙 설정) ──
 const PT_PACKS=[
   {p:100000, won:100000, tag:'스타터', save:''},
   {p:500000, won:495000, tag:'인기', save:'1% 할인'},
   {p:1000000, won:970000, tag:'대량', save:'3% 할인'},
 ];
 const PT_VENDOR={name:'OfficeMate 세일즈팀', email:'sales@officemate.im', tel:'02-1234-5678'};
-const ROOM_GRADES=[
-  {name:'번개', icon:'⚡', color:'var(--muted)', bg:'#EEF0F3', reward:20, cond:'기본 · 즉석 모임', when:'참여 확정 시'},
-  {name:'푸른 번개', icon:'⚡', color:'var(--brand-text)', bg:'#E7ECF6', reward:50, cond:'신뢰도 70+ 방장', when:'정원 달성·체크인 시'},
-  {name:'붉은 번개', icon:'⚡', color:'var(--danger-text)', bg:'#F8EBE9', reward:100, cond:'재만남·부서혼합 방', when:'완주 시 보너스'},
+// 메이트 등급제 (누적 모임 횟수) — 보상 포인트는 HR이 설정
+const MATE_GRADES=[
+  {name:'번개', icon:'⚡', color:'var(--muted)', bg:'#EEF0F3', cond:'누적 3회', reward:20},
+  {name:'푸른 번개', icon:'🔵', color:'var(--brand-text)', bg:'#E7ECF6', cond:'누적 5회', reward:50},
+  {name:'레드 번개', icon:'🔴', color:'var(--danger-text)', bg:'#F8EBE9', cond:'누적 10회', reward:80},
+  {name:'자이언트 제트', icon:'🌩️', color:'var(--warn-text)', bg:'#F8EEE1', cond:'누적 20회 · 최고 등급', reward:150},
 ];
+// 행동별 포인트 규칙 — 값·활성화를 HR이 설정
 const PT_ACTION_RULES=[
-  {dir:'earn', icon:'✅', name:'모임 참여·체크인', val:'+30P', desc:'출석 확인 시 자동 적립'},
-  {dir:'earn', icon:'🤝', name:'재만남 보너스', val:'+50P', desc:'다른 부서 동료와 재매칭'},
-  {dir:'earn', icon:'⚡', name:'방 등급 완주', val:'+20~100P', desc:'방 등급별 차등 보상'},
-  {dir:'spend', icon:'📝', name:'방 생성 계약금', val:'−100P', desc:'개설 시 예치 · 성사되면 환급'},
-  {dir:'spend', icon:'🛡', name:'노쇼 디파짓', val:'−500P', desc:'미참석 시 몰수'},
+  {icon:'✅', name:'모임 참여 완료', desc:'체크인 확인 시 적립', val:30, on:true},
+  {icon:'🤝', name:'재만남 보너스', desc:'다른 부서 동료와 재매칭 시 적립', val:50, on:true},
+  {icon:'📝', name:'방 개설 예치금', desc:'개설 시 예치 → 모임 완료 시 회수(반환)', val:100, on:true},
+  {icon:'🎫', name:'참여 예치금', desc:'참여 신청 시 예치 → 모임 완료 시 회수(반환)', val:500, on:true},
+  {icon:'🚫', name:'노쇼 페널티', desc:'무단 불참 시 예치금 미반환 · 보상 미지급', val:null, on:true},
+];
+// 조직 트리 (부서 > 팀 > 개인)
+const ORG_TREE=[
+  {dept:'플랫폼개발본부', teams:[
+    {name:'인프라팀', members:['김도현','박지우','이준서']},
+    {name:'백엔드팀', members:['최서준','정하은','한지민']},
+  ]},
+  {dept:'영업본부', teams:[
+    {name:'1팀', members:['김민재','오세훈','윤아름']},
+    {name:'2팀', members:['장우진','서예린']},
+  ]},
+  {dept:'경영지원본부', teams:[
+    {name:'디자인팀', members:['문가영','신재호']},
+    {name:'기획팀', members:['배수지','임현우']},
+    {name:'인사팀', members:['조은비','강태오']},
+  ]},
 ];
 
 function renderPoints(){
   const p=curP(); const pt=p.points; if(!pt)return;
-  const won=v=>'₩'+v.toLocaleString();
   const P=v=>v.toLocaleString()+'P';
   setText('kpiPtPool', P(pt.poolBalance));
-  setText('kpiPtPoolSub', `이번 달 좌석 구독료 ${P(pt.purchased)}`);
+  setText('kpiPtPoolSub', `이번 달 ${P(pt.purchased)} 충전`);
   setText('kpiPtDist', P(pt.distributed));
   setText('kpiPtDistSub', `${pt.distributedTargets} / ${pt.headcount}명 · 지급률 ${pt.distributedRate}%`);
-  setText('kpiPtEarned', P(pt.earned));
-  setText('kpiPtSpent', P(pt.spentOnRooms));
+  setText('kpiPtEscrow', P(pt.escrow));
+  setText('kpiPtRecovered', P(pt.recovered));
 
-  // ① 구매 팩
+  // ① 구매 팩 + 직접 입력 환산
   const packs=document.getElementById('ptPacks');
   if(packs){
     packs.innerHTML=PT_PACKS.map((k,i)=>`<button class="fmt-card" style="padding:12px;text-align:left;cursor:pointer" onclick="buyPack(${i})">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span class="badge badge-brand">${k.tag}</span>${k.save?`<span style="font-size:9px;color:var(--good-text);font-weight:700">${k.save}</span>`:''}</div>
       <div style="font-size:15px;font-weight:800;color:var(--ink);font-family:var(--mono)">${k.p.toLocaleString()}P</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:2px">${won(k.won)}</div></button>`).join('');
+      <div style="font-size:11px;color:var(--muted);margin-top:2px">₩${k.won.toLocaleString()} <span style="color:var(--brand-text)">(1P=₩${(k.won/k.p).toFixed(2)})</span></div></button>`).join('');
   }
-  // 제공사 문의
-  const vend=document.getElementById('ptVendor');
-  if(vend){
-    vend.innerHTML=`
-      <div style="font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:4px">${PT_VENDOR.name}</div>
-      <div class="info-row"><span class="info-lbl">이메일</span><span class="info-val" style="font-family:var(--mono)">${PT_VENDOR.email}</span></div>
-      <div class="info-row"><span class="info-lbl">전화</span><span class="info-val" style="font-family:var(--mono)">${PT_VENDOR.tel}</span></div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn-sm bsm-brand" onclick="toast('제공사에 대량 구매 견적을 요청했습니다.')">견적 문의</button>
-        <button class="btn-sm bsm-gray" onclick="toast('단가 협의 상담을 예약했습니다.')">단가 협의</button>
-      </div>`;
-  }
-  // ② 제공 요약 + 팀 테이블
+  calcCustomCost();
+
+  // ② 제공 요약 + 조직 트리
   const gb=document.getElementById('ptGrantBar');
   if(gb){
     gb.innerHTML=`<div style="display:flex;flex-wrap:wrap;gap:8px">
       <span class="mini-stat">이번 달 지급 ${P(pt.distributed)}</span>
       <span class="mini-stat">지급 대상 ${pt.distributedTargets}명</span>
-      <span class="mini-stat">1인 평균 ${pt.perCapita.toLocaleString()}P</span></div>`;
+      <span class="mini-stat">1인 평균 ${pt.perCapita.toLocaleString()}P</span>
+      <span class="mini-stat">부서를 누르면 팀 → 개인 순으로 펼쳐집니다</span></div>`;
   }
-  const tb=document.getElementById('ptTeamBody');
-  if(tb){
-    tb.innerHTML=pt.teams.map(t=>{
-      const uc=t.usage>=60?'badge-good':t.usage>=35?'badge-warn':'badge-danger';
-      return `<tr><td style="font-weight:600;color:var(--ink)">${t.name}</td><td>${t.hc}명</td><td style="font-family:var(--mono)">${t.per.toLocaleString()}P</td><td style="font-family:var(--mono)">${t.dist.toLocaleString()}P</td><td><span class="badge ${uc}">${t.usage}%</span></td><td><button class="btn-sm bsm-brand" onclick="toast('${t.name}에 포인트를 추가 지급합니다.')">지급</button></td></tr>`;
-    }).join('');
-  }
-  // ③ 방 등급별 인센티브
-  const grades=document.getElementById('ptGrades');
-  if(grades){
-    grades.innerHTML=ROOM_GRADES.map(g=>`<div class="list-row" style="cursor:default">
-      <span style="width:30px;height:30px;border-radius:8px;background:${g.bg};color:${g.color};display:grid;place-items:center;font-size:14px;flex-shrink:0">${g.icon}</span>
-      <div class="row-content"><div class="row-title" style="color:${g.color}">${g.name}</div><div class="row-desc">${g.cond} · ${g.when}</div></div>
-      <span class="badge badge-good">+${g.reward}P</span></div>`).join('');
-  }
-  // 행동별 규칙 (획득/소비)
-  const rules=document.getElementById('ptRules');
-  if(rules){
-    rules.innerHTML=PT_ACTION_RULES.map(r=>{
-      const badge=r.dir==='earn'?'badge-good':'badge-danger';
-      return `<div class="list-row" style="cursor:default"><span style="font-size:16px">${r.icon}</span><div class="row-content"><div class="row-title">${r.name}</div><div class="row-desc">${r.desc}</div></div><span class="badge ${badge}">${r.val}</span></div>`;
-    }).join('');
+  renderOrgTree(pt);
+
+  // ③ 등급 · 규칙 (설정 가능)
+  renderGrades();
+  renderRules();
+
+  // 제공사 문의 (별도 패널)
+  const vend=document.getElementById('ptVendor');
+  if(vend){
+    vend.innerHTML=`
+      <div style="min-width:200px"><div style="font-size:12.5px;font-weight:700;color:var(--ink)">${PT_VENDOR.name}</div><div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px">${PT_VENDOR.email} · ${PT_VENDOR.tel}</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-sm bsm-brand" onclick="toast('제공사에 대량 구매 견적을 요청했습니다.')">견적 문의</button>
+        <button class="btn-sm bsm-gray" onclick="toast('단가 협의 상담을 예약했습니다.')">단가 협의</button>
+        <button class="btn-sm bsm-gray" onclick="toast('도입 프로모션(100만P 무료) 상담을 요청했습니다.')">도입 상담</button>
+      </div>`;
   }
 }
+
+// 부서 > 팀 > 개인 트리
+function renderOrgTree(pt){
+  const el=document.getElementById('ptOrgTree'); if(!el)return;
+  const tmap={}; pt.teams.forEach(t=>tmap[t.name]=t);
+  const usageBadge=u=>`<span class="badge ${u>=60?'badge-good':u>=35?'badge-warn':'badge-danger'}">${u}%</span>`;
+  const offs=[8,-6,3];
+  el.innerHTML=ORG_TREE.map(d=>{
+    const ts=d.teams.map(t=>tmap[t.name]).filter(Boolean);
+    const hc=ts.reduce((s,t)=>s+t.hc,0), dist=ts.reduce((s,t)=>s+t.dist,0);
+    const usage=hc?Math.round(ts.reduce((s,t)=>s+t.usage*t.hc,0)/hc):0;
+    const teamsHtml=d.teams.map(t=>{
+      const td=tmap[t.name]||{hc:t.members.length,per:0,dist:0,usage:0};
+      const memHtml=t.members.map((m,mi)=>{
+        const mu=Math.max(0,Math.min(100,td.usage+offs[mi%3]));
+        return `<div class="tree-row" style="padding-left:76px;cursor:default">
+          <span style="width:22px;height:22px;border-radius:50%;background:var(--paper);display:grid;place-items:center;font-size:10px;color:var(--ink-soft);flex-shrink:0">${m[0]}</span>
+          <div class="row-content"><div class="row-title" style="font-weight:500">${m}</div><div class="row-desc">지급 ${td.per.toLocaleString()}P · 사용률 ${mu}%</div></div>
+          <button class="btn-sm bsm-brand" onclick="event.stopPropagation();grantTo('${m}님')">지급</button></div>`;
+      }).join('');
+      return `<div class="tree-row" style="padding-left:44px" onclick="toggleTree(this)">
+        <span class="tree-chev">▶</span>
+        <div class="row-content"><div class="row-title">${t.name}</div><div class="row-desc">${td.hc}명 · 1인 ${td.per.toLocaleString()}P · 총 ${td.dist.toLocaleString()}P</div></div>
+        ${usageBadge(td.usage)}
+        <button class="btn-sm bsm-brand" onclick="event.stopPropagation();grantTo('${t.name}')">지급</button></div>
+        <div class="tree-kids">${memHtml}</div>`;
+    }).join('');
+    return `<div class="tree-row" onclick="toggleTree(this)">
+      <span class="tree-chev">▶</span>
+      <div class="row-content"><div class="row-title" style="font-weight:700">${d.dept}</div><div class="row-desc">${hc}명 · 총 지급 ${dist.toLocaleString()}P</div></div>
+      ${usageBadge(usage)}
+      <button class="btn-sm bsm-brand" onclick="event.stopPropagation();grantTo('${d.dept}')">지급</button></div>
+      <div class="tree-kids">${teamsHtml}</div>`;
+  }).join('');
+}
+function toggleTree(row){
+  const kids=row.nextElementSibling;
+  if(!kids||!kids.classList.contains('tree-kids'))return;
+  row.classList.toggle('open');
+  kids.classList.toggle('show');
+}
+
+// 등급별 보상 설정 (HR 편집 가능)
+function renderGrades(){
+  const el=document.getElementById('ptGrades'); if(!el)return;
+  el.innerHTML=MATE_GRADES.map((g,i)=>`<div class="list-row" style="cursor:default">
+    <span style="width:30px;height:30px;border-radius:8px;background:${g.bg};color:${g.color};display:grid;place-items:center;font-size:14px;flex-shrink:0">${g.icon}</span>
+    <div class="row-content"><div class="row-title" style="color:${g.color}">${g.name}</div><div class="row-desc">${g.cond} · 모임 완료 시 보너스</div></div>
+    <input class="pt-input" type="number" value="${g.reward}" min="0" step="10" onchange="MATE_GRADES[${i}].reward=+this.value">
+    <span style="font-size:11px;color:var(--muted)">P</span></div>`).join('');
+}
+function saveGrades(){toast('등급별 보상 저장: '+MATE_GRADES.map(g=>`${g.name} +${g.reward}P`).join(' · '));}
+
+// 행동별 규칙 설정 (값 + on/off)
+function renderRules(){
+  const el=document.getElementById('ptRules'); if(!el)return;
+  el.innerHTML=PT_ACTION_RULES.map((r,i)=>`<div class="list-row" style="cursor:default">
+    <span style="font-size:16px">${r.icon}</span>
+    <div class="row-content"><div class="row-title">${r.name}</div><div class="row-desc">${r.desc}</div></div>
+    ${r.val===null?'':`<input class="pt-input" type="number" value="${r.val}" min="0" step="10" onchange="PT_ACTION_RULES[${i}].val=+this.value"><span style="font-size:11px;color:var(--muted)">P</span>`}
+    <button class="tg-switch ${r.on?'on':''}" onclick="PT_ACTION_RULES[${i}].on=!PT_ACTION_RULES[${i}].on;this.classList.toggle('on')"></button></div>`).join('');
+}
+function saveRules(){toast('행동별 포인트 규칙이 저장되었습니다.');}
+
+// 구매 액션
+function ptRate(v){return v>=1000000?0.97:v>=500000?0.99:1;}
+function calcCustomCost(){
+  const el=document.getElementById('ptCustom');const out=document.getElementById('ptCustomCost');
+  if(!el||!out)return;
+  const v=parseInt(el.value,10)||0;
+  const r=ptRate(v);
+  out.textContent=`= ₩${Math.round(v*r).toLocaleString()} (1P = ₩${r.toFixed(2)})`;
+}
 function buyPack(i){const k=PT_PACKS[i];toast(`${k.p.toLocaleString()}P 구매 — ₩${k.won.toLocaleString()} 카드 결제로 연결합니다.`);}
-function buyCustomPoints(){const el=document.getElementById('ptCustom');const v=parseInt(el&&el.value,10);if(!v||v<1){toast('구매할 포인트 수량을 입력하세요.');return;}toast(`${v.toLocaleString()}P 구매 — ₩${v.toLocaleString()} 카드 결제로 연결합니다.`);}
-function openGrant(){toast('포인트 지급 대상(부서·팀·개인)과 금액을 설정하세요.');}
+function buyCustomPoints(){
+  const el=document.getElementById('ptCustom');const v=parseInt(el&&el.value,10);
+  if(!v||v<1){toast('구매할 포인트 수량을 입력하세요.');return;}
+  const cost=Math.round(v*ptRate(v));
+  toast(`${v.toLocaleString()}P 구매 — ₩${cost.toLocaleString()} 카드 결제로 연결합니다.`);
+}
+function openGrant(){toast('지급 대상(부서·팀·개인)과 금액을 선택해 일괄 지급합니다.');}
+function grantTo(t){toast(`${t}에 포인트를 지급합니다 — 금액을 입력하세요.`);}
 
 // ── 6. 스폰서 ──
 const sponsors=[
