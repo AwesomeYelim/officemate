@@ -117,8 +117,32 @@ function extractAllStyleBlocks(haystack) {
   return blocks;
 }
 
-// Builds { title, payload } for one HTML file: payload = head <style> blocks
-// (verbatim, including tags) concatenated, then the <body> inner content.
+// Collects every stylesheet <link href="..."> in `haystack` and returns the
+// hrefs. SiteBuilder pages have no <head>, so these links would otherwise be
+// silently dropped — we re-emit them as a leading <style>@import ...</style>
+// block (webfonts like Material Icons / Pretendard break without this).
+function extractStylesheetHrefs(haystack) {
+  const hrefs = [];
+  let cursor = 0;
+  while (true) {
+    const openStart = haystack.indexOf("<link", cursor);
+    if (openStart === -1) break;
+    const openEnd = haystack.indexOf(">", openStart);
+    if (openEnd === -1) break;
+    const tag = haystack.slice(openStart, openEnd + 1);
+    cursor = openEnd + 1;
+    if (!tag.includes('rel="stylesheet"') && !tag.includes("rel='stylesheet'")) continue;
+    const m = tag.indexOf('href="') !== -1
+      ? tag.slice(tag.indexOf('href="') + 6, tag.indexOf('"', tag.indexOf('href="') + 6))
+      : null;
+    if (m) hrefs.push(m);
+  }
+  return hrefs;
+}
+
+// Builds { title, payload } for one HTML file: payload = head stylesheet
+// links (as @import), head <style> blocks (verbatim, including tags), then
+// the <body> inner content.
 function buildPayload(raw, file) {
   const head = extractTag(raw, "head");
   const body = extractTag(raw, "body");
@@ -126,7 +150,11 @@ function buildPayload(raw, file) {
   const title = head ? extractTag(head.inner, "title") : extractTag(raw, "title");
   const titleText = title ? title.inner.trim() : file;
   const styleBlocks = head ? extractAllStyleBlocks(head.inner) : [];
-  const payload = `${styleBlocks.join("\n")}\n${body.inner}`.trim();
+  const hrefs = head ? extractStylesheetHrefs(head.inner) : [];
+  const importBlock = hrefs.length
+    ? `<style>${hrefs.map((h) => `@import url("${h}");`).join("")}</style>`
+    : "";
+  const payload = `${importBlock}\n${styleBlocks.join("\n")}\n${body.inner}`.trim();
   return { title: titleText, payload };
 }
 
