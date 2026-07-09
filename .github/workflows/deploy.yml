@@ -5,10 +5,13 @@ on:
     branches: [main]
   workflow_dispatch: {}   # manual "deploy everything" button in the Actions tab
 
-# Avoid overlapping deploys if you push twice quickly.
+# Queue deploys instead of cancelling: each run only submits ITS OWN diff, so
+# a cancelled run's changes would never reach namo (they fell through the
+# cracks until the same files were touched again). Sequential runs keep every
+# push's diff submitted.
 concurrency:
   group: deploy
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
