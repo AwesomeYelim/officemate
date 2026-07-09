@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OfficeMate — UX 플로우 목업</title>
+<title>OfficeMate — 기능 매뉴얼</title>
 <style>body{margin:0}</style>
 <style>
   :root {
@@ -185,6 +185,47 @@
     color: var(--panel-muted);
   }
 
+  /* ---------- Manual scaffolding ---------- */
+  .step-head { width: 226px; display: flex; align-items: center; gap: 10px; }
+  .step-num {
+    flex: none; width: 30px; height: 30px; border-radius: 9px;
+    background: linear-gradient(150deg, var(--brand), var(--brand-deep));
+    color: #fff; font-family: var(--font-mono);
+    font-size: 12px; font-weight: 700; display: grid; place-items: center;
+    box-shadow: 0 4px 12px -4px rgba(51,84,156,.6);
+  }
+  .step-kicker { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--morning); }
+  .step-head h3 { margin: 0; font-size: 14px; font-weight: 700; color: #fff; line-height: 1.25; }
+
+  .spec-card {
+    width: 226px; background: rgba(255,255,255,0.045);
+    border: 1px solid var(--panel-line); border-radius: 12px;
+    padding: 11px 12px; display: flex; flex-direction: column; gap: 7px;
+  }
+  .spec-row { display: flex; gap: 9px; font-size: 11px; line-height: 1.5; }
+  .spec-k { flex: none; width: 30px; font-family: var(--font-mono); font-size: 9px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--morning); padding-top: 1px; }
+  .spec-v { color: #E2E1EA; }
+  .spec-v b { color: #fff; }
+
+  /* ---------- Bottom tab bar (화면 구성) ---------- */
+  .demo-tabbar { display: flex; border-top: 1px solid var(--line); background: var(--paper-raised); }
+  .demo-tab { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 0 8px; font-size: 8.5px; font-weight: 700; color: var(--muted); }
+  .demo-tab .dt-icon { font-size: 13px; }
+  .demo-tab.active { color: var(--brand-text); }
+
+  .room-row { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); border-radius: 11px; padding: 8px 9px; }
+  .room-av { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--paper); display: grid; place-items: center; font-size: 12px; }
+  .room-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .room-main b { font-size: 10.5px; }
+  .room-main span { font-size: 9px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .room-time { flex: none; font-size: 8.5px; color: var(--muted); font-family: var(--font-mono); }
+
+  .ring-row { display: flex; justify-content: center; gap: var(--sp-4); }
+  .ring { width: 76px; height: 76px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; }
+  .ring-hole { width: 56px; height: 56px; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; }
+  .ring-hole .v { font-family: var(--font-mono); font-size: 14px; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .ring-hole .k { font-size: 8px; color: var(--muted); }
+
   /* ---------- Phone mockup ---------- */
   .phone { width: 226px; flex: none; }
   .phone-bezel {
@@ -309,9 +350,9 @@
 
   <header class="masthead">
     <div class="wordmark"><a href="index.html" style="color:inherit;text-decoration:none">OfficeMate</a></div>
-    <div class="eyebrow">오피스챗 부착형 AI 매칭 어시스턴트 · UX 플로우 목업</div>
-    <h1>슬롯 선택부터 체크인까지, 7단계로 보는 매칭 플로우</h1>
-    <p class="lede">아침·점심·저녁 슬롯 안에서 30분 단위로 예약하고, 정원이 차면 확정, 안 차면 자동으로 정리됩니다. 화면 흐름을 오피스챗 봇 UI로 재구성했습니다.</p>
+    <div class="eyebrow">오피스챗 부착형 AI 매칭 어시스턴트 · 기능 매뉴얼</div>
+    <h1>기능 매뉴얼 — 메뉴별 화면 구성과 기능</h1>
+    <p class="lede">앱을 이루는 <b>3개 탭(채팅·탐색·마이)</b> 메뉴별로, 각 탭의 화면 구성과 그 안에서 동작하는 기능을 묶어 정리했습니다. 각 탭의 첫 화면이 탭 개요, 이어지는 화면들이 해당 탭의 기능입니다. 스펙 카드에서 <b>역할·규칙·분기</b>를 확인하세요.</p>
     <div class="day-arc-wrap">
       <div class="day-arc"></div>
       <div class="day-arc-labels">
@@ -324,21 +365,89 @@
 
   <section class="storyboard">
     <div class="storyboard-head">
-      <h2>Flow</h2>
+      <h2>💬 채팅 — 모임 개설부터 정산까지</h2>
       <div class="legend">
         <div class="legend-item"><span class="legend-dot" style="background:var(--good)"></span>확정</div>
         <div class="legend-item"><span class="legend-dot" style="background:var(--warn)"></span>타임어택 / 임박</div>
         <div class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>방폭 / 환급</div>
         <div class="legend-item"><span class="legend-dot" style="background:var(--brand)"></span>온라인 확정</div>
       </div>
-      <div class="sub">7 screens · office-chat bot</div>
+      <div class="sub">tab 1 · overview + features 01–06</div>
     </div>
 
     <div class="frame-grid">
 
+      <!-- 탭 1. 채팅 -->
+      <article class="frame">
+        <div class="step-head">
+          <span class="step-num">💬</span>
+          <div>
+            <div class="step-kicker">TAB 1 / 3</div>
+            <h3>채팅</h3>
+          </div>
+        </div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">12:00</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate</div>
+                  <div class="subtitle">대화방 목록</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <span class="tag brand">OfficeMate AI가 매칭 중…</span>
+                <button class="btn-primary" type="button">＋ 새 모임 만들기</button>
+                <div class="room-row">
+                  <span class="room-av">🍱</span>
+                  <div class="room-main"><b>OfficeMate 모임방</b><span>"내일 점심 마라탕 3명"처럼 말해보세요</span></div>
+                  <span class="room-time">지금</span>
+                </div>
+                <div class="room-row">
+                  <span class="room-av">🍜</span>
+                  <div class="room-main"><b>점심조 3반</b><span>내일도 마라탕 콜?</span></div>
+                  <span class="room-time">어제</span>
+                </div>
+                <div class="room-row">
+                  <span class="room-av">☕</span>
+                  <div class="room-main"><b>커피챗 소모임</b><span>다음 주에 또 뭉쳐요</span></div>
+                  <span class="room-time">월</span>
+                </div>
+              </div>
+              <div class="demo-tabbar">
+                <span class="demo-tab active"><span class="dt-icon">💬</span>채팅</span>
+                <span class="demo-tab"><span class="dt-icon">🔍</span>탐색</span>
+                <span class="demo-tab"><span class="dt-icon">🪪</span>마이</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">역할</span><span class="spec-v">모임 <b>개설·진행의 메인 화면</b>. 대화방 목록과 봇 대화방으로 구성</span></div>
+          <div class="spec-row"><span class="spec-k">구성</span><span class="spec-v">AI 상태 칩 · [＋ 새 모임 만들기] · 대화방 목록 · 자연어 입력창</span></div>
+          <div class="spec-row"><span class="spec-k">동작</span><span class="spec-v">모집→확정→체크인→정산 전 과정이 봇 메시지로 이 탭에서 진행</span></div>
+        </div>
+      </article>
+
       <!-- 1. 슬롯 선택 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">①</span><h3>슬롯 선택</h3></div>
+        <div class="step-head">
+          <span class="step-num">01</span>
+          <div>
+            <div class="step-kicker">FEATURE 01</div>
+            <h3>슬롯 선택 · 자연어 개설</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -388,12 +497,22 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">탭으로 고르거나 자연어 한 줄로 개설 — LLM이 슬롯·인원·취향을 파싱해 방을 엽니다</p>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v">아침·점심·저녁 시간대에서 <b>30분 단위 슬롯</b>을 선택하거나, 자연어 한 줄로 모임 개설</span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">2개 이상 슬롯 선택 시 매칭 확률 상승 · 정원 도달 시 모집 마감</span></div>
+          <div class="spec-row"><span class="spec-k">입력</span><span class="spec-v">"목요일 점심에 매운 거 3명" → LLM이 슬롯·인원·취향 파싱</span></div>
+        </div>
       </article>
 
       <!-- 2. 온오프 자동판별 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">②</span><h3>온·오프 자동판별</h3></div>
+        <div class="step-head">
+          <span class="step-num">02</span>
+          <div>
+            <div class="step-kicker">FEATURE 02</div>
+            <h3>온·오프라인 자동판별</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -429,12 +548,22 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">슬롯 길이 ≤30분은 무조건 온라인 — 이동시간이 대화시간을 넘는 비효율 제거</p>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v">슬롯 길이·근무형태로 온라인/오프라인 진행 방식 자동 결정</span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">슬롯 <b>≤30분 → 무조건 온라인</b> (Meet 링크 자동 생성)</span></div>
+          <div class="spec-row"><span class="spec-k">조건</span><span class="spec-v">혼합근무팀 → 온라인 우선 제안 후 오프라인 옵션 노출</span></div>
+        </div>
       </article>
 
       <!-- 3. 디파짓 확인 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">③</span><h3>디파짓 확인</h3></div>
+        <div class="step-head">
+          <span class="step-num">03</span>
+          <div>
+            <div class="step-kicker">FEATURE 03</div>
+            <h3>디파짓 (포인트 예치)</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -468,12 +597,22 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">실제 화폐 대신 사내 포인트 예치 — 노무 리스크는 피하고 심리적 구속력은 유지</p>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v">참여 확정 시 <b>사내 포인트 예치</b>로 노쇼 방지 (실제 화폐 아님)</span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">정상 참석 → 전액 환급 +50P · 사전취소(2h 전) → 무페널티 · 무단 노쇼 → 몰수</span></div>
+          <div class="spec-row"><span class="spec-k">예외</span><span class="spec-v">최초 3회는 예치 없이 체험 가능</span></div>
+        </div>
       </article>
 
       <!-- 4. 매칭 게이지 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">④</span><h3>매칭 게이지</h3></div>
+        <div class="step-head">
+          <span class="step-num">04</span>
+          <div>
+            <div class="step-kicker">FEATURE 04</div>
+            <h3>하이브리드 매칭</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -517,12 +656,22 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">태그가 안 겹쳐도 프로필 소개글의 결이 비슷하면 AI가 이어줍니다 — 하이브리드 매칭</p>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v"><b>태그 교집합 + 프로필 소개글 유사도</b>로 참여자 매칭, 진행률 실시간 표시</span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">정원 도달 또는 마감 카운트다운 종료 시 매칭 종료</span></div>
+          <div class="spec-row"><span class="spec-k">비고</span><span class="spec-v">태그가 겹치지 않아도 소개글 결이 비슷하면 연결</span></div>
+        </div>
       </article>
 
       <!-- 5. 확정/방폭 분기 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">⑤</span><h3>확정 / 방폭 분기</h3></div>
+        <div class="step-head">
+          <span class="step-num">05</span>
+          <div>
+            <div class="step-kicker">FEATURE 05</div>
+            <h3>확정 / 병합 / 방폭 분기</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -561,52 +710,23 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">정원 충족 → 즉시 확정 · 미달은 인접 슬롯 병합 제안 후에도 안 되면 방폭(전액 환급)</p>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v">마감 시 모집 결과에 따라 <b>3가지로 분기</b></span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">정원 충족 → 즉시 확정 (+AI 아이스브레이커)</span></div>
+          <div class="spec-row"><span class="spec-k">분기</span><span class="spec-v">미달 → 인접 슬롯 병합 제안 → 그래도 미달 시 방폭(500P 전액 환급)</span></div>
+        </div>
       </article>
 
-      <!-- 6. 개설형 방 타임어택 -->
-      <article class="frame">
-        <div class="frame-title"><span class="frame-num">⑥</span><h3>개설형 방 타임어택</h3></div>
-        <div class="phone">
-          <div class="phone-bezel">
-            <div class="phone-notch"></div>
-            <div class="phone-screen">
-              <div class="status-bar">
-                <span class="status-time">09:15</span>
-                <span class="status-icons">
-                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
-                  <span class="battery"><span class="battery-fill"></span></span>
-                </span>
-              </div>
-              <div class="app-header">
-                <div class="bot-avatar">OM</div>
-                <div class="app-header-text">
-                  <div class="name">OfficeMate 봇</div>
-                  <div class="subtitle">모임 모집</div>
-                </div>
-                <span class="status-dot"></span>
-              </div>
-              <div class="app-body">
-                <div class="bubble">'주식 스터디' 모집이 시작됐어요</div>
-                <div class="card">
-                  <span class="tag warn">마감임박 리마인드 예정</span>
-                  <div class="countdown">D-2 14:32<span class="blink">:</span>10</div>
-                  <div class="gauge">
-                    <div class="gauge-track"><div class="gauge-fill" style="width:60%"></div></div>
-                    <div class="gauge-label">3/5명 모집</div>
-                  </div>
-                  <div class="note" style="font-style:normal;">72시간 내 미달 시 자동 폭파 · 전액 환급</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <p class="frame-caption">개설 즉시 72시간 카운트다운 — 마감기한 없는 "죽은 방" 누적을 방지</p>
-      </article>
 
       <!-- 7. 체크인 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">⑦</span><h3>체크인</h3></div>
+        <div class="step-head">
+          <span class="step-num">06</span>
+          <div>
+            <div class="step-kicker">FEATURE 06</div>
+            <h3>체크인 · 신뢰도</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -641,7 +761,197 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">출석 확인 후 포인트 환급·적립 — 신뢰도 점수에 누적돼 매칭 우선순위에 반영</p>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v"><b>QR 또는 화상 접속</b>으로 출석 자동 확인</span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">체크인 완료 → 500P 환급 + 50P 적립</span></div>
+          <div class="spec-row"><span class="spec-k">출력</span><span class="spec-v">신뢰도 점수 누적 → 다음 매칭 우선순위에 반영</span></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="storyboard">
+    <div class="storyboard-head">
+      <h2>🔍 탐색 — 열린 모임 참여</h2>
+      <div class="sub">tab 2 · overview + feature 07</div>
+    </div>
+
+    <div class="frame-grid">
+
+      <!-- 탭 2. 탐색 -->
+      <article class="frame">
+        <div class="step-head">
+          <span class="step-num">🔍</span>
+          <div>
+            <div class="step-kicker">TAB 2 / 3</div>
+            <h3>탐색</h3>
+          </div>
+        </div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">12:00</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate</div>
+                  <div class="subtitle">탐색 피드</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="card compact">
+                  <span class="tag warn">스폰서드</span>
+                  <div style="font-weight:700;">☕ 신메뉴 카페 원정단</div>
+                  <div class="chip-row"><span class="chip-sm">참여 시 아메리카노 쿠폰</span><span class="chip selected" style="font-size:9px;">참여 신청</span></div>
+                </div>
+                <div class="card compact">
+                  <div style="font-weight:700;">🍜 목요일 점심 · 라멘 탐방대</div>
+                  <div class="chip-row"><span class="chip-sm">2명 모집중</span><span class="chip-sm">신뢰도 70+</span><span class="chip selected" style="font-size:9px;">참여 신청</span></div>
+                </div>
+                <div class="card compact">
+                  <div style="font-weight:700;">🏃 월요일 아침 · 조기 러닝크루</div>
+                  <div class="chip-row"><span class="chip-sm">4명 모집중</span><span class="chip-sm">오프라인 30분</span><span class="chip selected" style="font-size:9px;">참여 신청</span></div>
+                </div>
+                <p class="note">참여 신청만으로도 신뢰도 +2점이 반영돼요</p>
+              </div>
+              <div class="demo-tabbar">
+                <span class="demo-tab"><span class="dt-icon">💬</span>채팅</span>
+                <span class="demo-tab active"><span class="dt-icon">🔍</span>탐색</span>
+                <span class="demo-tab"><span class="dt-icon">🪪</span>마이</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">역할</span><span class="spec-v">동료들이 열어둔 모임을 둘러보는 <b>추천 피드</b> · [참여 신청]으로 합류</span></div>
+          <div class="spec-row"><span class="spec-k">구성</span><span class="spec-v">스폰서드 슬롯 + 일반 모임 카드 · 모집 현황·추천 조건 표시</span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">신청 시 신뢰도 +2 · 스폰서드는 쿠폰 자동 적용 · 확정 시 채팅 탭에 그룹방 생성</span></div>
+        </div>
+      </article>
+
+      <!-- 7. 개설형 방 타임어택 -->
+      <article class="frame">
+        <div class="step-head">
+          <span class="step-num">07</span>
+          <div>
+            <div class="step-kicker">FEATURE 07</div>
+            <h3>개설형 방 타임어택</h3>
+          </div>
+        </div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">09:15</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate 봇</div>
+                  <div class="subtitle">모임 모집</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="bubble">'주식 스터디' 모집이 시작됐어요</div>
+                <div class="card">
+                  <span class="tag warn">마감임박 리마인드 예정</span>
+                  <div class="countdown">D-2 14:32<span class="blink">:</span>10</div>
+                  <div class="gauge">
+                    <div class="gauge-track"><div class="gauge-fill" style="width:60%"></div></div>
+                    <div class="gauge-label">3/5명 모집</div>
+                  </div>
+                  <div class="note" style="font-style:normal;">72시간 내 미달 시 자동 폭파 · 전액 환급</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">기능</span><span class="spec-v">사용자가 직접 연 모임에 <b>72시간 카운트다운</b> 부여 · 탐색 피드에 노출</span></div>
+          <div class="spec-row"><span class="spec-k">규칙</span><span class="spec-v">72시간 내 정원 미달 → 자동 폭파·전액 환급</span></div>
+          <div class="spec-row"><span class="spec-k">목적</span><span class="spec-v">마감기한 없는 "죽은 방" 누적 방지 · 마감임박 리마인드 발송</span></div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="storyboard">
+    <div class="storyboard-head">
+      <h2>🪪 마이 — 활동 자산 확인</h2>
+      <div class="sub">tab 3 · dashboard</div>
+    </div>
+
+    <div class="frame-grid">
+
+      <!-- 탭 3. 마이 -->
+      <article class="frame">
+        <div class="step-head">
+          <span class="step-num">🪪</span>
+          <div>
+            <div class="step-kicker">TAB 3 / 3</div>
+            <h3>마이</h3>
+          </div>
+        </div>
+        <div class="phone">
+          <div class="phone-bezel">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+              <div class="status-bar">
+                <span class="status-time">12:00</span>
+                <span class="status-icons">
+                  <span class="signal-bars"><span></span><span></span><span></span><span></span></span>
+                  <span class="battery"><span class="battery-fill"></span></span>
+                </span>
+              </div>
+              <div class="app-header">
+                <div class="bot-avatar">OM</div>
+                <div class="app-header-text">
+                  <div class="name">OfficeMate</div>
+                  <div class="subtitle">마이페이지</div>
+                </div>
+                <span class="status-dot"></span>
+              </div>
+              <div class="app-body">
+                <div class="ring-row">
+                  <div class="ring" style="background:conic-gradient(var(--good) 0 295deg, var(--paper) 295deg 360deg);"><div class="ring-hole"><span class="v">82</span><span class="k">신뢰도</span></div></div>
+                  <div class="ring" style="background:conic-gradient(var(--brand) 0 62%, var(--paper) 62% 100%);"><div class="ring-hole"><span class="v">62%</span><span class="k">다양성</span></div></div>
+                </div>
+                <div class="card compact">
+                  <span class="tag brand">포인트 지갑</span>
+                  <div style="font-family:var(--font-mono); font-size:16px; font-weight:700;">1,200P</div>
+                  <div class="chip-row"><span class="chip-sm">참석 환급 +500P</span><span class="chip-sm">체크인 +50P</span></div>
+                </div>
+                <p class="note">서로 다른 부서 동료와 만날수록 다양성 지수가 올라가요</p>
+              </div>
+              <div class="demo-tabbar">
+                <span class="demo-tab"><span class="dt-icon">💬</span>채팅</span>
+                <span class="demo-tab"><span class="dt-icon">🔍</span>탐색</span>
+                <span class="demo-tab active"><span class="dt-icon">🪪</span>마이</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="spec-card">
+          <div class="spec-row"><span class="spec-k">역할</span><span class="spec-v">신뢰도·포인트·부서 다양성을 보여주는 <b>개인 현황판</b></span></div>
+          <div class="spec-row"><span class="spec-k">구성</span><span class="spec-v">신뢰도 링 · 다양성 도넛 · 포인트 지갑 · 월간 활동 요약</span></div>
+          <div class="spec-row"><span class="spec-k">상태</span><span class="spec-v">프로필 미작성 시 빈 화면 → 첫 모임 진행 시 온보딩으로 채워짐</span></div>
+        </div>
       </article>
 
     </div>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OfficeMate — 사용자 여정 목업</title>
+<title>OfficeMate — 시작 가이드 (튜토리얼)</title>
 <style>body{margin:0}</style>
 <style>
   :root {
@@ -187,6 +187,27 @@
     color: var(--panel-muted);
   }
 
+  /* ---------- Tutorial scaffolding ---------- */
+  .step-head { width: 226px; display: flex; align-items: center; gap: 10px; }
+  .step-num {
+    flex: none; width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(150deg, var(--brand), var(--brand-deep));
+    color: #fff; font-family: var(--font-serif); font-style: italic;
+    font-size: 15px; font-weight: 700; display: grid; place-items: center;
+    box-shadow: 0 4px 12px -4px rgba(51,84,156,.6);
+  }
+  .step-kicker { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--morning); }
+  .step-head h3 { margin: 0; font-size: 14px; font-weight: 700; color: #fff; line-height: 1.25; }
+
+  .guide-card {
+    width: 226px; background: rgba(255,255,255,0.045);
+    border: 1px solid var(--panel-line); border-radius: 12px;
+    padding: 11px 12px; display: flex; flex-direction: column; gap: 7px;
+  }
+  .guide-do { font-size: 11.5px; line-height: 1.5; color: #E7E6EE; }
+  .guide-do b { display: block; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--morning); margin-bottom: 3px; font-weight: 700; }
+  .guide-tip { font-size: 11px; line-height: 1.45; color: var(--panel-muted); }
+
   /* ---------- Phone mockup ---------- */
   .phone { width: 226px; flex: none; }
   .phone-bezel {
@@ -316,9 +337,9 @@
 
   <header class="masthead">
     <div class="wordmark"><a href="index.html" style="color:inherit;text-decoration:none">OfficeMate</a></div>
-    <div class="eyebrow">오피스챗 부착형 AI 매칭 어시스턴트 · 사용자 여정 목업</div>
-    <h1>프로필 등록부터 모임 탐색까지, 5개 화면으로 보는 사용자 여정</h1>
-    <p class="lede">매칭 플로우(별첨)의 앞뒤를 잇는 다섯 장면입니다. 프로필을 만들고, 확정된 모임에서 공통점과 장소를 추천받고, 리마인더로 노쇼를 막고, 신뢰도와 연결이 자산으로 쌓입니다.</p>
+    <div class="eyebrow">오피스챗 부착형 AI 매칭 어시스턴트 · 시작 가이드</div>
+    <h1>OfficeMate 시작하기 — 5단계 따라 하기 가이드</h1>
+    <p class="lede">처음 오셨나요? 프로필 등록부터 첫 모임, 그리고 활동이 자산으로 쌓이기까지 — 아래 화면을 순서대로 따라 해보세요. 화면 구성(채팅·탐색·마이 탭)과 상세 규칙은 <a href="flow-mockup.html" style="color:var(--brand-text);font-weight:700;">기능 매뉴얼</a>에서 확인할 수 있어요.</p>
     <div class="day-arc-wrap">
       <div class="day-arc"></div>
       <div class="day-arc-labels">
@@ -331,23 +352,31 @@
     </div>
   </header>
 
+
   <section class="storyboard">
     <div class="storyboard-head">
-      <h2>Journey</h2>
+      <h2>시작 가이드</h2>
       <div class="legend">
-        <div class="legend-item"><span class="legend-dot" style="background:var(--good)"></span>확정 / 집행</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--warn)"></span>리마인더 / 대기 승급</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--brand)"></span>프로필 / 데이터</div>
-        <div class="legend-item"><span class="legend-dot" style="background:var(--lunch)"></span>스폰서드</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--brand)"></span>1 · 프로필</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--good)"></span>2 · 확정방</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--warn)"></span>3 · 리마인더</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--dinner)"></span>4 · 마이페이지</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--lunch)"></span>5 · 탐색</div>
       </div>
-      <div class="sub">5 screens · before &amp; after the match</div>
+      <div class="sub">5-step tutorial · 따라 하기</div>
     </div>
 
     <div class="frame-grid">
 
       <!-- 1. 온보딩 프로필 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">①</span><h3>온보딩 프로필</h3></div>
+        <div class="step-head">
+          <span class="step-num">1</span>
+          <div>
+            <div class="step-kicker">STEP 1 / 5</div>
+            <h3>프로필 만들기</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -399,12 +428,21 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">1분 온보딩 — 매칭 재료는 선택형 프로필뿐, 메시지 내용은 건드리지 않음</p>
+        <div class="guide-card">
+          <div class="guide-do"><b>이렇게 하세요</b>관심사·식사 취향·근무형태를 고르고 한 줄 소개를 적은 뒤 <b style="display:inline;color:#fff;font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;">[프로필 저장]</b>을 누르세요.</div>
+          <div class="guide-tip">💡 태그에 없는 취향도 한 줄 소개에 적으면 AI가 알아서 읽어요. 사적 대화는 분석하지 않습니다.</div>
+        </div>
       </article>
 
       <!-- 2. 확정 그룹방 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">②</span><h3>확정 그룹방</h3></div>
+        <div class="step-head">
+          <span class="step-num">2</span>
+          <div>
+            <div class="step-kicker">STEP 2 / 5</div>
+            <h3>확정된 모임 확인</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -454,12 +492,21 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">AI 공통점 브리핑·대화 스타터 + 장소 추천 — 예약·캘린더·식대 집행까지 한 번에</p>
+        <div class="guide-card">
+          <div class="guide-do"><b>이렇게 하세요</b>매칭이 확정되면 그룹방이 열려요. AI가 정리한 공통점·대화 스타터·추천 장소를 확인하세요.</div>
+          <div class="guide-tip">💡 예약·캘린더 등록·식대 집행이 자동으로 처리되니 따로 신경 쓸 게 없어요.</div>
+        </div>
       </article>
 
       <!-- 3. 리마인더 & 사전취소 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">③</span><h3>리마인더 · 사전취소</h3></div>
+        <div class="step-head">
+          <span class="step-num">3</span>
+          <div>
+            <div class="step-kicker">STEP 3 / 5</div>
+            <h3>리마인더에 응답</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -500,12 +547,21 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">사전취소는 무페널티, 빈자리는 대기자 자동 승급 — 방은 끝까지 정원을 지킴</p>
+        <div class="guide-card">
+          <div class="guide-do"><b>이렇게 하세요</b>모임 1시간 전 알림이 오면 <b style="display:inline;color:#fff;font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;">[참석해요]</b>로 확정하세요. 못 가면 <b style="display:inline;color:#fff;font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;">[취소할게요]</b>.</div>
+          <div class="guide-tip">💡 시작 2시간 전까지 취소하면 페널티가 없어요. 빈자리는 대기자가 자동으로 채워집니다.</div>
+        </div>
       </article>
 
       <!-- 4. 마이페이지 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">④</span><h3>마이페이지</h3></div>
+        <div class="step-head">
+          <span class="step-num">4</span>
+          <div>
+            <div class="step-kicker">STEP 4 / 5</div>
+            <h3>내 활동 확인</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -561,12 +617,21 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">신뢰도 링 + 포인트 지갑 + 부서 다양성 도넛 — 참여가 개인의 자산으로 쌓임</p>
+        <div class="guide-card">
+          <div class="guide-do"><b>이렇게 하세요</b>마이페이지에서 신뢰도 점수·포인트 지갑·만난 부서 수를 확인하세요.</div>
+          <div class="guide-tip">💡 참석할수록 신뢰도와 포인트가 쌓이고, 다음 매칭 우선순위가 올라가요.</div>
+        </div>
       </article>
 
       <!-- 5. 개설형 방 탐색 피드 -->
       <article class="frame">
-        <div class="frame-title"><span class="frame-num">⑤</span><h3>모임 탐색 피드</h3></div>
+        <div class="step-head">
+          <span class="step-num">5</span>
+          <div>
+            <div class="step-kicker">STEP 5 / 5</div>
+            <h3>모임 만들기 · 탐색</h3>
+          </div>
+        </div>
         <div class="phone">
           <div class="phone-bezel">
             <div class="phone-notch"></div>
@@ -612,13 +677,17 @@
             </div>
           </div>
         </div>
-        <p class="frame-caption">개설형 방 피드 — 스폰서드 배지가 붙은 모임은 쿠폰·지원금이 자동 적용</p>
+        <div class="guide-card">
+          <div class="guide-do"><b>이렇게 하세요</b>탐색 피드에서 열린 모임에 참여하거나 <b style="display:inline;color:#fff;font-family:inherit;font-size:inherit;letter-spacing:0;text-transform:none;">[+ 새 모임 만들기]</b>로 직접 열어보세요.</div>
+          <div class="guide-tip">💡 스폰서드 배지가 붙은 모임은 쿠폰·지원금이 참여 확정 시 자동 적용돼요.</div>
+        </div>
       </article>
 
     </div>
   </section>
 
   <footer class="diff-footer">
+    <p class="disclaimer" style="font-style:normal;color:var(--ink-soft);">✅ 여기까지 따라오셨다면 준비 끝! 이제 오피스챗에서 <b>OfficeMate 봇</b>을 불러 첫 모임을 열어보세요.</p>
     <p class="disclaimer">* 실제 UI는 오피스챗 플랫폼(잔디 · 카카오워크 · 네이버웍스) SDK 제약에 따라 조정될 수 있음</p>
   </footer>
 
