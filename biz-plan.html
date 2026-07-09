@@ -1,4 +1,9 @@
 <title>OfficeMate — 사업계획서</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<style>
+/* í´ëì Material Icons â hr-consoleê³¼ ëì¼ í°í¸ Â· í¬ê¸°ë ë¬¸ë§¥ ê¸ìí¬ê¸° ìì */
+.msi{font-family:'Material Icons';font-weight:normal;font-style:normal;font-size:1.12em;line-height:1;display:inline-block;vertical-align:-0.14em;letter-spacing:normal;text-transform:none;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-feature-settings:'liga';font-feature-settings:'liga';-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+</style>
 <style>
   :root {
     --ink: #1D1B24;
@@ -219,9 +224,9 @@
   .d-card ol { margin: 0; padding-left: 20px; font-size: 13.5px; line-height: 1.8; color: var(--ink-soft); }
 
   /* ---------- Closing ---------- */
-  .closing { text-align: center; padding: var(--sp-6) 0 0; border-top: 1px solid var(--line); }
-  .closing p { margin: 0 auto; max-width: 46ch; font-family: var(--font-serif); font-style: italic; font-size: 18px; line-height: 1.6; color: var(--brand-text); text-wrap: balance; }
-  .disclaimer { margin: var(--sp-4) 0 0; font-size: 11.5px; font-style: italic; color: var(--muted); text-align: center; }
+  .closing { text-align: left; padding: var(--sp-6) 0 0; border-top: 1px solid var(--line); }
+  .closing p { margin: 0; font-family: var(--font-serif); font-style: italic; font-size: 18px; line-height: 1.6; color: var(--brand-text); }
+  .disclaimer { margin: var(--sp-4) 0 0; font-size: 11.5px; font-style: italic; color: var(--muted); text-align: left; }
 
   /* ---------- 실현 계획 카드 ---------- */
   .impl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--sp-4); }
@@ -341,7 +346,7 @@
       <span class="flow-step"><span class="n">⑥</span>개설형 방</span><span class="flow-arrow">→</span>
       <span class="flow-step"><span class="n">⑦</span>체크인</span>
     </div>
-    <p class="flow-link">* 이 루프는 <a href="https://claude.ai/code/artifact/75186ba6-26ee-4594-8040-bb9a6f68ce0d" target="_blank" rel="noopener">💬 라이브 데모</a>에서 실제로 동작하며, 화면별 상세는 <a href="https://claude.ai/code/artifact/a896878a-83b0-4531-a658-173b06bdf7ce" target="_blank" rel="noopener">📱 핵심 플로우 목업 (7화면)</a> · <a href="https://claude.ai/code/artifact/34a115eb-e649-48ca-b3a2-6d091d1f7563" target="_blank" rel="noopener">🧭 사용자 여정 목업 (5화면)</a> 참조 — 본 문서와 동일한 디자인 시스템으로 제작</p>
+    <p class="flow-link">* 이 루프는 <a href="https://claude.ai/code/artifact/75186ba6-26ee-4594-8040-bb9a6f68ce0d" target="_blank" rel="noopener"><span class="msi">chat</span> 라이브 데모</a>에서 실제로 동작하며, 화면별 상세는 <a href="https://claude.ai/code/artifact/a896878a-83b0-4531-a658-173b06bdf7ce" target="_blank" rel="noopener"><span class="msi">smartphone</span> 핵심 플로우 목업 (7화면)</a> · <a href="https://claude.ai/code/artifact/34a115eb-e649-48ca-b3a2-6d091d1f7563" target="_blank" rel="noopener"><span class="msi">explore</span> 사용자 여정 목업 (5화면)</a> 참조 — 본 문서와 동일한 디자인 시스템으로 제작</p>
     <div class="mech-row">
       <article class="p-card">
         <span class="tag brand">온라인 확정</span>
@@ -491,7 +496,7 @@
       <div class="step"><span class="dot">4</span><div class="txt"><b>장소에서 사용</b><span>제휴 매장은 포인트로 직접 결제, 비제휴 매장·포인트 부족 시에는 등록된 개인카드로 결제하고 결제액의 일부(기본 10%)를 포인트 풀에서 현금 페이백 받는다</span></div></div>
       <div class="step"><span class="dot">5</span><div class="txt"><b>재충전</b><span>다음 달 자리세가 다시 자동 충전되고, 필요하면 포인트 팩을 추가 구매 — 다시 1로 순환</span></div></div>
     </div>
-    <div class="moat">⚡ <b>HR이 확보한 가용 포인트 안에서만 지급되므로, 예산이 통제된 상태로 모임 활성화가 이뤄집니다.</b> 개인카드 페이백은 별도 수익이 아니라 HR의 포인트 풀에서 나가는 비용이지만, 카드 결제·영수증 자동 인식을 통해 실사용 데이터를 남기고 포인트 소진 속도를 끌어올려 ①·②의 재구매를 앞당깁니다.</div>
+    <div class="moat"><span class="msi">bolt</span> <b>HR이 확보한 가용 포인트 안에서만 지급되므로, 예산이 통제된 상태로 모임 활성화가 이뤄집니다.</b> 개인카드 페이백은 별도 수익이 아니라 HR의 포인트 풀에서 나가는 비용이지만, 카드 결제·영수증 자동 인식을 통해 실사용 데이터를 남기고 포인트 소진 속도를 끌어올려 ①·②의 재구매를 앞당깁니다.</div>
 
     <div class="money-panel">
       <div class="money-head">
@@ -500,7 +505,7 @@
       </div>
 
       <div class="fd-source">
-        <div class="t">🏢 오피스챗 플러그인 설치 (무료)</div>
+        <div class="t"><span class="msi">apartment</span> 오피스챗 플러그인 설치 (무료)</div>
         <div class="s">별도 라이선스 비용 없이 설치 — 도입 즉시 자리세(정기 포인트 충전)가 매출 바닥을 만든다</div>
       </div>
       <div class="fd-streams">
@@ -520,7 +525,7 @@
           <span class="num">③</span>
           <h3>조직 인사이트 — 성장 수익</h3>
           <div class="rate">Enterprise <small>연 단위 계약</small></div>
-          <p>부서 간 연결·온보딩 리텐션 ONA 리포트. 조직문화 진단 예산은 기업에 이미 존재하는 돈 — 신입 1명 이탈 비용 대비 효과를 참여 데이터로 증명하는 고마진 상품. HR 콘솔의 AI 시그널(등급 승급 임박 알림 등)이 층위 3 AI의 첫 상용화 형태로 이미 데모에 구현돼 있습니다. <a href="https://claude.ai/code/artifact/618d50f4-7887-470c-bb4c-c255c50301d4" target="_blank" rel="noopener">📊 HR 대시보드 목업 →</a></p>
+          <p>부서 간 연결·온보딩 리텐션 ONA 리포트. 조직문화 진단 예산은 기업에 이미 존재하는 돈 — 신입 1명 이탈 비용 대비 효과를 참여 데이터로 증명하는 고마진 상품. HR 콘솔의 AI 시그널(등급 승급 임박 알림 등)이 층위 3 AI의 첫 상용화 형태로 이미 데모에 구현돼 있습니다. <a href="https://claude.ai/code/artifact/618d50f4-7887-470c-bb4c-c255c50301d4" target="_blank" rel="noopener"><span class="msi">bar_chart</span> HR 대시보드 목업 →</a></p>
         </article>
       </div>
       <div class="fd-foot">
@@ -602,7 +607,7 @@
         <p>자리세 ARR이 7.2억까지 성장하고 포인트 팩·인사이트가 더해지는 3년차에 <b>+2.68억의 확실한 영업이익</b>을 냅니다. 자리세는 참여도와 무관한 매출이라, 참여율 가정이 기대에 못 미쳐도 손익분기 자체가 흔들리지는 않습니다.</p>
       </article>
     </div>
-    <div class="moat">⚠ <b>이 절의 모든 수치는 검증된 실측이 아니라 계획 수립을 위한 가정입니다.</b> 다만 ①자리세는 인당 정액 자동 충전이라 도입 인원 수만 확정되면 매출도 함께 확정되는 구조이고, 참여율·전환율 가정이 흔드는 부분은 ②포인트 팩과 ③인사이트뿐입니다 — 아래 민감도 표에서 확인할 수 있듯, 증분이 0이어도 3년차는 여전히 흑자입니다. 인건비 규모와 도입사 수는 파일럿(09절 실행계획의 2026.09–11) 이후 재산정이 필요합니다.</div>
+    <div class="moat"><span class="msi">warning</span> <b>이 절의 모든 수치는 검증된 실측이 아니라 계획 수립을 위한 가정입니다.</b> 다만 ①자리세는 인당 정액 자동 충전이라 도입 인원 수만 확정되면 매출도 함께 확정되는 구조이고, 참여율·전환율 가정이 흔드는 부분은 ②포인트 팩과 ③인사이트뿐입니다 — 아래 민감도 표에서 확인할 수 있듯, 증분이 0이어도 3년차는 여전히 흑자입니다. 인건비 규모와 도입사 수는 파일럿(09절 실행계획의 2026.09–11) 이후 재산정이 필요합니다.</div>
 
     <div class="sub-head">
       <h3>재무를 다른 렌즈로 본다 — 민감도, LTV, 유사 카테고리</h3>
@@ -651,13 +656,13 @@
           <tr><th>항목</th><th class="center me">OfficeMate</th><th class="center">아기고래</th><th class="center">Donut</th></tr>
         </thead>
         <tbody>
-          <tr><td>국내 오피스챗/잔디/네이버웍스 지원</td><td class="center me ok">✅</td><td class="center no">❌ Slack 전용</td><td class="center no">❌ Slack 전용</td></tr>
+          <tr><td>국내 오피스챗/잔디/네이버웍스 지원</td><td class="center me ok"><span class="msi">check_circle</span></td><td class="center no"><span class="msi">cancel</span> Slack 전용</td><td class="center no"><span class="msi">cancel</span> Slack 전용</td></tr>
           <tr><td>수익 구조</td><td class="center me ok">무료 설치 + 자리세 + 데이터</td><td class="center mid">△ 좌석 구독 단층</td><td class="center mid">△ 좌석 구독 단층</td></tr>
-          <tr><td>매칭 깊이 (슬롯·온오프판별·방폭)</td><td class="center me ok">✅ 전문 특화</td><td class="center mid">△ 부가 기능</td><td class="center mid">△ 랜덤 위주</td></tr>
-          <tr><td>AI 매칭 (자연어 개설·임베딩·학습)</td><td class="center me ok">✅ LLM+하이브리드</td><td class="center mid">△ 랜덤 매칭</td><td class="center mid">△ 랜덤 매칭</td></tr>
-          <tr><td>노쇼 방지 장치(포인트 미지급형)</td><td class="center me ok">✅</td><td class="center no">❌ 미확인</td><td class="center no">❌ 미확인</td></tr>
-          <tr><td>기존 B2B 배포 채널</td><td class="center me ok">✅ 지란지교 오피스챗</td><td class="center mid">△ 자체 영업</td><td class="center no">❌ 국내 부재</td></tr>
-          <tr><td>보안/공공 조직 적합성</td><td class="center me ok">✅</td><td class="center mid">△ 제한적</td><td class="center no">❌</td></tr>
+          <tr><td>매칭 깊이 (슬롯·온오프판별·방폭)</td><td class="center me ok"><span class="msi">check_circle</span> 전문 특화</td><td class="center mid">△ 부가 기능</td><td class="center mid">△ 랜덤 위주</td></tr>
+          <tr><td>AI 매칭 (자연어 개설·임베딩·학습)</td><td class="center me ok"><span class="msi">check_circle</span> LLM+하이브리드</td><td class="center mid">△ 랜덤 매칭</td><td class="center mid">△ 랜덤 매칭</td></tr>
+          <tr><td>노쇼 방지 장치(포인트 미지급형)</td><td class="center me ok"><span class="msi">check_circle</span></td><td class="center no"><span class="msi">cancel</span> 미확인</td><td class="center no"><span class="msi">cancel</span> 미확인</td></tr>
+          <tr><td>기존 B2B 배포 채널</td><td class="center me ok"><span class="msi">check_circle</span> 지란지교 오피스챗</td><td class="center mid">△ 자체 영업</td><td class="center no"><span class="msi">cancel</span> 국내 부재</td></tr>
+          <tr><td>보안/공공 조직 적합성</td><td class="center me ok"><span class="msi">check_circle</span></td><td class="center mid">△ 제한적</td><td class="center no"><span class="msi">cancel</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -685,25 +690,25 @@
           <span class="when">2026.12</span>
           <span class="what">정식 출시</span>
           <span class="how">오피스챗 플러그인 무료 설치 개시, 자리세(인당 ₩1,500/월 자동 충전) 과금 가동 — 주 수익 가동</span>
-          <span class="tag brand money-tag">💰 ①</span>
+          <span class="tag brand money-tag"><span class="msi">paid</span> ①</span>
         </div>
         <div class="tl-stop">
           <span class="when">2027.Q1</span>
           <span class="what">증분 검증</span>
           <span class="how">포인트 팩 온디맨드 구매·개인카드 페이백 전환율 파일럿 검증, 네이버 예약 제휴 — 자리세 위에 증분 매출 쌓기 시작</span>
-          <span class="tag warn money-tag">💰 ② 파일럿</span>
+          <span class="tag warn money-tag"><span class="msi">paid</span> ② 파일럿</span>
         </div>
         <div class="tl-stop">
           <span class="when">2027.Q2</span>
           <span class="what">플랫폼 확장</span>
           <span class="how">잔디·네이버웍스 연동, 조직 인사이트(층위 3 AI) 정식 계약 확대 — Enterprise 계약 2개사 목표. 메이트 등급제·개인카드 페이백은 이미 MVP 데모에서 실동작 검증 완료(10절), 이 단계에서는 서버 연동만 확장</span>
-          <span class="tag brand money-tag">💰 ③</span>
+          <span class="tag brand money-tag"><span class="msi">paid</span> ③</span>
         </div>
         <div class="tl-stop">
           <span class="when">2027.H2</span>
           <span class="what">모임 허브</span>
           <span class="how">회식·팀모임·본부 행사 통합 처리 + HR 승인형 셀프서브 스폰서 확대</span>
-          <span class="tag warn money-tag">💰 ① + 파생</span>
+          <span class="tag warn money-tag"><span class="msi">paid</span> ① + 파생</span>
         </div>
       </div>
     </div>
@@ -713,23 +718,23 @@
   <section id="gap-plan">
     <div class="sec-eyebrow">10 — 미구현 항목 실현 계획</div>
     <h2>다섯 가지 중 넷은 데모에서 실동작까지 검증했고, 남은 인프라 연동만 순서대로 붙입니다</h2>
-    <p class="sec-lede">해커톤 데모(💬)는 핵심 매칭 루프에 더해 온·오프 자동판별·QR 체크인(①), 온보딩·메이트 등급/포인트·탐색 피드(②), 가상 포인트 원장(⑤)까지 실동작으로 구현했고, 랜딩(🤝)에서는 방폭 시나리오(④)를 검증했습니다. 다섯 항목 모두 UI·로직은 클라이언트 사이드로 완성됐고 서버·외부 인프라 연동만 남았습니다. 실제 메신저 연동(③)만 아직 API 실사 단계이며, 항목별로 <b>무엇을 검증했는지</b>와 <b>실서비스 전환에 무엇이 필요한지</b>를 명시합니다.</p>
+    <p class="sec-lede">해커톤 데모(<span class="msi">chat</span>)는 핵심 매칭 루프에 더해 온·오프 자동판별·QR 체크인(①), 온보딩·메이트 등급/포인트·탐색 피드(②), 가상 포인트 원장(⑤)까지 실동작으로 구현했고, 랜딩(<span class="msi">handshake</span>)에서는 방폭 시나리오(④)를 검증했습니다. 다섯 항목 모두 UI·로직은 클라이언트 사이드로 완성됐고 서버·외부 인프라 연동만 남았습니다. 실제 메신저 연동(③)만 아직 API 실사 단계이며, 항목별로 <b>무엇을 검증했는지</b>와 <b>실서비스 전환에 무엇이 필요한지</b>를 명시합니다.</p>
     <div class="impl-grid">
       <article class="impl-card">
         <span class="tag good">데모에서 실동작 검증 완료</span>
         <h3>① 온·오프라인 자동판별 · QR 체크인/출석 확인</h3>
-        <p class="impl-status"><b>현재 상태</b> — 온·오프 판별 규칙("30분 이하 슬롯은 온라인")은 본 계획서 03절에 정의돼 있고, 데모(💬)에서 체크인 카드가 이 규칙에 따라 온라인은 "입장 확인", 오프라인은 "QR 스캔 체크인" 버튼으로 자동 분기되는 것까지 클라이언트 사이드 로직으로 구현·검증했습니다. 다만 이는 시연용 상태 전이이며, 실제 QR 토큰 발급·화상회의 API 연동은 아직 없습니다.</p>
+        <p class="impl-status"><b>현재 상태</b> — 온·오프 판별 규칙("30분 이하 슬롯은 온라인")은 본 계획서 03절에 정의돼 있고, 데모(<span class="msi">chat</span>)에서 체크인 카드가 이 규칙에 따라 온라인은 "입장 확인", 오프라인은 "QR 스캔 체크인" 버튼으로 자동 분기되는 것까지 클라이언트 사이드 로직으로 구현·검증했습니다. 다만 이는 시연용 상태 전이이며, 실제 QR 토큰 발급·화상회의 API 연동은 아직 없습니다.</p>
         <ol class="impl-stages">
           <li class="impl-stage"><span class="ph">MVP</span><span class="tx"><b>수동 체크인</b> — 방장이 봇 카드의 "출석 확인" 버튼을 눌러 참가자를 체크한다. 위치 검증 없이 자기신고 기반으로 단순화해 QR 인프라 없이 우선 출시한다. <b>온·오프 자동분기 UI는 데모에서 검증 완료.</b></span></li>
           <li class="impl-stage"><span class="ph">베타</span><span class="tx"><b>QR 체크인</b> — 방 확정 시 방별 서명된 단기 토큰으로 QR을 발급, 참가자가 인앱 카메라로 스캔하면 체크인 API가 호출된다. 오프라인 모임 전용.</span></li>
           <li class="impl-stage"><span class="ph">정식출시</span><span class="tx"><b>화상 접속 확인</b> — 온라인 모임은 화상회의 참가자 목록 조회 API로 자동 확인(수동 확인 병행), 온·오프 판별은 근무형태 데이터가 있는 조직에 한해 자동화하고 없으면 슬롯 길이 규칙만 적용한다.</span></li>
         </ol>
-        <p class="impl-risk">⚠ QR은 물리적 프린트·부착이 필요해 파일럿 초기엔 운영 부담이 크다. 자기신고 체크인으로 시작해 누적 참여 데이터가 쌓인 뒤 QR로 전환하는 순서를 권장한다.</p>
+        <p class="impl-risk"><span class="msi">warning</span> QR은 물리적 프린트·부착이 필요해 파일럿 초기엔 운영 부담이 크다. 자기신고 체크인으로 시작해 누적 참여 데이터가 쌓인 뒤 QR로 전환하는 순서를 권장한다.</p>
       </article>
       <article class="impl-card">
         <span class="tag good">데모에서 실동작 검증 완료</span>
         <h3>② 온보딩·프로필 등록 · 메이트 등급/포인트 · 탐색 피드</h3>
-        <p class="impl-status"><b>현재 상태</b> — 사용자 여정 목업(🧭)에 있던 온보딩·프로필·등급 링 화면을 데모(💬)에도 이식해, 최초 실행 시 온보딩 모달에서 관심사 태그·자기소개를 입력하면 등급 링이 채워지고 탐색 피드에서 누적 참여 기준 자동 승인까지 클라이언트 사이드 로직으로 재현했습니다. 메이트 등급(번개→제트) 산식과 탐색 피드의 서버 연동은 아직 없습니다.</p>
+        <p class="impl-status"><b>현재 상태</b> — 사용자 여정 목업(<span class="msi">explore</span>)에 있던 온보딩·프로필·등급 링 화면을 데모(<span class="msi">chat</span>)에도 이식해, 최초 실행 시 온보딩 모달에서 관심사 태그·자기소개를 입력하면 등급 링이 채워지고 탐색 피드에서 누적 참여 기준 자동 승인까지 클라이언트 사이드 로직으로 재현했습니다. 메이트 등급(번개→제트) 산식과 탐색 피드의 서버 연동은 아직 없습니다.</p>
         <ol class="impl-stages">
           <li class="impl-stage"><span class="ph">MVP</span><span class="tx"><b>최초 대화 온보딩</b> — 봇 최초 실행 시 관심사 태그 버튼 선택 + 자기소개 한 줄을 받아 프로필 DB에 저장하고, 자기소개 텍스트는 매칭엔진 층위 2 임베딩 파이프라인에 그대로 재사용한다. <b>데모에서 검증 완료.</b></span></li>
           <li class="impl-stage"><span class="ph">베타</span><span class="tx"><b>메이트 등급 산식</b> — 누적 모임 생성·참여 횟수 기준으로 시작(번개 3회→푸른번개 5회→레드번개 10회→자이언트 제트 20회). HR 콘솔에는 등급별 보상 포인트(기본 20/50/80/150P)를 조직이 직접 조정하는 관리자 패널까지 이미 데모로 구현돼 있다 — 계산에 필요한 실제 체크인 데이터가 베타 기간에야 쌓이므로 MVP 단계엔 실서비스 배포가 어렵다.</span></li>
@@ -745,12 +750,12 @@
           <li class="impl-stage"><span class="ph">베타</span><span class="tx"><b>캘린더 자동 등록</b> — 확정된 모임을 참가자 캘린더에 등록(제목·시간·장소). 캘린더 API는 이번 실사 범위 밖이라 베타 착수 전 별도 실사가 필요하다.</span></li>
           <li class="impl-stage"><span class="ph">증분검증</span><span class="tx"><b>네이버 예약 연동</b> — 파트너센터 심사가 전제라 MVP는 "예약 링크 제공"으로 축소하고, 실연동은 06절의 예약 제휴 커미션과 같은 시점에 착수한다. 카카오워크는 모달 폼 개설로 변형 구현, 잔디는 주최 측 API 협의가 전제된다.</span></li>
         </ol>
-        <p class="impl-risk">⚠ 네이버웍스 봇은 방 생성 시점에만 멤버를 지정할 수 있어(부록A 실사 결과), 인접 슬롯 병합 시 방 재생성이 필요해 기존 설계보다 API 호출이 늘어난다.</p>
+        <p class="impl-risk"><span class="msi">warning</span> 네이버웍스 봇은 방 생성 시점에만 멤버를 지정할 수 있어(부록A 실사 결과), 인접 슬롯 병합 시 방 재생성이 필요해 기존 설계보다 API 호출이 늘어난다.</p>
       </article>
       <article class="impl-card">
         <span class="tag good">데모에서 실동작 검증 완료</span>
         <h3>④ 방폭 (72시간 미달 자동 해산 + 예치금 전액 환급)</h3>
-        <p class="impl-status"><b>현재 상태</b> — 랜딩 데모(🤝)에서 타임어택 가속 버튼으로 실제 트리거해 "방폭 → 예치금(방개설 100P·참여 500P) 전액 환급 → 안내 메시지" 시퀀스가 상태머신으로 재현됨을 검증했습니다. 다만 이는 <b>클라이언트 사이드 타이머와 가상 포인트</b>로 만든 시뮬레이션입니다.</p>
+        <p class="impl-status"><b>현재 상태</b> — 랜딩 데모(<span class="msi">handshake</span>)에서 타임어택 가속 버튼으로 실제 트리거해 "방폭 → 예치금(방개설 100P·참여 500P) 전액 환급 → 안내 메시지" 시퀀스가 상태머신으로 재현됨을 검증했습니다. 다만 이는 <b>클라이언트 사이드 타이머와 가상 포인트</b>로 만든 시뮬레이션입니다.</p>
         <ol class="impl-stages">
           <li class="impl-stage"><span class="ph">MVP</span><span class="tx"><b>서버 사이드 타이머</b> — 방 생성 시 마감 시각(생성+72h)을 DB에 기록하고 배치 잡(cron 또는 지연 큐)이 주기적으로 미달 방을 스캔·해산한다. 데모의 상태 전이 로직을 그대로 서버로 이관한다.</span></li>
           <li class="impl-stage"><span class="ph">MVP</span><span class="tx"><b>인접 슬롯 병합 제안</b> — 방폭 확정 전 매칭엔진이 인접 슬롯 후보를 조회해 병합 제안 카드를 먼저 발송하고, 미응답 시에만 방폭을 확정한다.</span></li>
@@ -760,7 +765,7 @@
       <article class="impl-card">
         <span class="tag good">MVP(가상 포인트 원장) 실동작 검증 완료</span>
         <h3>⑤ 자리세·포인트 팩·개인카드 페이백 · HR 콘솔 연동</h3>
-        <p class="impl-status"><b>현재 상태</b> — HR 콘솔 데모(📊)에서 자리세 자동 충전(인당 ₩1,500/월)·포인트 팩 구매(10만/50만/100만P, 볼륨 할인 1~3%)·개인카드 결제 시 페이백(기본 10%, 5/10/15/20% 조정 가능) 화면과 정책 설정 UI까지 클라이언트 사이드로 구현·검증했습니다. 예산·정산 페이지의 KPI(포인트 구매 결제액·페이백 지급액 등)도 목업 데이터로 재현돼 있습니다. 다만 법인카드 실결제·PG 연동·전자결의 파이프라인은 아직 없습니다.</p>
+        <p class="impl-status"><b>현재 상태</b> — HR 콘솔 데모(<span class="msi">bar_chart</span>)에서 자리세 자동 충전(인당 ₩1,500/월)·포인트 팩 구매(10만/50만/100만P, 볼륨 할인 1~3%)·개인카드 결제 시 페이백(기본 10%, 5/10/15/20% 조정 가능) 화면과 정책 설정 UI까지 클라이언트 사이드로 구현·검증했습니다. 예산·정산 페이지의 KPI(포인트 구매 결제액·페이백 지급액 등)도 목업 데이터로 재현돼 있습니다. 다만 법인카드 실결제·PG 연동·전자결의 파이프라인은 아직 없습니다.</p>
         <ol class="impl-stages">
           <li class="impl-stage"><span class="ph">MVP</span><span class="tx"><b>가상 포인트 원장</b> — 실제 법인카드·PG 연동 대신, HR이 선결제로 포인트를 충전(자리세 자동 충전 + 포인트 팩 수동 구매)하고 모임 참석 확인 시 지급·장소 결제 시 차감되는 자체 원장으로 우회한다. 조직별 ERP·전자결의 시스템은 표준 API가 없어 커스텀 연동이 불가피하기 때문이다. <b>데모에서 검증 완료.</b></span></li>
           <li class="impl-stage"><span class="ph">증분검증</span><span class="tx"><b>개인카드 PG 연동</b> — PG사 결제 + 사업자 인증 API로 개인카드 등록·영수증 자동 인식을 구현하고, 결제 확인 시 포인트 원장에서 자동으로 페이백을 차감·지급하는 훅을 추가한다. 스폰서 셀프서브 온보딩도 같은 PG 연동 위에서 구현한다.</span></li>
@@ -810,10 +815,10 @@
         <span class="tag good">Step 1 · 7/9–10</span>
         <h3>기획 제출물</h3>
         <ol>
-          <li><a href="https://claude.ai/code/artifact/75186ba6-26ee-4594-8040-bb9a6f68ce0d" target="_blank" rel="noopener">💬 라이브 데모</a> — 핵심 매칭 루프(자연어 개설→타임어택 모집→방 생성→장소 추천) + 온·오프 자동판별 체크인·온보딩·메이트 등급·탐색 피드·가상 포인트 원장 실동작</li>
-          <li><a href="https://claude.ai/code/artifact/a896878a-83b0-4531-a658-173b06bdf7ce" target="_blank" rel="noopener">📱 핵심 플로우 목업 (7화면)</a> + <a href="https://claude.ai/code/artifact/34a115eb-e649-48ca-b3a2-6d091d1f7563" target="_blank" rel="noopener">🧭 사용자 여정 목업 (5화면)</a> — 제품 전모</li>
-          <li>🍱 사업계획서 (본 문서)</li>
-          <li><a href="https://claude.ai/code/artifact/47fecea5-b34d-4f3e-8efc-6107475c7729" target="_blank" rel="noopener">🤝 랜딩 페이지</a> — 문제 / 솔루션 / 베타 신청 CTA</li>
+          <li><a href="https://claude.ai/code/artifact/75186ba6-26ee-4594-8040-bb9a6f68ce0d" target="_blank" rel="noopener"><span class="msi">chat</span> 라이브 데모</a> — 핵심 매칭 루프(자연어 개설→타임어택 모집→방 생성→장소 추천) + 온·오프 자동판별 체크인·온보딩·메이트 등급·탐색 피드·가상 포인트 원장 실동작</li>
+          <li><a href="https://claude.ai/code/artifact/a896878a-83b0-4531-a658-173b06bdf7ce" target="_blank" rel="noopener"><span class="msi">smartphone</span> 핵심 플로우 목업 (7화면)</a> + <a href="https://claude.ai/code/artifact/34a115eb-e649-48ca-b3a2-6d091d1f7563" target="_blank" rel="noopener"><span class="msi">explore</span> 사용자 여정 목업 (5화면)</a> — 제품 전모</li>
+          <li><span class="msi">description</span> 사업계획서 (본 문서)</li>
+          <li><a href="https://claude.ai/code/artifact/47fecea5-b34d-4f3e-8efc-6107475c7729" target="_blank" rel="noopener"><span class="msi">handshake</span> 랜딩 페이지</a> — 문제 / 솔루션 / 베타 신청 CTA</li>
         </ol>
       </article>
       <article class="d-card">
@@ -842,11 +847,11 @@
           <tr><th>MVP 필수 기능</th><th class="center me">네이버웍스</th><th class="center">카카오워크</th><th class="center">잔디</th></tr>
         </thead>
         <tbody>
-          <tr><td>봇 메시지 발송 (푸시)</td><td class="center me ok">✅</td><td class="center ok">✅</td><td class="center ok">✅ 웹훅</td></tr>
-          <tr><td>자유 텍스트 수신 — <b>자연어 개설의 전제</b></td><td class="center me ok">✅ 콜백</td><td class="center no">❌ 버튼·모달 응답만</td><td class="center mid">△ 키워드 트리거만</td></tr>
-          <tr><td>인터랙티브 UI (버튼·카드·폼)</td><td class="center me ok">✅ 버튼·리스트·Flex</td><td class="center ok">✅ Block Kit + 모달</td><td class="center no">❌</td></tr>
-          <tr><td>그룹 대화방 자동 생성 + 초대</td><td class="center me mid">△ 생성 시 멤버 지정</td><td class="center ok">✅ 생성·초대·퇴장</td><td class="center no">❌ API 없음</td></tr>
-          <tr><td>조직 구성원 조회 API</td><td class="center me ok">✅</td><td class="center ok">✅ 부서·이메일 포함</td><td class="center mid">△ 1,000인+ 전용</td></tr>
+          <tr><td>봇 메시지 발송 (푸시)</td><td class="center me ok"><span class="msi">check_circle</span></td><td class="center ok"><span class="msi">check_circle</span></td><td class="center ok"><span class="msi">check_circle</span> 웹훅</td></tr>
+          <tr><td>자유 텍스트 수신 — <b>자연어 개설의 전제</b></td><td class="center me ok"><span class="msi">check_circle</span> 콜백</td><td class="center no"><span class="msi">cancel</span> 버튼·모달 응답만</td><td class="center mid">△ 키워드 트리거만</td></tr>
+          <tr><td>인터랙티브 UI (버튼·카드·폼)</td><td class="center me ok"><span class="msi">check_circle</span> 버튼·리스트·Flex</td><td class="center ok"><span class="msi">check_circle</span> Block Kit + 모달</td><td class="center no"><span class="msi">cancel</span></td></tr>
+          <tr><td>그룹 대화방 자동 생성 + 초대</td><td class="center me mid">△ 생성 시 멤버 지정</td><td class="center ok"><span class="msi">check_circle</span> 생성·초대·퇴장</td><td class="center no"><span class="msi">cancel</span> API 없음</td></tr>
+          <tr><td>조직 구성원 조회 API</td><td class="center me ok"><span class="msi">check_circle</span></td><td class="center ok"><span class="msi">check_circle</span> 부서·이메일 포함</td><td class="center mid">△ 1,000인+ 전용</td></tr>
         </tbody>
       </table>
     </div>
@@ -889,6 +894,8 @@
     <p>같은 공간에서 일해도 낯선 사람으로 남는 조직에게, OfficeMate는 매 끼니를 관계로 바꾸는 가장 작은 개입입니다.</p>
     <p class="disclaimer">* 시장·수익 관련 수치는 인당 자리세 ₩1,500/월 자동 충전(hr-console.html 근거)을 매출 바닥으로 삼고, 포인트 팩·인사이트 등 증분만 하향식 가정을 사용합니다 — 도입 조직 수·비용 규모는 파일럿에서 검증하며, 항목별 근거 구분은 부록B에 정리했습니다.</p>
   </footer>
+  </div>
+  </div>
 
 </div>
 

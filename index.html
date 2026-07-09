@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>OfficeMate — 동료와의 밥 한 끼, 오늘부터</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<style>
+/* í´ëì Material Icons â hr-consoleê³¼ ëì¼ í°í¸ Â· í¬ê¸°ë ë¬¸ë§¥ ê¸ìí¬ê¸° ìì */
+.msi{font-family:'Material Icons';font-weight:normal;font-style:normal;font-size:1.12em;line-height:1;display:inline-block;vertical-align:-0.14em;letter-spacing:normal;text-transform:none;white-space:nowrap;word-wrap:normal;direction:ltr;-webkit-font-feature-settings:'liga';font-feature-settings:'liga';-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+</style>
 <style>body{margin:0}</style>
 <style>
   :root {
@@ -194,6 +199,7 @@
 
   /* ---------- 산출물 ---------- */
   .lede b { color: var(--ink); }
+  .emoji .msi { color: var(--brand-text); } /* 카드 대표 아이콘은 브랜드 톤 */
 
   /* 핵심 지표 밴드 */
   .proof-band { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: var(--sp-4) var(--sp-5); background: var(--paper-raised); border: 1px solid var(--line); border-radius: 18px; padding: var(--sp-5) var(--sp-6); }
@@ -620,8 +626,8 @@
     <div class="proof-band">
       <div class="stat"><span class="s-val">10초</span><span class="s-cap">AI 한 줄이면 번개방 개설 — 나머지는 봇이 진행</span></div>
       <div class="stat"><span class="s-val">노쇼 ≤ 5%</span><span class="s-cap">디파짓 + 방폭 구조로 설계한 베타 Go 기준</span></div>
-      <div class="stat"><span class="s-val">13 : 1</span><span class="s-cap">조직당 LTV : CAC 추정 — SaaS 건강 기준(3:1) 상회</span></div>
-      <div class="stat"><span class="s-val">₩7.8억</span><span class="s-cap">3년차 매출 추정 · <a href="/biz-plan">사업계획서에서 근거 보기</a></span></div>
+      <div class="stat"><span class="s-val">30 : 1</span><span class="s-cap">조직당 LTV : CAC 추정 — 자리세가 확정 매출이라 성립</span></div>
+      <div class="stat"><span class="s-val">₩10.3억</span><span class="s-cap">3년차 매출 추정 · <a href="/biz-plan">사업계획서에서 근거 보기</a></span></div>
     </div>
   </section>
 
@@ -632,15 +638,15 @@
     <p class="sec-lede">회식비·조직문화 예산은 매년 집행되지만, <b>부서 밖 동료와의 연결</b>은 여전히 우연에 맡겨져 있습니다.</p>
     <div class="noshow-row">
       <article class="ns-card">
-        <h3>🏢 같은 층, 대화 없음</h3>
+        <h3><span class="msi">apartment</span> 같은 층, 대화 없음</h3>
         <p>재택·자율좌석·칸막이 문화로 우연한 만남 자체가 사라졌습니다. 옆 팀에 누가 있는지도 모른 채 1년이 갑니다.</p>
       </article>
       <article class="ns-card">
-        <h3>💸 회식비는 집행되지만</h3>
+        <h3><span class="msi">payments</span> 회식비는 집행되지만</h3>
         <p>부서 단위 회식은 늘 아는 사람과의 반복입니다. 예산은 소진되는데 새로운 연결은 생기지 않습니다.</p>
       </article>
       <article class="ns-card">
-        <h3>🚪 기존 도구는 못 들어온다</h3>
+        <h3><span class="msi">meeting_room</span> 기존 도구는 못 들어온다</h3>
         <p>Slack Donut류 매칭 도구는 국내 오피스 메신저 시장에 진입하지 못했습니다. 오피스챗에 바로 붙는 OfficeMate의 자리입니다.</p>
       </article>
     </div>
@@ -653,25 +659,25 @@
     <p class="sec-lede">관심사로 만나는 자발적 모임, 72시간 안에 채워져요.</p>
     <div class="meet-grid">
       <article class="meet-card">
-        <span class="emoji">🍜</span>
+        <span class="emoji"><span class="msi">ramen_dining</span></span>
         <h3>점심 번개</h3>
         <p>취향 맞는 4인, 오늘 바로.</p>
         <span class="meta">매일 · 30분–1시간</span>
       </article>
       <article class="meet-card">
-        <span class="emoji">🇬🇧</span>
+        <span class="emoji"><span class="msi">translate</span></span>
         <h3>영어 스터디</h3>
         <p>점심 30분, 꾸준하면 고정 그룹.</p>
         <span class="meta">주 2회 · 온라인</span>
       </article>
       <article class="meet-card">
-        <span class="emoji">🏃</span>
+        <span class="emoji"><span class="msi">directions_run</span></span>
         <h3>퇴근 후 러닝크루</h3>
         <p>한강 5km, 음료 쿠폰 스폰서드.</p>
         <span class="meta">주 1회 · 저녁 슬롯</span>
       </article>
       <article class="meet-card">
-        <span class="emoji">🥾</span>
+        <span class="emoji"><span class="msi">hiking</span></span>
         <h3>주말 등산</h3>
         <p>부서 밖 등산 태그 친구 찾기.</p>
         <span class="meta">주말 · 오프라인</span>
@@ -732,29 +738,29 @@
                         <div class="screen" data-panel="0">
                           <div class="app-header"><div class="bot-avatar">OM</div><div class="app-header-text"><div class="name">OfficeMate AI</div><div class="subtitle">방 만들기 도우미</div></div><div class="status-dot"></div></div>
                           <div class="app-body">
-                            <div class="bubble" data-step="0">안녕하세요 김대리님 👋 오늘은 어떤 번개방을 열어볼까요?</div>
+                            <div class="bubble" data-step="0">안녕하세요 김대리님 <span class="msi">waving_hand</span> 오늘은 어떤 번개방을 열어볼까요?</div>
                             <div class="m-card" data-step="0">
                               <span class="tag brand">취향 기반 추천 모임명</span>
-                              <div class="chip-row"><span class="chip-sm">🍜 매운맛 점심 원정대</span><span class="chip-sm">☕ 오후 커피챗</span><span class="chip-sm">🍲 부서 화합 저녁</span></div>
+                              <div class="chip-row"><span class="chip-sm"><span class="msi">ramen_dining</span> 매운맛 점심 원정대</span><span class="chip-sm"><span class="msi">local_cafe</span> 오후 커피챗</span><span class="chip-sm"><span class="msi">dinner_dining</span> 부서 화합 저녁</span></div>
                               <div class="note">수집된 취향(#매운맛 #점심)에 맞춘 이름이에요.</div>
                             </div>
                             <div class="bubble" data-step="0">지난번에 만든 <b>‘보드게임 번개’</b>처럼 다시 열 수도 있어요.</div>
                             <div class="bubble user-bubble" data-step="0">“매운거 좋아하는 사람 3명, 오늘 점심”</div>
                             <div class="m-card" data-step="0">
                               <span class="tag good">AI 제안 완성</span>
-                              <div style="font-weight:800;">🍜 매운맛 점심 원정대</div>
+                              <div style="font-weight:800;"><span class="msi">ramen_dining</span> 매운맛 점심 원정대</div>
                               <div class="chip-row"><span class="chip-sm">오늘 12:00</span><span class="chip-sm">정원 4명</span><span class="chip-sm">#매운맛</span></div>
                               <button class="mini-btn" type="button" data-advance>이 방으로 만들기</button>
                             </div>
-                            <div class="toast" data-step="1">⚡ 번개방이 생성됐어요!</div>
+                            <div class="toast" data-step="1"><span class="msi">bolt</span> 번개방이 생성됐어요!</div>
                             <div class="m-card" data-step="1">
-                              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><div style="font-weight:800;">🍜 매운맛 점심 원정대</div><span class="grade-badge g-bolt">⚡ 번개</span></div>
+                              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><div style="font-weight:800;"><span class="msi">ramen_dining</span> 매운맛 점심 원정대</div><span class="grade-badge g-bolt"><span class="msi">bolt</span> 번개</span></div>
                               <div class="chip-row"><span class="chip-sm">오늘 12:00</span><span class="chip-sm">정원 4명</span></div>
                               <div class="avatar-stack"><span style="background:var(--brand)">김</span><span style="background:var(--line);color:var(--muted)">+3</span></div>
                               <div class="gauge"><div class="gauge-track"><div class="gauge-fill" style="width:25%"></div></div><div class="gauge-label">1/4명 · 참여자 모집 시작</div></div>
                             </div>
                             <div class="note" data-step="1">참여자에게 알림이 전송됩니다 — 이제 <b>참여자 시점</b>으로 전환할게요.</div>
-                            <button class="mini-btn" type="button" data-advance data-step="1">🙋 참여자 시점으로 이동하기</button>
+                            <button class="mini-btn" type="button" data-advance data-step="1"><span class="msi">front_hand</span> 참여자 시점으로 이동하기</button>
                           </div>
                         </div>
 
@@ -764,18 +770,18 @@
                           <div class="app-body">
                             <div class="push-card" data-step="2">
                               <div class="push-head"><div class="bot-avatar">OM</div><span class="push-app">OfficeMate 번개방</span><span class="push-time">지금</span></div>
-                              <div class="push-title">⚡ 취향 저격 번개방이 열렸어요</div>
+                              <div class="push-title"><span class="msi">bolt</span> 취향 저격 번개방이 열렸어요</div>
                               <div class="push-body">회원님이 좋아하는 <b>#매운맛 #점심</b> — ‘매운맛 점심 원정대’에 딱 맞아요. 클릭 한 번으로 참여!</div>
                               <button class="mini-btn" type="button" data-advance>바로 참여하기</button>
                             </div>
-                            <div class="toast" data-step="2">✅ 참여 완료 · 오른쪽 목록에서도 골라요</div>
+                            <div class="toast" data-step="2"><span class="msi">check_circle</span> 참여 완료 · 오른쪽 목록에서도 골라요</div>
                             <div class="note" data-step="2">알림으로 바로 참여하거나, 옆의 <b>방 목록</b>에서 방폭 임박순으로 골라요.</div>
                           </div>
                         </div>
 
                         <!-- 패널 C) 모임 진행 대화 — 체크인 → 장소 → 페이백 → 종료 (아래로 누적) -->
                         <div class="screen" data-panel="2">
-                          <div class="app-header"><div class="bot-avatar">OM</div><div class="app-header-text"><div class="name">🍜 매운맛 점심 원정대</div><div class="subtitle">번개방</div></div><div class="status-dot"></div></div>
+                          <div class="app-header"><div class="bot-avatar">OM</div><div class="app-header-text"><div class="name"><span class="msi">ramen_dining</span> 매운맛 점심 원정대</div><div class="subtitle">번개방</div></div><div class="status-dot"></div></div>
                           <div class="app-body">
                             <!-- 체크인 -->
                             <div class="bubble" data-step="3">장소에 도착하면 체크인해 주세요. <b>전원 체크인</b>하면 모임이 시작돼요!</div>
@@ -786,14 +792,14 @@
                               <div class="checkin-row wait"><div class="avatar-stack"><span style="background:var(--good)">나</span></div><span class="ci-name">나</span><span class="ci-state">대기 중</span></div>
                             </div>
                             <button class="mini-btn" type="button" data-advance data-step="3">QR 스캔하고 체크인하기</button>
-                            <div class="toast" data-step="3">🎉 전원 체크인 완료 · 모임 시작!</div>
+                            <div class="toast" data-step="3"><span class="msi">celebration</span> 전원 체크인 완료 · 모임 시작!</div>
                             <!-- 장소 추천·예약 -->
                             <div class="bubble" data-step="4"><span class="tag brand">AI 장소 추천</span> ‘매운맛 점심’에 어울리는 곳을 골라봤어요.</div>
-                            <div class="place-opt selected" data-step="4"><div class="place-name">🌶️ 신전 마라탕</div><div class="chip-row"><span class="chip-sm">도보 3분</span><span class="chip-sm">4인석</span><span class="chip-sm">1인 12,000원</span></div></div>
-                            <div class="place-opt" data-step="4"><div class="place-name">🍜 강호동 짬뽕</div><div class="chip-row"><span class="chip-sm">도보 6분</span><span class="chip-sm">매운맛 ★★★</span></div></div>
+                            <div class="place-opt selected" data-step="4"><div class="place-name"><span class="msi">local_fire_department</span> 신전 마라탕</div><div class="chip-row"><span class="chip-sm">도보 3분</span><span class="chip-sm">4인석</span><span class="chip-sm">1인 12,000원</span></div></div>
+                            <div class="place-opt" data-step="4"><div class="place-name"><span class="msi">ramen_dining</span> 강호동 짬뽕</div><div class="chip-row"><span class="chip-sm">도보 6분</span><span class="chip-sm">매운맛 ★★★</span></div></div>
                             <button class="mini-btn" type="button" data-advance data-step="4">이 장소로 예약 확정</button>
                             <div class="m-card" data-step="4"><span class="tag good">네이버 예약 완료 · 오늘 12:00</span></div>
-                            <div class="toast" data-step="4">📅 officeNext 캘린더에 일정 등록 완료 (참여자 전원)</div>
+                            <div class="toast" data-step="4"><span class="msi">event</span> officeNext 캘린더에 일정 등록 완료 (참여자 전원)</div>
                             <!-- 페이백 -->
                             <div class="bubble" data-step="5">오늘 모임 잘 마치셨나요? 영수증으로 <b>인사팀 페이백</b>을 신청할 수 있어요.</div>
                             <div class="m-card" data-step="5">
@@ -806,9 +812,9 @@
                               </div>
                               <button class="mini-btn" type="button" data-advance>인사팀에 페이백 신청</button>
                             </div>
-                            <div class="toast" data-step="5">✅ 인사팀 페이백 신청 완료 · 검토 중</div>
+                            <div class="toast" data-step="5"><span class="msi">check_circle</span> 인사팀 페이백 신청 완료 · 검토 중</div>
                             <!-- 모임 종료 -->
-                            <div class="bubble" data-step="6">모두 참석 완료! 걸어둔 <b>포인트를 정산</b>할게요 🎉</div>
+                            <div class="bubble" data-step="6">모두 참석 완료! 걸어둔 <b>포인트를 정산</b>할게요 <span class="msi">celebration</span></div>
                             <div class="m-card" data-step="6">
                               <span class="tag brand">포인트 지급</span>
                               <div class="checkin-row done"><span class="ci-name">김대리 (개설자)</span><span class="ci-state">+150P</span></div>
@@ -816,7 +822,7 @@
                               <div class="checkin-row done"><span class="ci-name">정사원</span><span class="ci-state">+120P</span></div>
                               <div class="checkin-row done"><span class="ci-name">나</span><span class="ci-state">+120P</span></div>
                             </div>
-                            <div class="toast" data-step="6">💰 참여자·생성자 전원 포인트 지급 완료</div>
+                            <div class="toast" data-step="6"><span class="msi">paid</span> 참여자·생성자 전원 포인트 지급 완료</div>
                             <div class="m-card" data-step="6">
                               <span class="tag brand">내 포인트 지갑</span>
                               <div class="wallet"><span class="w-amt">1,370P</span><span class="w-plus">+120P</span></div>
@@ -842,24 +848,24 @@
                     <div class="app-header"><div class="bot-avatar">OM</div><div class="app-header-text"><div class="name">번개방 탐색</div><div class="subtitle">방폭 임박순 정렬</div></div><div class="status-dot"></div></div>
                     <div class="app-body">
                       <div class="room-row urgent" data-advance data-remain="252" data-total="1800">
-                        <div class="rr-top"><span class="rr-name">🔥 마감임박 삼겹살</span><span class="grade-badge g-red">🔴 레드 번개</span></div>
-                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--dinner)">최</span><span style="background:var(--lunch)">한</span><span style="background:var(--morning)">유</span></div><span class="rr-count">3/4명</span><span class="rr-points">💰 +180P</span></div>
+                        <div class="rr-top"><span class="rr-name"><span class="msi">local_fire_department</span> 마감임박 삼겹살</span><span class="grade-badge g-red"><span class="msi">circle</span> 레드 번개</span></div>
+                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--dinner)">최</span><span style="background:var(--lunch)">한</span><span style="background:var(--morning)">유</span></div><span class="rr-count">3/4명</span><span class="rr-points"><span class="msi">paid</span> +180P</span></div>
                         <div class="gauge"><div class="gauge-track"><div class="gauge-fill danger" style="width:14%"></div></div><div class="gauge-label">방폭까지 04:12</div></div>
                       </div>
                       <div class="room-row" data-advance data-remain="690" data-total="1800">
-                        <div class="rr-top"><span class="rr-name">🍜 매운맛 점심 원정대</span><span class="grade-badge g-bolt">⚡ 번개</span></div>
-                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--brand)">김</span><span style="background:var(--good)">나</span></div><span class="rr-count">2/4명</span><span class="rr-points">💰 +120P</span></div>
+                        <div class="rr-top"><span class="rr-name"><span class="msi">ramen_dining</span> 매운맛 점심 원정대</span><span class="grade-badge g-bolt"><span class="msi">bolt</span> 번개</span></div>
+                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--brand)">김</span><span style="background:var(--good)">나</span></div><span class="rr-count">2/4명</span><span class="rr-points"><span class="msi">paid</span> +120P</span></div>
                         <div class="gauge"><div class="gauge-track"><div class="gauge-fill warn" style="width:38%"></div></div><div class="gauge-label">방폭까지 11:30</div></div>
                       </div>
                       <div class="room-row" data-advance data-remain="1600" data-total="2400">
-                        <div class="rr-top"><span class="rr-name">☕ 오후 커피챗</span><span class="grade-badge g-blue">🔵 푸른 번개</span></div>
-                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--morning)">서</span><span style="background:var(--lunch)">배</span><span style="background:var(--dinner)">임</span><span style="background:var(--brand)">황</span></div><span class="rr-count">4/6명</span><span class="rr-points">💰 +90P</span></div>
+                        <div class="rr-top"><span class="rr-name"><span class="msi">local_cafe</span> 오후 커피챗</span><span class="grade-badge g-blue"><span class="msi">circle</span> 푸른 번개</span></div>
+                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--morning)">서</span><span style="background:var(--lunch)">배</span><span style="background:var(--dinner)">임</span><span style="background:var(--brand)">황</span></div><span class="rr-count">4/6명</span><span class="rr-points"><span class="msi">paid</span> +90P</span></div>
                         <div class="gauge"><div class="gauge-track"><div class="gauge-fill" style="width:67%"></div></div><div class="gauge-label">방폭까지 26:40</div></div>
                       </div>
                       <div class="room-row" data-advance>
-                        <div class="rr-top"><span class="rr-name">🎳 전사 볼링 대회</span><span class="grade-badge g-jet">🌩️ 자이언트 제트</span></div>
-                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--brand)">전</span><span style="background:var(--good)">사</span><span style="background:var(--line);color:var(--muted)">+16</span></div><span class="rr-count">18/40명</span><span class="rr-points">💰 +300P</span></div>
-                        <span class="chip-sm">🔓 상시 · 방폭 없음</span>
+                        <div class="rr-top"><span class="rr-name"><span class="msi">emoji_events</span> 전사 볼링 대회</span><span class="grade-badge g-jet"><span class="msi">thunderstorm</span> 자이언트 제트</span></div>
+                        <div class="rr-mid"><div class="avatar-stack"><span style="background:var(--brand)">전</span><span style="background:var(--good)">사</span><span style="background:var(--line);color:var(--muted)">+16</span></div><span class="rr-count">18/40명</span><span class="rr-points"><span class="msi">paid</span> +300P</span></div>
+                        <span class="chip-sm"><span class="msi">lock_open</span> 상시 · 방폭 없음</span>
                       </div>
                       <div class="note">방폭 임박순 정렬. 자이언트 제트는 방폭이 없어요.</div>
                     </div>
@@ -896,22 +902,22 @@
     <div class="noshow-row">
       <article class="ns-card">
         <span class="tag good">실동작</span>
-        <h3>📍 온·오프 자동판별 · QR 체크인</h3>
+        <h3><span class="msi">location_on</span> 온·오프 자동판별 · QR 체크인</h3>
         <p>30분 이하는 온라인 전환, QR로 디파짓 환급.</p>
       </article>
       <article class="ns-card">
         <span class="tag good">실동작</span>
-        <h3>🪪 온보딩 · 신뢰도 링 · 탐색 피드</h3>
+        <h3><span class="msi">badge</span> 온보딩 · 신뢰도 링 · 탐색 피드</h3>
         <p>태그 하나로 신뢰도 링·추천 피드가 즉시.</p>
       </article>
       <article class="ns-card">
         <span class="tag good">실동작</span>
-        <h3>💰 가상 포인트 원장</h3>
+        <h3><span class="msi">paid</span> 가상 포인트 원장</h3>
         <p>디파짓 500P, 참석 시 +50P 전액 환급.</p>
       </article>
       <article class="ns-card">
         <span class="tag warn">SIMULATED</span>
-        <h3>💬 메신저 · 캘린더 연동</h3>
+        <h3><span class="msi">chat</span> 메신저 · 캘린더 연동</h3>
         <p>실연동·캘린더 자동등록은 다음 단계.</p>
       </article>
     </div>
@@ -922,18 +928,18 @@
     <div class="company-panel">
       <span class="sec-eyebrow">그리고, 수익까지</span>
       <h2>밥 한 끼로 동료를 잇고, 조직의 연결을 수익으로 바꿉니다</h2>
-      <p class="sec-lede">무료로 설치되고, <b>포인트가 오갈 때마다 수익이 쌓이는</b> 구조입니다. 1,000인 조직이 이미 집행하는 모임 예산(연 3.6억 규모)이 포인트로 전환되는 흐름 위에 세 갈래 수익원이 올라갑니다.</p>
+      <p class="sec-lede">무료로 설치되고, 임직원 1인당 매달 1,500P가 자동 충전되는 <b>자리세가 예측 가능한 매출 바닥</b>을 깔면 — 그 위에 포인트 팩과 조직 인사이트가 증분으로 쌓입니다.</p>
       <div class="co-row">
         <article class="co-card">
-          <h3>💳 포인트 판매 수수료 3–5%</h3>
-          <p>HR이 충전한 포인트가 모임에서 소진될 때마다 발생 — 구독료 없는 핵심 수익.</p>
+          <h3><span class="msi">credit_card</span> 자리세 ₩1,500/인·월</h3>
+          <p>HR 법인카드 자동 충전 — 인당 정액 구독과 같은 예측 가능한 주 수익.</p>
         </article>
         <article class="co-card">
-          <h3>🧾 개인카드 페이백</h3>
-          <p>영수증 기반 인사팀 페이백으로 개인 지출을 조직 포인트로 끌어오는 전환 장치.</p>
+          <h3><span class="msi">redeem</span> 포인트 팩 (온디맨드)</h3>
+          <p>자리세로 부족하면 HR이 추가 구매 — 모임이 활발할수록 커지는 증분 수익.</p>
         </article>
         <article class="co-card">
-          <h3>📈 조직 인사이트 · ONA</h3>
+          <h3><span class="msi">trending_up</span> 조직 인사이트 · ONA</h3>
           <p>부서 간 연결·고립 시그널을 HR 콘솔 대시보드로 — Enterprise 성장 수익.</p>
         </article>
       </div>
@@ -951,25 +957,25 @@
     <p class="sec-lede">이 페이지의 데모가 <b>무엇으로 돈을 버는지</b>는 사업계획서에, 화면 하나하나의 규칙은 목업에 담았습니다.</p>
     <div class="dl-grid">
       <a class="dl-card" href="/biz-plan">
-        <span class="emoji">🍱</span>
+        <span class="emoji"><span class="msi">description</span></span>
         <h3>사업계획서</h3>
         <p>3층 수익구조 · Go/Fix 리텐션 지표 · SOM 숫자 모델 · 3개년 손익과 필요 자금.</p>
         <span class="dl-go">열기 →</span>
       </a>
       <a class="dl-card" href="/hr-console">
-        <span class="emoji">🖥️</span>
+        <span class="emoji"><span class="msi">dashboard</span></span>
         <h3>HR 콘솔 시뮬레이터</h3>
         <p>Enterprise 수익의 실체 — 대시보드·ONA·시그널·예산·스폰서·리포트 8페이지 인터랙티브.</p>
         <span class="dl-go">열기 →</span>
       </a>
       <a class="dl-card" href="/flow-mockup">
-        <span class="emoji">📱</span>
+        <span class="emoji"><span class="msi">smartphone</span></span>
         <h3>핵심 플로우 7화면</h3>
         <p>슬롯 선택부터 디파짓·매칭·확정/방폭·정산까지 매칭 루프의 화면 규칙.</p>
         <span class="dl-go">열기 →</span>
       </a>
       <a class="dl-card" href="/journey-mockup">
-        <span class="emoji">🗺️</span>
+        <span class="emoji"><span class="msi">map</span></span>
         <h3>사용자 여정 5화면</h3>
         <p>프로필 등록 → 첫 모임 → 활동이 자산으로 쌓이기까지의 온보딩 여정.</p>
         <span class="dl-go">열기 →</span>
@@ -1030,9 +1036,9 @@
   ];
 
   var PERSONA = {
-    creator:     { cls: 'creator',     label: '⚡ 번개방 생성자' },
-    participant: { cls: 'participant', label: '🙋 번개방 참여자' },
-    meeting:     { cls: 'meeting',     label: '🤝 모임 진행' }
+    creator:     { cls: 'creator',     label: '<span class="msi">bolt</span> 번개방 생성자' },
+    participant: { cls: 'participant', label: '<span class="msi">front_hand</span> 번개방 참여자' },
+    meeting:     { cls: 'meeting',     label: '<span class="msi">handshake</span> 모임 진행' }
   };
 
   var N = META.length;
@@ -1148,7 +1154,8 @@
     var m = META[idx];
     var p = PERSONA[m.persona];
     personaEl.className = 'persona-badge ' + p.cls;
-    personaEl.textContent = p.label;
+    personaEl.innerHTML = p.label; // 라벨에 아이콘(<span class="msi">) 포함 — 내부 상수만 사용
+
     stepEl.textContent = 'STEP ' + (idx + 1) + ' / ' + N + ' · ' + m.name;
     titleEl.textContent = m.title;
     capEl.textContent = m.cap;
@@ -1309,7 +1316,7 @@
 
   function renderFinalStatic() {
     heroBody.innerHTML =
-      '<div class="bubble">오늘 12:00 점심 함께할 네 분이 모였어요 🎉</div>' +
+      '<div class="bubble">오늘 12:00 점심 함께할 네 분이 모였어요 <span class="msi">celebration</span></div>' +
       '<div class="m-card">' +
         '<div class="avatar-stack">' +
           '<span style="background:var(--morning)">김</span>' +
@@ -1320,8 +1327,8 @@
         '<div class="chip-row"><span class="chip-sm">#등산</span><span class="chip-sm">#보드게임</span></div>' +
         '<div class="gauge"><div class="gauge-track"><div class="gauge-fill good" style="width:100%"></div></div><div class="gauge-label">4/4명 확정</div></div>' +
       '</div>' +
-      '<div class="m-card"><span class="tag good">장소 추천 완료</span><div style="font-weight:700;">🍲 광화문 김치찌개</div></div>' +
-      '<div class="toast">✅ 체크인 완료 · +550P 적립</div>';
+      '<div class="m-card"><span class="tag good">장소 추천 완료</span><div style="font-weight:700;"><span class="msi">dinner_dining</span> 광화문 김치찌개</div></div>' +
+      '<div class="toast"><span class="msi">check_circle</span> 체크인 완료 · +550P 적립</div>';
   }
 
   function typeUserBubble(text) {
@@ -1349,9 +1356,9 @@
     return row;
   }
 
-  function heroBotText(text) {
+  function heroBotText(html) {
     var b = el('<div class="bubble"></div>');
-    b.textContent = text;
+    b.innerHTML = html; // 아이콘(<span class="msi">) 포함 — 내부 상수만 사용
     appendMsg(b);
     return b;
   }
@@ -1390,7 +1397,7 @@
         var t = showHeroTyping();
         return wait(1500).then(function () { t.remove(); });
       })
-      .then(function () { return heroBotText('파싱 완료! 모집을 시작할게요 🍜'); })
+      .then(function () { return heroBotText('파싱 완료! 모집을 시작할게요 <span class="msi">ramen_dining</span>'); })
       .then(function () { return wait(1500); })
       .then(function () {
         var card = el('<div class="m-card">' +
@@ -1406,14 +1413,14 @@
         return fillHeroGauge(card);
       })
       .then(function () { return wait(1000); })
-      .then(function () { return heroBotText('🎉 확정! 대화방을 만들었어요'); })
+      .then(function () { return heroBotText('<span class="msi">celebration</span> 확정! 대화방을 만들었어요'); })
       .then(function () { return wait(1000); })
       .then(function () {
-        appendMsg(el('<div class="m-card"><span class="tag good">장소 추천</span><div style="font-weight:700;">🍲 마라공방 본점</div><div class="chip-sm">도보 3분 · 4.6★</div></div>'));
+        appendMsg(el('<div class="m-card"><span class="tag good">장소 추천</span><div style="font-weight:700;"><span class="msi">dinner_dining</span> 마라공방 본점</div><div class="chip-sm">도보 3분 · 4.6★</div></div>'));
       })
       .then(function () { return wait(3000); })
       .then(function () {
-        appendMsg(el('<div class="toast">✅ 체크인 완료 · +550P 적립</div>'));
+        appendMsg(el('<div class="toast"><span class="msi">check_circle</span> 체크인 완료 · +550P 적립</div>'));
       })
       .then(function () { return wait(2000); })
       .then(function () {
