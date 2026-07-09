@@ -242,6 +242,27 @@ function unbundle(raw, file) {
   return tpl;
 }
 
+// namo's SPA shell owns the document <head>, so a <link rel="icon"> in our
+// source files never reaches the served page. Instead, emit a tiny script
+// that swaps the favicon at runtime with the data-URI icon found in the
+// source file's head. Returns "" when the source has no icon link.
+function faviconScript(raw) {
+  const head = extractTag(raw, "head");
+  if (!head) return "";
+  const linkStart = head.inner.indexOf('<link rel="icon"');
+  if (linkStart === -1) return "";
+  const hrefStart = head.inner.indexOf('href="', linkStart);
+  if (hrefStart === -1) return "";
+  const start = hrefStart + 'href="'.length;
+  const end = head.inner.indexOf('"', start);
+  const href = head.inner.slice(start, end);
+  return (
+    `<script>(function(){var l=document.querySelector('link[rel~="icon"]')||document.createElement('link');` +
+    `l.rel='icon';l.type='image/png';l.href='${href}';` +
+    `if(!l.parentNode)document.head.appendChild(l);})();</scr` + `ipt>`
+  );
+}
+
 // Builds { title, payload } for one HTML file: payload = head stylesheet
 // links (as @import), head <style> blocks (verbatim, including tags), then
 // the <body> inner content.
@@ -275,7 +296,7 @@ function buildPayload(raw, file) {
   // runtime boots on readyState!=="loading", so running late is fine.
   const headScripts = unbundled && head ? extractAllScriptBlocks(head.inner) : [];
   let payload = rewriteInternalLinks(
-    `${importBlock}\n${styleBlocks.join("\n")}\n${body.inner}\n${headScripts.join("\n")}`.trim()
+    `${importBlock}\n${styleBlocks.join("\n")}\n${body.inner}\n${headScripts.join("\n")}\n${faviconScript(raw)}`.trim()
   );
   // namo's update_page_html validator rejects any payload containing a <body>
   // tag. We only ever send body *inner* content, but bundled/simulated pages
