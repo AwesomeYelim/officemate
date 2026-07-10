@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="assets/logo.png" width="72" alt="OfficeMate 로고">
-
-# OfficeMate
+# <img src="assets/logo.png" width="34" align="top" alt="OfficeMate 로고"> OfficeMate
 
 ### 하루 세 끼, 새 동료를 만나는 순간.
 
@@ -87,8 +85,6 @@ DRY_RUN=1 node scripts/deploy.mjs
 ---
 
 <div align="center">
-
-<img src="assets/logo.png" width="28" alt="OfficeMate">
 
 **같은 회사, 몰랐던 동료. 다음 끼니에 만나보세요.**
 
