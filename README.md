@@ -40,7 +40,7 @@ DRY_RUN=1 node scripts/deploy.mjs
 | [/landing](https://officemate-five.vercel.app/landing) | `/`로 리다이렉트 (구 링크 호환용) |
 | [/biz-plan](https://officemate-five.vercel.app/biz-plan) | 사업계획서 — 3층 수익구조·리텐션 가설·SOM 모델 |
 | [/flow-mockup](https://officemate-five.vercel.app/flow-mockup) | 핵심 매칭 플로우 목업 (12개 폰 화면 + 스펙 카드) |
-| [/journey-mockup](https://officemate-five.vercel.app/journey-mockup) | 사용자 여정 목업 (5단계 시작 가이드) |
+| [/journey-mockup](https://officemate-five.vercel.app/journey-mockup) | 사용자 여정 목업 (7단계 시작 가이드 — 프로필·참여 디파짓·확정·리마인더·체크인 페이백·자산·탐색) |
 | [/hr-console](https://officemate-five.vercel.app/hr-console) | HR 콘솔 시뮬레이터 (10페이지 인터랙티브 대시보드) |
 
 ## 라이브 데모 주요 기능
