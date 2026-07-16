@@ -224,7 +224,21 @@
   .badge.p1 { background: rgba(224,90,90,.14); color: #A32E2E; }
   .badge.p2 { background: rgba(240,166,78,.16); color: #8A5A16; }
   .badge.p3 { background: #EEF1F8; color: var(--muted); }
+  .badge.sim { background: var(--warn); color: #fff; }
+  .badge.roadmap { background: #EEF1F8; color: var(--muted); border: 1px dashed var(--muted2); }
   body.hide-badges .badge { display: none; }
+
+  .om-qr {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; width: 132px; height: 132px;
+    margin: 0 auto; padding: 10px; background: #fff; border-radius: 12px;
+  }
+  .om-qr span { background: var(--ink); border-radius: 1px; }
+  .om-qr span.off { background: transparent; }
+
+  .om-stepper { display: flex; align-items: center; gap: 6px; justify-content: center; margin-bottom: 14px; }
+  .om-stepper .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+  .om-stepper .dot.done { background: var(--good); }
+  .om-stepper .dot.now { background: var(--brand); width: 10px; height: 10px; }
 
   .om-owner-pill { display: inline-flex; font-size: 10.5px; font-weight: 700; color: var(--muted); background: #F3F5FA; border-radius: 999px; padding: 2px 8px; margin-right: 4px; }
 
@@ -282,7 +296,7 @@
   <section>
     <div class="om-panel-section">
       <h2>화면 · 기능 우선순위 맵</h2>
-      <p class="sub">기능 → 주차(W) → 담당 → 우선순위(P0=핵심 루프, P1=반복사용 보조, P2=탐색/방폭, P3=HR, WX=제외). 왼쪽 화면 목록을 클릭하면 표에서 해당 행이 강조됩니다.</p>
+      <p class="sub">기능 → 주차(W) → 담당 → 우선순위(P0=핵심 루프, P1=반복사용 보조, P2=탐색/방폭, P3=HR). <span class="badge sim" style="font-size:10px;">SIM</span> = MVP-PLAN §3a — UI는 완성, 백엔드는 시뮬레이션(파일럿에서는 "베타" 라벨 표시). <span class="badge roadmap" style="font-size:10px;">ROADMAP</span> = §3b, 화면 없음. 왼쪽 화면 목록을 클릭하면 표에서 해당 행이 강조됩니다.</p>
       <div style="overflow-x:auto;">
       <table class="om-spec-table" id="specTable">
         <thead>
@@ -294,8 +308,8 @@
     </div>
 
     <div class="om-panel-section">
-      <h2>명시적으로 뺀 것 (MVP-PLAN §3)</h2>
-      <p class="sub">아래 항목은 이번 스프린트에서 만들지 않습니다 — 하면 지는 것.</p>
+      <h2>3b. 로드맵 (화면 없음) — MVP-PLAN §3b</h2>
+      <p class="sub">전 기능이 UI에는 존재한다는 원칙(§3 "full package UI")의 유일한 예외 — 아래는 화면도 구현도 없이 발표 로드맵 슬라이드로만 다룹니다.</p>
       <div id="excludedList" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
     </div>
 
@@ -304,7 +318,8 @@
       <p class="sub" style="margin-bottom:0; line-height:1.7;">
         1) 기존 라이브 데모(index.html #demo)의 스토리보드 패턴 — 폰 프레임, 상태바, 카드, 말풍선, 색 토큰 — 을 그대로 재사용해 독립 스크립트로 새로 구현했습니다 (원본 JS 클래스를 그대로 로드하지 않음 → 스크립트 충돌 없음).<br>
         2) 실서비스에 필요한데 데모엔 없던 화면(온보딩 상세·알림함·모임 상세·설정)을 같은 톤으로 추가했습니다.<br>
-        3) 각 화면의 예외 상태를 왼쪽 "비정상 상태 체험" 목록에서 직접 눌러 확인할 수 있습니다.
+        3) 각 화면의 예외 상태를 왼쪽 "비정상 상태 체험" 목록에서 직접 눌러 확인할 수 있습니다.<br>
+        4) MVP-PLAN §3a 재편에 맞춰 QR 체크인·스폰서 등록·온·오프 판별 화면을 추가하고, 탐색 피드(스폰서드+쿠폰)·n빵 정산(결제수단+영수증)에 상태를 보강했습니다 — 전부 <span class="badge sim" style="font-size:10px;">SIM</span> 경계이며, 화면 안의 버튼(QR 스캔 시뮬레이션·쿠폰 적용하기·슬롯 길이 바꿔보기 등)을 눌러 직접 확인할 수 있습니다.
       </p>
     </div>
   </section>
@@ -334,7 +349,11 @@
       clock: '<circle cx="12" cy="12" r="9" fill="none" stroke="' + color + '" stroke-width="1.8"/><path d="M12 7v5l4 2" stroke="' + color + '" stroke-width="1.8" fill="none" stroke-linecap="round"/>',
       lock: '<rect x="6" y="10" width="12" height="10" rx="2"/><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" fill="none" stroke="' + color + '" stroke-width="1.8"/>',
       signal: '<rect x="3" y="14" width="3" height="6" rx="1"/><rect x="8" y="10" width="3" height="10" rx="1"/><rect x="13" y="6" width="3" height="14" rx="1"/><rect x="18" y="3" width="3" height="17" rx="1"/>',
-      close: '<path d="M6 6l12 12M18 6L6 18" stroke="' + color + '" stroke-width="2.2" stroke-linecap="round"/>'
+      close: '<path d="M6 6l12 12M18 6L6 18" stroke="' + color + '" stroke-width="2.2" stroke-linecap="round"/>',
+      video: '<rect x="3" y="6" width="13" height="12" rx="2" fill="none" stroke="' + color + '" stroke-width="1.8"/><path d="M16 10.5 21 8v8l-5-2.5Z"/>',
+      building: '<rect x="4" y="3" width="16" height="18" rx="1.5" fill="none" stroke="' + color + '" stroke-width="1.8"/><path d="M8 8h2M14 8h2M8 12h2M14 12h2M8 16h2M14 16h2" stroke="' + color + '" stroke-width="1.6" stroke-linecap="round"/>',
+      percent: '<circle cx="7.5" cy="7.5" r="2.6" fill="none" stroke="' + color + '" stroke-width="1.8"/><circle cx="16.5" cy="16.5" r="2.6" fill="none" stroke="' + color + '" stroke-width="1.8"/><path d="M6 18 18 6" stroke="' + color + '" stroke-width="1.8" stroke-linecap="round"/>',
+      target: '<circle cx="12" cy="12" r="8.5" fill="none" stroke="' + color + '" stroke-width="1.6"/><circle cx="12" cy="12" r="5" fill="none" stroke="' + color + '" stroke-width="1.6"/><circle cx="12" cy="12" r="1.6"/>'
     };
     var body = shapes[name] || shapes.bolt;
     return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + color + '" aria-hidden="true" style="display:block;">' + body + '</svg>';
@@ -372,10 +391,48 @@
     }
     return html;
   }
+  // Deterministic pseudo-QR pattern (fixed 7x7 bitmap, not a real scannable
+  // code) — used only as a visual placeholder, so no Math.random involved.
+  var QR_BITS =
+    "1111111" +
+    "1000101" +
+    "1011101" +
+    "1000001" +
+    "1011011" +
+    "1000001" +
+    "1111111";
+  function qrGrid() {
+    var html = '<div class="om-qr">';
+    for (var i = 0; i < QR_BITS.length; i++) {
+      html += '<span class="' + (QR_BITS[i] === "1" ? "on" : "off") + '"></span>';
+    }
+    return html + '</div>';
+  }
+  function stepperDots(total, current) {
+    var html = '<div class="om-stepper">';
+    for (var i = 0; i < total; i++) {
+      var cls = i < current ? "done" : (i === current ? "now" : "");
+      html += '<span class="dot ' + cls + '"></span>';
+    }
+    return html + '</div>';
+  }
+
+  /* ---------------- simulation-trigger state (MVP-PLAN §3a) ---------------- */
+  // These are separate from the exception STATES below: STATES swap a whole
+  // screen into a broken/edge variant, while simFlags are small in-screen
+  // toggles (QR scanned? coupon applied? which sponsor step? slot length?)
+  // that a click inside the phone re-renders against. No Math.random —
+  // every flag has a fixed default and only flips on explicit click.
+  var simFlags = {
+    qrScanned: false,
+    couponApplied: false,
+    sponsorStep: 0,
+    slotMinutes: 30
+  };
 
   /* ================= SCREENS (ported + new) ================= */
-  // Each screen: id, label (picker), badge {week, prio}, owner, normal(), and
-  // optional broken(toastText) for the exception-state variant.
+  // Each screen: id, label (picker), badge {week, prio, sim}, owner, normal(),
+  // and optional broken(toastText) for the exception-state variant.
   var SCREENS = [
     {
       id: "privacy", label: "온보딩·동의", week: "w2", prio: "p0", owner: "FE-1",
@@ -462,6 +519,30 @@
       }
     },
     {
+      id: "auto-detect", label: "온·오프 판별", week: "w2", prio: "p0", owner: "BE-1 · FE-1", sim: true,
+      note: "신규(MVP-PLAN §3a) — 슬롯 길이 규칙만으로 온/오프라인을 표시. 근무형태 연동은 없음(로드맵 아님, SIM 경계).",
+      normal: function () {
+        var isOnline = simFlags.slotMinutes <= 30;
+        var resultCard = isOnline
+          ? '<div class="om-card" style="text-align:center;">' + chip("blue", "온라인") +
+            '<div style="margin:10px 0;">' + icon("video", 30, "#2F5EDB") + '</div>' +
+            '<div style="font-weight:800; font-size:13px;">Google Meet 링크 생성됨</div>' +
+            '<div style="font-size:11px; color:var(--muted); margin-top:4px;">meet.google.com/om-xxxx-yyy</div></div>'
+          : '<div class="om-card" style="text-align:center;">' + chip("green", "오프라인") +
+            '<div style="margin:10px 0;">' + icon("building", 30, "#22A06B") + '</div>' +
+            '<div style="font-weight:800; font-size:13px;">신전 마라탕 (도보 4분)</div>' +
+            '<div style="font-size:11px; color:var(--muted); margin-top:4px;">오프라인 모임 · 장소 예약 완료</div></div>';
+        return statusBar() + appBar("온·오프 판별", "슬롯 길이 규칙 기반") +
+          '<div class="om-body">' +
+          '<div class="om-card"><div style="font-size:11px; color:var(--muted);">이번 모임 슬롯 길이</div>' +
+          '<div style="font-size:18px; font-weight:800; margin-top:2px;">' + simFlags.slotMinutes + '분</div>' +
+          '<div style="font-size:10.5px; color:var(--muted); margin-top:4px;">30분 이하 → 온라인 · 60분 이상 → 오프라인</div></div>' +
+          resultCard +
+          '<button class="om-btn secondary om-press" data-sim="toggle-slot">슬롯 길이 바꿔보기 (30 ↔ 60분)</button>' +
+          '</div>';
+      }
+    },
+    {
       id: "detail", label: "모임 상세", week: "w2", prio: "p0", owner: "FE-1",
       note: "신규 — 참여 전에 모집 현황·멤버를 미리 보는 화면(기존 데모는 확정 알림에서 바로 디파짓으로 건너뜀).",
       normal: function () {
@@ -536,13 +617,43 @@
       }
     },
     {
-      id: "settlement", label: "n빵 정산", week: "w3", prio: "p0", owner: "FE-1 · BE-2",
-      note: "기존 데모 포팅 — 총액 → 참석자별 몫 표시(가상 원장).",
+      id: "qr-checkin", label: "QR 체크인", week: "w3", prio: "p0", owner: "FE-2 · BE-1", sim: true,
+      note: "신규(MVP-PLAN §3a) — QR 표시·스캔 UI만. 실제 토큰 발급·검증은 없고 수동 체크인(방장 확인)이 정식 경로.",
+      normal: function () {
+        if (simFlags.qrScanned) {
+          return statusBar() + appBar("QR 체크인", "스캔 결과") +
+            '<div class="om-body">' +
+            '<div class="om-card" style="text-align:center;">' + chip("green", "스캔됨") +
+            '<div style="margin:10px 0;">' + icon("check", 30, "#22A06B") + '</div>' +
+            '<div style="font-weight:800; font-size:13px;">QR 스캔 완료 · 체크인 대기</div>' +
+            '<div style="font-size:11px; color:var(--muted); margin-top:6px;">실제 체크인 확정은 방장이 확인해야 반영됩니다 (수동 체크인 화면으로 이동).</div></div>' +
+            '<button class="om-btn secondary om-press" data-sim="toggle-qr">다시 스캔 안 됨 상태로</button>' +
+            '<div class="om-card" style="margin-top:10px; background:rgba(240,166,78,.1); box-shadow:none;">' + chip("amber", "SIM · 토큰 발급 없음") + '</div>' +
+            '</div>';
+        }
+        return statusBar() + appBar("QR 체크인", "방장 화면에 표시") +
+          '<div class="om-body">' +
+          qrGrid() +
+          '<div style="text-align:center; font-size:11.5px; color:var(--muted); margin:10px 0 14px;">참여자가 이 QR을 스캔하면 체크인 후보로 표시됩니다.</div>' +
+          '<button class="om-btn om-press" data-sim="toggle-qr">스캔 시뮬레이션</button>' +
+          '<div class="om-card" style="margin-top:10px; background:rgba(240,166,78,.1); box-shadow:none;">' + chip("amber", "SIM · 정식 경로는 수동 체크인") + '</div>' +
+          '</div>';
+      }
+    },
+    {
+      id: "settlement", label: "n빵 정산", week: "w3", prio: "p0", owner: "FE-1 · BE-2", sim: true,
+      note: "기존 데모 포팅 + 결제수단·영수증 상태 보강(MVP-PLAN §3a) — 가상 원장까지, 실 money 이동 없음.",
       normal: function () {
         return statusBar() + appBar("정산", "n빵 · 영수증 증빙") +
           '<div class="om-body">' +
           '<div class="om-card"><div style="font-size:11px; color:var(--muted);">총액</div><div style="font-size:20px; font-weight:800;">36,000원</div>' +
           '<div style="font-size:11.5px; color:var(--muted); margin-top:4px;">3명 ÷ = 인당 12,000원 · 노쇼자 제외</div></div>' +
+          '<div class="om-card"><div style="font-size:11.5px; font-weight:700; margin-bottom:8px;">결제 수단</div>' +
+          chip("blue", "간편결제") + " " + chip("grey", "신용카드") + " " + chip("grey", "포인트만") + '</div>' +
+          '<div class="om-card" style="display:flex; align-items:center; justify-content:space-between;">' +
+          '<div>' + icon("receipt", 18, "#8892AE") + '</div>' +
+          '<div style="flex:1; margin-left:10px;"><div style="font-size:12px; font-weight:700;">영수증 발급 완료</div><div style="font-size:10.5px; color:var(--muted); margin-top:2px;">가상 원장 기록 — 실제 송금 없음</div></div>' +
+          chip("green", "발급됨") + '</div>' +
           '<button class="om-btn om-press">' + icon("check", 14, "#fff") + ' +50P 환급 완료</button>' +
           '</div>';
       }
@@ -554,8 +665,17 @@
         function card(title, meta) {
           return '<div class="om-card"><div style="font-weight:700; font-size:12.5px;">' + title + '</div><div style="font-size:11px; color:var(--muted); margin-top:3px;">' + meta + '</div></div>';
         }
+        var sponsoredCard = '<div class="om-card" style="border:1px solid rgba(240,166,78,.4);">' +
+          chip("amber", "스폰서드 · SIM") +
+          '<div style="font-weight:700; font-size:12.5px; margin-top:8px;">사내 카페 원두 시식 커피챗</div>' +
+          '<div style="font-size:11px; color:var(--muted); margin-top:3px;">14:00 · 0/3명 · 스폰서 제공 원두 증정</div>' +
+          (simFlags.couponApplied
+            ? '<div style="margin-top:8px;">' + chip("green", "쿠폰 적용됨 · 15% 할인") + '</div>'
+            : '<button class="om-btn secondary om-press" style="margin-top:8px;" data-sim="apply-coupon">쿠폰 적용하기</button>') +
+          '</div>';
         return statusBar() + appBar("탐색", "모집 중인 방") + bottomNavPlaceholder() +
           '<div class="om-body">' +
+          sponsoredCard +
           card("금요일 커피챗", "15:00 · 1/2명 · 방폭 임박") +
           card("월요일 러닝 크루", "07:30 · 2/4명") +
           '</div>' + bottomNav(1);
@@ -617,6 +737,35 @@
           toggleRow("부서 다양성 우선", true) + toggleRow("채식 옵션만 보기", false) + '</div>' +
           '</div>';
       }
+    },
+    {
+      id: "sponsor-register", label: "스폰서 등록", week: "w5", prio: "p2", owner: "FE-2", sim: true,
+      note: "신규(MVP-PLAN §3a) — 사업자용 타깃·예산 스테퍼. 실제 과금·정산은 없음(가상 등록까지). 탐색 피드의 스폰서드 배지·쿠폰(위 항목)과 한 세트.",
+      normal: function () {
+        var step = simFlags.sponsorStep;
+        var body;
+        if (step === 0) {
+          body = '<div class="om-card"><div style="font-size:11.5px; font-weight:700; margin-bottom:8px;">타깃 설정</div>' +
+            chip("blue", "매운맛") + " " + chip("blue", "커피챗") + " " + chip("grey", "+ 태그 추가") +
+            '<div style="font-size:11px; color:var(--muted); margin-top:10px;">부서 전체 노출 · 관심 태그 매칭 유저에게만 표시</div></div>';
+        } else if (step === 1) {
+          body = '<div class="om-card"><div style="font-size:11.5px; font-weight:700; margin-bottom:8px;">예산 설정</div>' +
+            '<div style="font-size:20px; font-weight:800;">300,000P</div>' +
+            '<div style="font-size:11px; color:var(--muted); margin-top:4px;">이번 달 · 쿠폰 15% 할인 재원</div></div>';
+        } else {
+          body = '<div class="om-card"><div style="font-size:11.5px; font-weight:700; margin-bottom:8px;">검토 · 제출</div>' +
+            '<div style="font-size:11.5px; color:#4A5170; line-height:1.7;">타깃: 매운맛·커피챗 태그<br>예산: 300,000P/월<br>쿠폰: 15% 할인</div>' +
+            '<div style="margin-top:8px;">' + chip("amber", "SIM · 실제 과금 없음") + '</div></div>';
+        }
+        var btnLabel = step < 2 ? "다음 단계" : "등록 신청 (시뮬레이션)";
+        return statusBar() + appBar("스폰서 등록", "사업자용 · 타깃/예산") +
+          '<div class="om-body">' +
+          stepperDots(3, step) +
+          body +
+          '<button class="om-btn om-press" data-sim="sponsor-next">' + btnLabel + '</button>' +
+          (step > 0 ? '<button class="om-btn ghost om-press" style="margin-top:8px;" data-sim="sponsor-reset">처음부터</button>' : '') +
+          '</div>';
+      }
     }
   ];
   function bottomNavPlaceholder() { return ""; }
@@ -629,13 +778,22 @@
     { id: "loading", target: "match", label: icon("clock", 13, "#8892AE") + " 로딩 스켈레톤" }
   ];
 
+  // MVP-PLAN §3b — UI/구현 없이 로드맵 슬라이드로만 커버되는 항목.
+  // (QR·스폰서·결제·온오프판별·HR은 더 이상 "뺀 것"이 아니라 §3a SIM 화면으로 존재함 —
+  // 아래 목록에서 뺐다. 최신 스코프는 항상 MVP-PLAN.md §3을 정본으로 삼는다.)
   var EXCLUDED = [
-    "QR·화상 체크인", "신뢰도 모델 학습(단순 가산만)", "임베딩 매칭(태그 규칙만)",
-    "스폰서 시스템", "실결제·송금(가상 원장까지)", "잔디·네이버웍스 확장",
-    "온·오프 자동판별 고도화", "HR 콘솔 2페이지 이후"
+    "신뢰도 모델 학습(단순 가산만 사용)", "임베딩 매칭(태그 규칙만)", "잔디·네이버웍스 확장"
   ];
 
-  var HR_ROW = { label: "HR 콘솔 대시보드", week: "w5", prio: "p3", owner: "FE-2", note: "1페이지만 실데이터 연결 (참여 건수·참여율·노쇼율). 폰 데모 화면 아님 — 별도 대시보드." };
+  var HR_ROW = {
+    label: '<a href="hr-console.html">HR 콘솔 대시보드</a>', week: "w5", prio: "p3", sim: true, owner: "FE-2",
+    note: "10페이지 전체 UI는 유지 — 실데이터 연결은 대시보드 1페이지만(참여 건수·참여율·노쇼율), 나머지 9페이지는 예시 데이터(SIM). 폰 데모 화면 아님 — /hr-console 참고."
+  };
+
+  var ROADMAP_ROW = {
+    label: "3b 로드맵 (화면 없음)", week: "-", prio: "roadmap", owner: "-",
+    note: "신뢰도 모델 학습(단순 가산만 사용) · 임베딩 매칭(태그 규칙만) · 잔디·네이버웍스 확장 — UI·구현 없이 9/1 발표 로드맵 슬라이드로만 커버."
+  };
 
   /* ================= state ================= */
   var currentIdx = 0;
@@ -703,8 +861,10 @@
     render();
   }
 
-  function badgeHtml(week, prio) {
-    return '<span class="badge ' + week + '">' + week.toUpperCase() + '</span> <span class="badge ' + prio + '">' + prio.toUpperCase() + '</span>';
+  function badgeHtml(week, prio, sim) {
+    var html = '<span class="badge ' + week + '">' + week.toUpperCase() + '</span> <span class="badge ' + prio + '">' + prio.toUpperCase() + '</span>';
+    if (sim) html += ' <span class="badge sim">SIM</span>';
+    return html;
   }
 
   function buildPicker() {
@@ -737,7 +897,7 @@
       tr.setAttribute("data-screen-id", s.id);
       tr.innerHTML = '<td class="feat">' + s.label + '</td>' +
         '<td>' + s.week.toUpperCase() + '</td>' +
-        '<td>' + badgeHtml(s.week, s.prio) + '</td>' +
+        '<td>' + badgeHtml(s.week, s.prio, s.sim) + '</td>' +
         '<td><span class="om-owner-pill">' + s.owner + '</span></td>' +
         '<td style="color:#8892AE; font-size:11.5px;">' + s.note + '</td>';
       tr.style.cursor = "pointer";
@@ -749,17 +909,25 @@
     var hrTr = document.createElement("tr");
     hrTr.innerHTML = '<td class="feat">' + HR_ROW.label + '</td>' +
       '<td>' + HR_ROW.week.toUpperCase() + '</td>' +
-      '<td>' + badgeHtml(HR_ROW.week, HR_ROW.prio) + '</td>' +
+      '<td>' + badgeHtml(HR_ROW.week, HR_ROW.prio, HR_ROW.sim) + '</td>' +
       '<td><span class="om-owner-pill">' + HR_ROW.owner + '</span></td>' +
       '<td style="color:#8892AE; font-size:11.5px;">' + HR_ROW.note + '</td>';
     tbody.appendChild(hrTr);
+
+    var roadmapTr = document.createElement("tr");
+    roadmapTr.innerHTML = '<td class="feat">' + ROADMAP_ROW.label + '</td>' +
+      '<td>' + ROADMAP_ROW.week + '</td>' +
+      '<td><span class="badge roadmap">ROADMAP</span></td>' +
+      '<td><span class="om-owner-pill">' + ROADMAP_ROW.owner + '</span></td>' +
+      '<td style="color:#8892AE; font-size:11.5px;">' + ROADMAP_ROW.note + '</td>';
+    tbody.appendChild(roadmapTr);
   }
 
   function buildExcluded() {
     var wrap = document.getElementById("excludedList");
     EXCLUDED.forEach(function (label) {
       var span = document.createElement("span");
-      span.className = "badge wx";
+      span.className = "badge roadmap";
       span.style.fontSize = "11px";
       span.style.padding = "5px 10px";
       span.textContent = label;
@@ -767,11 +935,35 @@
     });
   }
 
+  // Simulation triggers live inside the rendered screen markup itself
+  // (data-sim="..." on a button). Delegated on #screenRoot so it keeps
+  // working across re-renders without re-binding per screen.
+  function handleSimAction(action) {
+    if (action === "toggle-qr") {
+      simFlags.qrScanned = !simFlags.qrScanned;
+    } else if (action === "apply-coupon") {
+      simFlags.couponApplied = true;
+    } else if (action === "toggle-slot") {
+      simFlags.slotMinutes = simFlags.slotMinutes === 30 ? 60 : 30;
+    } else if (action === "sponsor-next") {
+      simFlags.sponsorStep = simFlags.sponsorStep < 2 ? simFlags.sponsorStep + 1 : 0;
+    } else if (action === "sponsor-reset") {
+      simFlags.sponsorStep = 0;
+    } else {
+      return;
+    }
+    render();
+  }
+
   function wireControls() {
     document.getElementById("btnPrev").addEventListener("click", function () { goTo(currentIdx - 1); });
     document.getElementById("btnNext").addEventListener("click", function () { goTo(currentIdx + 1); });
     document.getElementById("badgeToggle").addEventListener("change", function (e) {
       document.body.classList.toggle("hide-badges", !e.target.checked);
+    });
+    document.getElementById("screenRoot").addEventListener("click", function (e) {
+      var el = e.target.closest ? e.target.closest("[data-sim]") : null;
+      if (el) handleSimAction(el.getAttribute("data-sim"));
     });
   }
 
