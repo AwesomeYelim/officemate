@@ -3,7 +3,7 @@
 // Unlike the portfolio repo (single page, CDN-backed assets), officemate is:
 //   - all-in-one HTML files (head: title/meta/style, body: markup+script) — no
 //     separate css/js tracked by a CDN, so there is no purge track here.
-//   - multi-page: 6 root HTML files, each mapped to one namo page.
+//   - multi-page: 7 root HTML files, each mapped to one namo page.
 //
 // Page resolution (deterministic, no hardcoded page ids):
 //   1. call list_pages
@@ -59,6 +59,7 @@ const PAGES = [
   { file: "hr-console.html", slug: "hr-console", slugAliases: [] },
   { file: "flow-mockup.html", slug: "flow-mockup", slugAliases: [] },
   { file: "journey-mockup.html", slug: "journey-mockup", slugAliases: [] },
+  { file: "spec.html", slug: "spec", slugAliases: [] },
 ];
 
 // --- changed-file detection ---------------------------------------------
