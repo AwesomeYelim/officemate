@@ -29,9 +29,15 @@ jobs:
       # remote page and skips identical content, so only real differences are
       # submitted. No git-diff dependency → cancelled/failed runs can never
       # permanently lose a change.
+      # ALLOW_CREATE is granted only to manual dispatch runs: page creation
+      # enters namo's approval queue, and while a create is pending the page
+      # is invisible to list_pages — so push-triggered runs would re-create it
+      # on every push (this produced 4 duplicate /spec pages once). Creating
+      # pages is a deliberate, manual act; push runs only update existing ones.
       - name: Deploy
         env:
           SB_TOKEN: ${{ secrets.SB_TOKEN }}
           SB_SITE_ID: ${{ secrets.SB_SITE_ID }}
           CHANGED: ALL
+          ALLOW_CREATE: ${{ github.event_name == 'workflow_dispatch' && '1' || '' }}
         run: node scripts/deploy.mjs

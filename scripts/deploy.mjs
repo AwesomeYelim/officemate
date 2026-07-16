@@ -450,6 +450,15 @@ async function main() {
         continue;
       }
       console.log(`  matched existing page id=${id} (slug/title match)`);
+    } else if (!process.env.ALLOW_CREATE) {
+      // Creation is restricted to manual dispatch runs (ALLOW_CREATE=1):
+      // while a create_page request sits in the approval queue the page is
+      // invisible to list_pages, so every push-run would submit another
+      // create — this once produced 4 duplicate /spec pages. Push runs just
+      // report and move on; run the workflow manually once to create.
+      console.log(`  page missing — creation is manual-dispatch only (run the Actions workflow manually once)`);
+      summary.push(`${t.file}: page missing (create via manual dispatch)`);
+      continue;
     } else {
       // Live schema: create_page takes `path` (e.g. "/landing"), not `slug`.
       const pagePath = t.slug === "index" ? "/" : `/${t.slug}`;
