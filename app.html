@@ -1,0 +1,3570 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OfficeMate — 앱 프로토타입</title>
+<style>
+  /* ===================================================================
+     DESIGN TOKENS — lifted from C:\workspace\officemate\spec.html :root
+     (spec.html is the source of truth; keep these in sync if it changes)
+     =================================================================== */
+  :root {
+    --bg: #EDF1F9;
+    --ink: #0E1430;
+    --ink2: #4A5170;
+    --muted: #8892AE;
+    --muted2: #9AA3BE;
+    --line: #D6DEEF;
+    --card: #FFFFFF;
+    --brand: #2F5EDB;
+    --brand-dark: #1B3EA8;
+    --brand-grad-a: #4C7DF5;
+    --brand-grad-b: #2F5EDB;
+    --good: #22A06B;
+    --good-dark: #1C7F55;
+    --warn: #F0A64E;
+    --danger: #E05A5A;
+    --purple: #7C5CC4;
+    --banner: #7A1F2B;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+      "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #0b1022;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  h1, h2, h3, p, ul { margin: 0; }
+  a { color: var(--brand); text-decoration: none; }
+  button { font-family: inherit; }
+
+  /* ---------- shared component classes (catalog — see CONTRACT.md) ---------- */
+  .om-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--brand); color: #fff; border: none; border-radius: 999px;
+    padding: 11px 16px; font-size: 13px; font-weight: 700; width: 100%; cursor: pointer;
+  }
+  .om-btn.secondary { background: #fff; color: var(--brand); border: 1.5px solid var(--brand); }
+  .om-btn.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+  .om-btn.danger { background: var(--danger); color: #fff; }
+  .om-btn:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
+  .om-btn.auto { width: auto; padding: 9px 18px; }
+  .om-press { transition: transform .15s cubic-bezier(.2,.8,.2,1); }
+  .om-press:active { transform: scale(.96); }
+
+  .om-card {
+    background: #fff; border-radius: 16px; padding: 14px; margin-bottom: 10px;
+    box-shadow: 0 8px 20px -14px rgba(20,40,110,.35);
+  }
+  .om-chip {
+    display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 700;
+    padding: 3px 9px; border-radius: 999px;
+  }
+  .om-chip.blue { background: rgba(47,94,219,.12); color: var(--brand-dark); }
+  .om-chip.green { background: rgba(34,160,107,.14); color: var(--good-dark); }
+  .om-chip.amber { background: rgba(240,166,78,.16); color: #8A5A16; }
+  .om-chip.red { background: rgba(224,90,90,.14); color: #A32E2E; }
+  .om-chip.grey { background: #EEF1F8; color: var(--muted); }
+
+  .om-gauge { height: 8px; border-radius: 5px; background: #EEF1F8; overflow: hidden; }
+  .om-gauge > i { display: block; height: 100%; background: var(--brand); }
+
+  .om-toast {
+    position: absolute; left: 16px; right: 16px; bottom: 78px; z-index: 40;
+    background: var(--ink); color: #fff; font-size: 11.5px; font-weight: 700;
+    padding: 10px 14px; border-radius: 12px; text-align: center;
+    box-shadow: 0 10px 24px -10px rgba(0,0,0,.5);
+    animation: omToastIn .25s ease both;
+  }
+  @keyframes omToastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .om-bubble { background: #E9EEFB; color: var(--ink); font-size: 12px; line-height: 1.55; border-radius: 14px 14px 14px 4px; padding: 10px 13px; margin-bottom: 10px; max-width: 92%; }
+  .om-bubble.bot { background: #fff; border: 1px solid #E4E9F5; }
+  .skel-line { height: 10px; border-radius: 6px; background: #E4E9F5; margin-bottom: 8px; }
+  @media (prefers-reduced-motion: no-preference) {
+    .skel { animation: omPulse 1.1s ease-in-out infinite; }
+    @keyframes omPulse { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+  }
+
+  .om-status {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px 2px; font-size: 12px; font-weight: 700; color: var(--ink); flex: none;
+  }
+  .om-appbar { display: flex; align-items: center; gap: 8px; padding: 8px 16px 12px; flex: none; }
+  .om-logo {
+    width: 26px; height: 26px; border-radius: 9px; flex: none;
+    background: linear-gradient(150deg, var(--brand-grad-a), var(--brand-grad-b));
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 14px -4px rgba(47,94,219,.6);
+  }
+  .om-appbar-title { font-size: 12.5px; font-weight: 800; }
+  .om-appbar-sub { font-size: 10.5px; color: var(--muted); }
+  .om-appbar-back {
+    width: 30px; height: 30px; border-radius: 50%; border: none; background: #fff;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; flex: none;
+    box-shadow: 0 4px 10px -6px rgba(20,40,110,.4);
+  }
+  .om-body { flex: 1; padding: 6px 16px 16px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+  .om-stepper { display: flex; align-items: center; gap: 6px; justify-content: center; margin-bottom: 14px; }
+  .om-stepper .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+  .om-stepper .dot.done { background: var(--good); }
+  .om-stepper .dot.now { background: var(--brand); width: 10px; height: 10px; }
+
+  .om-qr {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; width: 132px; height: 132px;
+    margin: 0 auto; padding: 10px; background: #fff; border-radius: 12px;
+  }
+  .om-qr span.on { background: var(--ink); border-radius: 1px; }
+  .om-qr span.off { background: transparent; }
+
+  /* ---------- placeholder (module-not-loaded) ---------- */
+  .om-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; padding: 40px 24px; color: var(--muted); }
+  .om-placeholder .tag { font-family: monospace; font-size: 11px; background: #EEF1F8; color: var(--ink2); border-radius: 8px; padding: 4px 8px; margin-top: 10px; }
+
+  /* ===================================================================
+     APP FRAME — phone bezel on desktop, full-screen on mobile
+     =================================================================== */
+  #omStage {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% -10%, #182246, #0b1022 60%);
+    padding: 28px 12px;
+  }
+  #omDevice {
+    width: 390px; max-width: 100%; flex: none;
+    background: linear-gradient(160deg,#1a2440,#0b1022);
+    border-radius: 44px; padding: 10px;
+    box-shadow: 0 40px 90px -30px rgba(0,0,0,.7), inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+  #omViewport {
+    background: var(--bg); border-radius: 34px; overflow: hidden;
+    height: 800px; max-height: calc(100vh - 56px);
+    display: flex; flex-direction: column; position: relative;
+  }
+  @media (max-width: 640px) {
+    #omStage { padding: 0; background: var(--bg); }
+    #omDevice { width: 100%; height: 100vh; border-radius: 0; padding: 0; box-shadow: none; background: none; }
+    #omViewport { height: 100%; max-height: none; border-radius: 0; }
+  }
+
+  #omScreenStack { position: relative; flex: 1; overflow: hidden; }
+  .om-screen {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    background: var(--bg); overflow: hidden;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .om-screen.slide-in-fwd { transform: translateX(100%); }
+    .om-screen.slide-in-back { transform: translateX(-100%); }
+    .om-screen.slide-settle { transform: translateX(0); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+    .om-screen.slide-out-fwd { transform: translateX(-30%); transition: transform .28s cubic-bezier(.2,.8,.2,1); opacity: .7; }
+    .om-screen.slide-out-back { transform: translateX(100%); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .om-screen.slide-in-fwd, .om-screen.slide-in-back { transform: none; }
+  }
+
+  #omTabbar { display: flex; border-top: 1px solid #E4E9F5; background: #fff; flex: none; }
+  .om-tab {
+    flex: 1; text-align: center; padding: 9px 4px 10px; font-size: 10.5px; color: var(--muted);
+    border: none; background: none; cursor: pointer; display: flex; flex-direction: column; gap: 3px; align-items: center;
+    position: relative;
+  }
+  .om-tab.active { color: var(--brand); font-weight: 700; }
+  .om-tab .badge-dot {
+    position: absolute; top: 2px; right: 22%; min-width: 15px; height: 15px; border-radius: 999px;
+    background: var(--danger); color: #fff; font-size: 9px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; padding: 0 3px;
+  }
+
+  #omSimBar {
+    position: absolute; top: 6px; left: 6px; right: 6px; z-index: 1000;
+    display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 700;
+    background: rgba(14,20,48,.72); color: #fff; border-radius: 999px; padding: 4px 8px;
+    pointer-events: none; opacity: 0; transition: opacity .2s ease;
+  }
+  #omSimBar.show { pointer-events: auto; opacity: 1; }
+  #omSimBar button { pointer-events: auto; background: rgba(255,255,255,.16); border: none; color: #fff; border-radius: 999px; padding: 3px 8px; font-size: 10px; font-weight: 800; cursor: pointer; }
+</style>
+<style>
+  /* ---- mod-a-onboarding.html ---- */
+  /* ============================================================
+     Group A — onboarding / settings / profile-edit
+     Scoped classes: om-scr-onb-*, om-scr-set-*, om-scr-ped-*
+     ============================================================ */
+  .om-scr-onb-item {
+    display: flex; align-items: center; gap: 10px; padding: 11px 4px;
+    border-bottom: 1px solid #EEF1F8; cursor: pointer;
+  }
+  .om-scr-onb-item:last-child { border-bottom: none; }
+  .om-scr-onb-box {
+    width: 20px; height: 20px; border-radius: 6px; border: 1.6px solid var(--line);
+    display: flex; align-items: center; justify-content: center; flex: none; background: #fff;
+  }
+  .om-scr-onb-box.on { background: var(--brand); border-color: var(--brand); }
+  .om-scr-onb-label { font-size: 12.5px; font-weight: 600; color: var(--ink); flex: 1; }
+  .om-scr-onb-tag-req { font-size: 10px; font-weight: 700; color: var(--danger); margin-left: 4px; }
+  .om-scr-onb-tag-opt { font-size: 10px; font-weight: 700; color: var(--muted); margin-left: 4px; }
+  .om-scr-onb-detail { font-size: 11px; color: var(--muted); margin-top: 2px; line-height: 1.5; }
+
+  .om-scr-onb-chiprow { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+  .om-scr-onb-tagchip {
+    font-size: 11.5px; font-weight: 700; padding: 7px 13px; border-radius: 999px;
+    border: 1.4px solid var(--line); background: #fff; color: var(--ink2); cursor: pointer;
+  }
+  .om-scr-onb-tagchip.on { background: rgba(47,94,219,.12); border-color: var(--brand); color: var(--brand-dark); }
+
+  .om-scr-onb-seg { display: flex; gap: 7px; margin-top: 8px; }
+  .om-scr-onb-segbtn {
+    flex: 1; text-align: center; font-size: 12px; font-weight: 700; padding: 9px 6px;
+    border-radius: 10px; border: 1.4px solid var(--line); background: #fff; color: var(--ink2); cursor: pointer;
+  }
+  .om-scr-onb-segbtn.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+  .om-scr-onb-bio {
+    width: 100%; border: 1.4px solid var(--line); border-radius: 12px; padding: 10px 12px;
+    font-size: 12.5px; font-family: inherit; resize: none; margin-top: 8px; color: var(--ink);
+  }
+  .om-scr-onb-bio:focus { outline: none; border-color: var(--brand); }
+  .om-scr-onb-label-sm { font-size: 11.5px; font-weight: 800; color: var(--ink2); margin-top: 14px; }
+  .om-scr-onb-label-sm:first-child { margin-top: 0; }
+
+  .om-scr-set-row {
+    display: flex; align-items: center; justify-content: space-between; padding: 12px 2px;
+    border-bottom: 1px solid #EEF1F8;
+  }
+  .om-scr-set-row:last-child { border-bottom: none; }
+  .om-scr-set-row-txt { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+  .om-scr-set-row-sub { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .om-scr-set-switch {
+    width: 40px; height: 24px; border-radius: 999px; background: var(--line); position: relative;
+    border: none; cursor: pointer; flex: none;
+  }
+  .om-scr-set-switch.on { background: var(--brand); }
+  .om-scr-set-switch i {
+    position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%;
+    background: #fff; transition: transform .15s ease; box-shadow: 0 2px 4px rgba(0,0,0,.25);
+  }
+  .om-scr-set-switch.on i { transform: translateX(16px); }
+  .om-scr-set-simbox { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .om-scr-set-navrow {
+    display: flex; align-items: center; justify-content: space-between; padding: 13px 2px; cursor: pointer;
+  }
+
+  .om-scr-ped-field { margin-top: 12px; }
+  .om-scr-ped-field label { font-size: 11px; font-weight: 800; color: var(--ink2); display: block; margin-bottom: 5px; }
+  .om-scr-ped-input {
+    width: 100%; border: 1.4px solid var(--line); border-radius: 10px; padding: 9px 12px;
+    font-size: 12.5px; font-family: inherit; color: var(--ink);
+  }
+  .om-scr-ped-input.err { border-color: var(--danger); }
+  .om-scr-ped-input:focus { outline: none; border-color: var(--brand); }
+  .om-scr-ped-errtxt { font-size: 10.5px; color: var(--danger); font-weight: 700; margin-top: 4px; }
+  .om-scr-ped-empty { font-size: 11px; color: var(--muted); padding: 6px 2px; }
+</style>
+<style>
+  /* ---- mod-b-home.html ---- */
+  /* ---- home (봇 채팅) ---- */
+  .om-hc-composer { display: flex; gap: 8px; padding: 10px 16px 14px; background: var(--bg); flex: none; align-items: center; }
+  .om-hc-input { flex: 1; border: 1px solid var(--line); border-radius: 999px; padding: 10px 14px; font-size: 12.5px; background: #fff; color: var(--ink); outline: none; }
+  .om-hc-send { width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--brand); display: flex; align-items: center; justify-content: center; flex: none; cursor: pointer; }
+  .om-hc-examples { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+  .om-hc-chipbtn { border: none; cursor: pointer; }
+  .om-hc-stepper-row { display: flex; align-items: center; justify-content: center; gap: 16px; }
+  .om-hc-slot-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+  .om-hc-slot-tab { flex: 1; border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 7px 0; font-size: 11.5px; font-weight: 700; color: var(--muted); cursor: pointer; }
+  .om-hc-slot-tab.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .om-hc-slotgrid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .om-hc-slotchip { border: none; cursor: pointer; }
+
+  /* ---- room-chat (개별 모임 방 채팅) ---- */
+  .om-rc-composer { display: flex; gap: 8px; padding: 10px 16px 14px; background: var(--bg); flex: none; align-items: center; }
+  .om-rc-input { flex: 1; border: 1px solid var(--line); border-radius: 999px; padding: 10px 14px; font-size: 12.5px; background: #fff; color: var(--ink); outline: none; }
+  .om-rc-send { width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--brand); display: flex; align-items: center; justify-content: center; flex: none; cursor: pointer; }
+</style>
+<style>
+  /* ---- mod-c-lifecycle.html ---- */
+  /* Group C (lifecycle) — scoped classes, prefix om-c- */
+  .om-c-avatar {
+    width: 30px; height: 30px; border-radius: 50%; background: #E9EEFB; color: var(--brand-dark);
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;
+    flex: none;
+  }
+  .om-c-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #EEF1F8; }
+  .om-c-row:last-child { border-bottom: none; }
+  .om-c-name { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+  .om-c-sub { font-size: 10.5px; color: var(--muted); margin-top: 1px; }
+  .om-c-tabbar { display: flex; gap: 6px; margin-bottom: 12px; }
+  .om-c-tabbtn {
+    flex: 1; text-align: center; padding: 8px 4px; border-radius: 10px; font-size: 11.5px; font-weight: 700;
+    background: #fff; color: var(--muted); border: 1px solid var(--line); cursor: pointer;
+  }
+  .om-c-tabbtn.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .om-c-chipbtn {
+    border: 1.5px solid var(--line); background: #fff; color: var(--ink2); border-radius: 999px;
+    padding: 7px 13px; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  }
+  .om-c-chipbtn.active { border-color: var(--brand); background: rgba(47,94,219,.10); color: var(--brand-dark); }
+  .om-c-empty { text-align: center; color: var(--muted); font-size: 12px; padding: 30px 10px; }
+  .om-c-receiptrow { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; color: var(--ink2); }
+  .om-c-receiptrow b { color: var(--ink); }
+  .om-c-seqitem { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 6px 0; color: var(--muted2); }
+  .om-c-seqitem.done { color: var(--good-dark); font-weight: 700; }
+  .om-c-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); flex: none; }
+  .om-c-dot.done { background: var(--good); }
+</style>
+<style>
+  /* ---- mod-d-explore.html ---- */
+  /* ============================================================
+     Group D — explore / room-preview / sponsor-offer / sponsor-register
+     All classes scoped with om-scr-<route>- prefixes. Reuses shared
+     .om-card / .om-chip / .om-btn / .om-press / .om-gauge / .om-toast
+     from shell.html — do not redefine those here.
+     ============================================================ */
+
+  /* ---- explore feed ---- */
+  .om-scr-explore-filterbar { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 2px; }
+  .om-scr-explore-filterbtn {
+    flex: none; font-size: 11.5px; font-weight: 700; padding: 7px 13px; border-radius: 999px;
+    border: 1.5px solid var(--line); background: #fff; color: var(--ink2); cursor: pointer;
+  }
+  .om-scr-explore-filterbtn.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .om-scr-explore-roomtitle { font-weight: 800; font-size: 14px; color: var(--ink); }
+  .om-scr-explore-metarow { display: flex; align-items: center; gap: 6px; margin: 6px 0 8px; flex-wrap: wrap; }
+  .om-scr-explore-tagrow { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+  .om-scr-explore-bottomrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+  .om-scr-explore-count { font-size: 11px; color: var(--muted); font-weight: 700; }
+  .om-scr-explore-sponsorcard { border: 1.5px solid rgba(240,166,78,.5); background: linear-gradient(160deg, rgba(240,166,78,.08), #fff); }
+  .om-scr-explore-empty { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 46px 20px; color: var(--muted); }
+  .om-scr-explore-empty .headline { font-weight: 800; font-size: 13.5px; color: var(--ink); margin-top: 10px; }
+  .om-scr-explore-empty .sub { font-size: 11.5px; margin-top: 4px; line-height: 1.5; }
+  .om-scr-explore-fab {
+    position: absolute; right: 16px; bottom: 20px; z-index: 30; width: auto; padding: 12px 18px;
+    box-shadow: 0 12px 24px -8px rgba(47,94,219,.55);
+  }
+  .om-scr-explore-registerbanner {
+    display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px;
+    background: linear-gradient(150deg, var(--brand-grad-a), var(--brand-grad-b)); color: #fff;
+    margin-top: 6px; cursor: pointer;
+  }
+  .om-scr-explore-registerbanner .t1 { font-size: 12.5px; font-weight: 800; }
+  .om-scr-explore-registerbanner .t2 { font-size: 10.5px; opacity: .85; margin-top: 2px; }
+
+  /* ---- room-preview ---- */
+  .om-scr-preview-hero { text-align: center; padding: 6px 0 4px; }
+  .om-scr-preview-hero .title { font-size: 16px; font-weight: 800; color: var(--ink); margin-top: 8px; }
+  .om-scr-preview-hero .slot { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .om-scr-preview-avatars { display: flex; justify-content: center; margin: 14px 0 6px; }
+  .om-scr-preview-avatar {
+    width: 34px; height: 34px; border-radius: 50%; background: var(--brand); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800;
+    margin-left: -8px; border: 2px solid #fff; flex: none;
+  }
+  .om-scr-preview-avatar.empty { background: #EEF1F8; color: var(--muted2); }
+  .om-scr-preview-avatar:first-child { margin-left: 0; }
+  .om-scr-preview-infogrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+  .om-scr-preview-infogrid .cell { background: #F5F7FC; border-radius: 12px; padding: 10px 12px; }
+  .om-scr-preview-infogrid .cell .k { font-size: 10px; color: var(--muted); font-weight: 700; }
+  .om-scr-preview-infogrid .cell .v { font-size: 13px; color: var(--ink); font-weight: 800; margin-top: 2px; }
+  .om-scr-preview-couponstrip {
+    display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px;
+    background: rgba(240,166,78,.12); margin-top: 4px; cursor: pointer;
+  }
+  .om-scr-preview-couponstrip .txt { flex: 1; font-size: 11.5px; font-weight: 700; color: #8A5A16; }
+
+  /* ---- sponsor-offer ---- */
+  .om-scr-offer-hero { text-align: center; padding: 10px 0; }
+  .om-scr-offer-pct { font-size: 40px; font-weight: 900; color: var(--brand-dark); line-height: 1; }
+  .om-scr-offer-pct span { font-size: 16px; font-weight: 800; margin-left: 3px; }
+  .om-scr-offer-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
+  .om-scr-offer-row:last-child { border-bottom: none; }
+  .om-scr-offer-row .k { color: var(--muted); font-weight: 700; }
+  .om-scr-offer-row .v { color: var(--ink); font-weight: 800; }
+  .om-scr-offer-budgetbar { height: 6px; border-radius: 4px; background: #EEF1F8; overflow: hidden; margin-top: 6px; }
+  .om-scr-offer-budgetbar > i { display: block; height: 100%; background: var(--warn); }
+
+  /* ---- sponsor-register (stepper) ---- */
+  .om-scr-reg-field { margin-bottom: 14px; }
+  .om-scr-reg-label { font-size: 11.5px; font-weight: 800; color: var(--ink2); margin-bottom: 6px; }
+  .om-scr-reg-input {
+    width: 100%; border: 1.5px solid var(--line); border-radius: 12px; padding: 11px 13px;
+    font-size: 13px; color: var(--ink); background: #fff; font-family: inherit;
+  }
+  .om-scr-reg-input:focus { outline: none; border-color: var(--brand); }
+  .om-scr-reg-taggrid { display: flex; flex-wrap: wrap; gap: 7px; }
+  .om-scr-reg-tagbtn {
+    font-size: 11.5px; font-weight: 700; padding: 7px 13px; border-radius: 999px;
+    border: 1.5px solid var(--line); background: #fff; color: var(--ink2); cursor: pointer;
+  }
+  .om-scr-reg-tagbtn.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .om-scr-reg-counter { display: flex; align-items: center; gap: 14px; }
+  .om-scr-reg-counter button {
+    width: 34px; height: 34px; border-radius: 10px; border: 1.5px solid var(--line); background: #fff;
+    font-size: 16px; font-weight: 800; color: var(--brand); cursor: pointer;
+  }
+  .om-scr-reg-counter .num { font-size: 15px; font-weight: 800; min-width: 46px; text-align: center; }
+  .om-scr-reg-pctgrid { display: flex; gap: 7px; }
+  .om-scr-reg-pctbtn {
+    flex: 1; text-align: center; font-size: 12.5px; font-weight: 800; padding: 10px 0; border-radius: 12px;
+    border: 1.5px solid var(--line); background: #fff; color: var(--ink2); cursor: pointer;
+  }
+  .om-scr-reg-pctbtn.active { background: rgba(47,94,219,.12); border-color: var(--brand); color: var(--brand-dark); }
+  .om-scr-reg-summaryrow { display: flex; justify-content: space-between; padding: 7px 0; font-size: 12.5px; }
+  .om-scr-reg-summaryrow .k { color: var(--muted); font-weight: 700; }
+  .om-scr-reg-summaryrow .v { color: var(--ink); font-weight: 800; }
+  .om-scr-reg-donewrap { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 30px 10px; }
+  .om-scr-reg-donewrap .circle {
+    width: 62px; height: 62px; border-radius: 50%; background: rgba(34,160,107,.14);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
+  }
+  .om-scr-reg-donewrap .headline { font-size: 15px; font-weight: 800; color: var(--ink); }
+  .om-scr-reg-donewrap .sub { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .om-scr-reg-footer { display: flex; gap: 8px; margin-top: 6px; }
+</style>
+<style>
+  /* ---- mod-e-my.html ---- */
+  /* ---- Group E (my / ledger / notifications) scoped styles ---- */
+  .om-e-ring-wrap { display: flex; align-items: center; gap: 14px; }
+  .om-e-ring {
+    width: 64px; height: 64px; border-radius: 50%; flex: none; position: relative;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .om-e-ring::before {
+    content: ""; position: absolute; inset: 6px; border-radius: 50%; background: #fff;
+  }
+  .om-e-ring span { position: relative; font-size: 13px; font-weight: 800; color: var(--ink); }
+  .om-e-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .om-e-stat { background: #F5F7FC; border-radius: 12px; padding: 10px 6px; text-align: center; }
+  .om-e-stat .n { font-size: 15px; font-weight: 800; color: var(--ink); }
+  .om-e-stat .l { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .om-e-quick { display: flex; gap: 8px; }
+  .om-e-quick button {
+    flex: 1; background: #fff; border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 700; color: var(--ink2); cursor: pointer; position: relative;
+  }
+  .om-e-quick .badge {
+    position: absolute; top: -5px; right: 14px; min-width: 15px; height: 15px; border-radius: 999px;
+    background: var(--danger); color: #fff; font-size: 9px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; padding: 0 3px;
+  }
+  .om-e-section-h { display: flex; align-items: center; justify-content: space-between; margin: 12px 2px 8px; }
+  .om-e-section-h .t { font-size: 12.5px; font-weight: 800; color: var(--ink); }
+  .om-e-section-h a { font-size: 11px; font-weight: 700; color: var(--brand); cursor: pointer; }
+  .om-e-row {
+    display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 14px;
+    padding: 11px 12px; margin-bottom: 8px; cursor: pointer;
+  }
+  .om-e-row .ic {
+    width: 34px; height: 34px; border-radius: 10px; flex: none; display: flex; align-items: center;
+    justify-content: center; background: #EEF1F8;
+  }
+  .om-e-row .mid { flex: 1; min-width: 0; }
+  .om-e-row .mid .t1 { font-size: 12.5px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .om-e-row .mid .t2 { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+  .om-e-row .amt { font-size: 12.5px; font-weight: 800; flex: none; }
+  .om-e-row .amt.pos { color: var(--good-dark); }
+  .om-e-row .amt.neg { color: #A32E2E; }
+  .om-e-row.unread { background: #F0F4FF; }
+  .om-e-row .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); flex: none; }
+  .om-e-empty { text-align: center; padding: 34px 16px; color: var(--muted); font-size: 12px; }
+  .om-e-filters { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 10px; -webkit-overflow-scrolling: touch; }
+  .om-e-filters button { border: none; cursor: pointer; flex: none; }
+  .om-e-summary { display: flex; gap: 10px; }
+  .om-e-summary > div { flex: 1; text-align: center; }
+  .om-e-summary .n { font-size: 15px; font-weight: 800; }
+  .om-e-summary .l { font-size: 10px; color: var(--muted); margin-top: 2px; }
+</style>
+</head>
+<body style="margin:0;">
+<div id="omInternalBand" style="position:fixed; top:0; left:0; right:0; z-index:999; display:flex; align-items:center; justify-content:center; gap:10px; background:#7A1F2B; color:#fff; font-size:11.5px; font-weight:700; padding:6px 12px; font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;">
+  <span>팀 내부용 프로토타입 — 대외 공유 금지</span>
+  <button type="button" onclick="var b=document.getElementById('omInternalBand'); if(b) b.remove();" style="background:rgba(255,255,255,.18); border:none; color:#fff; border-radius:999px; width:20px; height:20px; line-height:20px; cursor:pointer; font-size:12px; font-weight:800;" aria-label="닫기">×</button>
+</div>
+<div id="omStage">
+  <div id="omDevice">
+    <div id="omViewport">
+      <div id="omScreenStack"></div>
+      <div id="omTabbar"></div>
+      <div id="omSimBar"></div>
+    </div>
+  </div>
+</div>
+<script>
+/* =====================================================================
+   OfficeMate app shell — store, router, sim engine, screen registry.
+   See CONTRACT.md for the full API reference given to module builders.
+   ===================================================================== */
+(function () {
+  "use strict";
+
+  /* ---------------------------------------------------------------
+   * Icon / chip helpers (ported from spec.html, exposed as OM.ui.*)
+   * --------------------------------------------------------------- */
+  function icon(name, size, color) {
+    size = size || 16; color = color || "currentColor";
+    var shapes = {
+      bolt: '<path d="M11 21 13 13 9 13 13 3 11 11 15 11 11 21Z"/>',
+      check: '<path d="M4 12l5 5L20 6" stroke="' + color + '" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+      bell: '<path d="M12 2a5 5 0 0 0-5 5v4l-2 4h14l-2-4V7a5 5 0 0 0-5-5Z"/><rect x="10" y="19" width="4" height="2.4" rx="1"/>',
+      shield: '<path d="M12 2 20 5v6c0 5-4 8-8 9-4-1-8-4-8-9V5Z"/>',
+      gear: '<circle cx="12" cy="12" r="3.2" fill="none" stroke="' + color + '" stroke-width="2"/><path d="M12 3v2.6M12 18.4V21M3 12h2.6M18.4 12H21M5.6 5.6l1.9 1.9M16.5 16.5l1.9 1.9M18.4 5.6l-1.9 1.9M7.5 16.5l-1.9 1.9" stroke="' + color + '" stroke-width="1.8" stroke-linecap="round"/>',
+      receipt: '<rect x="5" y="3" width="14" height="18" rx="2" fill="none" stroke="' + color + '" stroke-width="1.8"/><path d="M8 8h8M8 12h8M8 16h5" stroke="' + color + '" stroke-width="1.6" stroke-linecap="round"/>',
+      compass: '<circle cx="12" cy="12" r="9" fill="none" stroke="' + color + '" stroke-width="1.8"/><path d="M15 9l-2 6-6 2 2-6z"/>',
+      person: '<circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/>',
+      chat: '<path d="M4 5h16v10H9l-5 4V5Z"/>',
+      warn: '<path d="M12 3 21 19H3Z" fill="none" stroke="' + color + '" stroke-width="1.8"/><rect x="11.1" y="9" width="1.8" height="5.4" rx="0.9"/><rect x="11.1" y="15.4" width="1.8" height="1.8" rx="0.9"/>',
+      clock: '<circle cx="12" cy="12" r="9" fill="none" stroke="' + color + '" stroke-width="1.8"/><path d="M12 7v5l4 2" stroke="' + color + '" stroke-width="1.8" fill="none" stroke-linecap="round"/>',
+      lock: '<rect x="6" y="10" width="12" height="10" rx="2"/><path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" fill="none" stroke="' + color + '" stroke-width="1.8"/>',
+      signal: '<rect x="3" y="14" width="3" height="6" rx="1"/><rect x="8" y="10" width="3" height="10" rx="1"/><rect x="13" y="6" width="3" height="14" rx="1"/><rect x="18" y="3" width="3" height="17" rx="1"/>',
+      close: '<path d="M6 6l12 12M18 6L6 18" stroke="' + color + '" stroke-width="2.2" stroke-linecap="round"/>',
+      back: '<path d="M15 5 8 12l7 7" stroke="' + color + '" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+      video: '<rect x="3" y="6" width="13" height="12" rx="2" fill="none" stroke="' + color + '" stroke-width="1.8"/><path d="M16 10.5 21 8v8l-5-2.5Z"/>',
+      building: '<rect x="4" y="3" width="16" height="18" rx="1.5" fill="none" stroke="' + color + '" stroke-width="1.8"/><path d="M8 8h2M14 8h2M8 12h2M14 12h2M8 16h2M14 16h2" stroke="' + color + '" stroke-width="1.6" stroke-linecap="round"/>',
+      percent: '<circle cx="7.5" cy="7.5" r="2.6" fill="none" stroke="' + color + '" stroke-width="1.8"/><circle cx="16.5" cy="16.5" r="2.6" fill="none" stroke="' + color + '" stroke-width="1.8"/><path d="M6 18 18 6" stroke="' + color + '" stroke-width="1.8" stroke-linecap="round"/>',
+      target: '<circle cx="12" cy="12" r="8.5" fill="none" stroke="' + color + '" stroke-width="1.6"/><circle cx="12" cy="12" r="5" fill="none" stroke="' + color + '" stroke-width="1.6"/><circle cx="12" cy="12" r="1.6"/>'
+    };
+    var body = shapes[name] || shapes.bolt;
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + color + '" aria-hidden="true" style="display:block;">' + body + '</svg>';
+  }
+  function chip(cls, text) { return '<span class="om-chip ' + cls + '">' + text + '</span>'; }
+  function statusBar(clockLabel) {
+    return '<div class="om-status"><span>' + (clockLabel || "11:42") + '</span>' + icon("signal", 15, "#0E1430") + '</div>';
+  }
+  function appBar(title, sub, showBack) {
+    return '<div class="om-appbar">' +
+      (showBack ? '<button class="om-appbar-back om-press" data-om-back="1">' + icon("back", 14, "#0E1430") + '</button>' : '<span class="om-logo">' + icon("bolt", 15, "#fff") + '</span>') +
+      '<div><div class="om-appbar-title">' + title + '</div><div class="om-appbar-sub">' + (sub || "") + '</div></div>' +
+      '</div>';
+  }
+  // Fixed 7x7 bitmap — visual placeholder only, not a scannable code, no Math.random.
+  var QR_BITS = "1111111" + "1000101" + "1011101" + "1000001" + "1011011" + "1000001" + "1111111";
+  function qrGrid() {
+    var html = '<div class="om-qr">';
+    for (var i = 0; i < QR_BITS.length; i++) html += '<span class="' + (QR_BITS[i] === "1" ? "on" : "off") + '"></span>';
+    return html + '</div>';
+  }
+  function stepperDots(total, current) {
+    var html = '<div class="om-stepper">';
+    for (var i = 0; i < total; i++) html += '<span class="dot ' + (i < current ? "done" : (i === current ? "now" : "")) + '"></span>';
+    return html + '</div>';
+  }
+  function gauge(pct) { return '<div class="om-gauge"><i style="width:' + Math.max(0, Math.min(100, pct)) + '%"></i></div>'; }
+
+  /* ---------------------------------------------------------------
+   * Seed data — all constants, no Math.random / Date.now / new Date.
+   * --------------------------------------------------------------- */
+  var COLLEAGUES = [
+    { id: "c01", name: "김도윤", dept: "플랫폼팀", tags: ["매운맛", "커피챗"] },
+    { id: "c02", name: "이서연", dept: "디자인팀", tags: ["베이커리", "커피챗"] },
+    { id: "c03", name: "박주현", dept: "영업팀", tags: ["매운맛", "보드게임"] },
+    { id: "c04", name: "최지훈", dept: "인프라팀", tags: ["러닝", "채식"] },
+    { id: "c05", name: "정하윤", dept: "플랫폼팀", tags: ["채식", "베이커리"] },
+    { id: "c06", name: "강민서", dept: "마케팅팀", tags: ["커피챗", "보드게임"] },
+    { id: "c07", name: "조은우", dept: "디자인팀", tags: ["매운맛", "러닝"] },
+    { id: "c08", name: "윤태경", dept: "인프라팀", tags: ["보드게임", "매운맛"] },
+    { id: "c09", name: "임소율", dept: "영업팀", tags: ["베이커리", "채식"] },
+    { id: "c10", name: "한지민", dept: "플랫폼팀", tags: ["러닝", "커피챗"] },
+    { id: "c11", name: "오승현", dept: "HR팀", tags: ["보드게임", "채식"] },
+    { id: "c12", name: "배유나", dept: "마케팅팀", tags: ["매운맛", "베이커리"] }
+  ];
+
+  var SEED_ROOMS = [
+    { id: "r-seed-1", title: "목요일 매운맛 점심", slotLabel: "목 12:00", tags: ["매운맛"], capacity: 3, online: "offline", tick: 0, deadlineTick: 6, createdTick: 0, sponsored: false },
+    { id: "r-seed-2", title: "금요일 커피챗", slotLabel: "금 15:00", tags: ["커피챗"], capacity: 2, online: "online", tick: 0, deadlineTick: 5, createdTick: 0, sponsored: false },
+    { id: "r-seed-3", title: "월요일 러닝 크루", slotLabel: "월 07:30", tags: ["러닝"], capacity: 4, online: "offline", tick: 0, deadlineTick: 8, createdTick: 0, sponsored: false }
+  ];
+
+  var SEED_NOTIFICATIONS = [
+    { id: "n1", icon: "bolt", iconColor: "#2F5EDB", title: "점심 슬롯 제안 — 매운맛 좋아하는 3명이 모였어요", time: "오늘 11:30", read: false, roomId: "r-seed-1" },
+    { id: "n2", icon: "clock", iconColor: "#F0A64E", title: "1시간 전 리마인더 — 목요일 매운맛 점심", time: "오늘 11:00", read: false, roomId: "r-seed-1" },
+    { id: "n3", icon: "check", iconColor: "#22A06B", title: "체크인 완료 · +50P 환급", time: "어제 12:41", read: true, roomId: null },
+    { id: "n4", icon: "bell", iconColor: "#7C5CC4", title: "저녁 슬롯 제안 — 저녁 같이 드실 분 계신가요?", time: "어제 17:30", read: false, roomId: null }
+  ];
+
+  function buildRoom(seed) {
+    return {
+      id: seed.id,
+      title: seed.title,
+      slotLabel: seed.slotLabel,
+      tags: seed.tags.slice(),
+      capacity: seed.capacity,
+      online: seed.online,
+      sponsored: !!seed.sponsored,
+      status: "recruiting",
+      createdTick: seed.createdTick,
+      deadlineTick: seed.deadlineTick,
+      slotTick: seed.deadlineTick + 2,
+      reminderSent: false,
+      participants: [],
+      scheduledJoins: computeScheduledJoins(seed),
+      receipt: null
+    };
+  }
+  function computeScheduledJoins(seed) {
+    // Deterministic: colleagues whose tags intersect the room tags, in
+    // COLLEAGUES order, join one tick apart starting at tick 1, capped
+    // at (capacity - 1) since the creator occupies the first seat.
+    var picks = [];
+    for (var i = 0; i < COLLEAGUES.length && picks.length < seed.capacity - 1; i++) {
+      var c = COLLEAGUES[i];
+      var hit = false;
+      for (var j = 0; j < c.tags.length; j++) if (seed.tags.indexOf(c.tags[j]) !== -1) hit = true;
+      if (hit) picks.push(c.id);
+    }
+    var joins = [];
+    for (var k = 0; k < picks.length; k++) joins.push({ colleagueId: picks[k], joinTick: k + 1 });
+    return joins;
+  }
+
+  /* ---------------------------------------------------------------
+   * Store
+   * --------------------------------------------------------------- */
+  var state = {
+    user: { id: "me", name: "나", dept: "플랫폼팀", points: 1250, trust: "상", noshowCount: 0 },
+    rooms: SEED_ROOMS.map(buildRoom),
+    ledger: [],
+    notifications: SEED_NOTIFICATIONS.map(function (n) { return Object.assign({}, n); }),
+    settings: { notifyMorning: false, notifyLunch: true, notifyEvening: true, preferDiversity: true, vegOnly: false },
+    tick: 0,
+    simSpeed: 1,
+    _roomSeq: SEED_ROOMS.length,
+    _ledgerSeq: 0
+  };
+
+  var subs = [];
+  function subscribe(fn) { subs.push(fn); return function unsub() { var i = subs.indexOf(fn); if (i !== -1) subs.splice(i, 1); }; }
+  function emit() { for (var i = 0; i < subs.length; i++) subs[i](state); }
+
+  function findRoom(id) { for (var i = 0; i < state.rooms.length; i++) if (state.rooms[i].id === id) return state.rooms[i]; return null; }
+  function findParticipant(room, userId) { for (var i = 0; i < room.participants.length; i++) if (room.participants[i].id === userId) return room.participants[i]; return null; }
+  function pushNotification(n) {
+    n.id = "n-" + (state.notifications.length + 1) + "-" + state.tick;
+    n.read = false;
+    state.notifications.unshift(n);
+  }
+  function pushLedger(entry) {
+    state._ledgerSeq++;
+    entry.id = "l" + state._ledgerSeq;
+    entry.tick = state.tick;
+    state.ledger.unshift(entry);
+  }
+
+  /* Forfeit a no-show participant's deposit and split it among the
+   * remaining (non-noshow) participants — mirrors the "몰수 · 분배"
+   * figures shown on the noshow screen so the promised compensation
+   * actually lands in the wallet/ledger. */
+  function forfeitDeposit(room, participant) {
+    if (!participant.deposited) return;
+    participant.deposited = false;
+    var others = room.participants.filter(function (x) { return x.id !== participant.id && !x.noshow; });
+    var share = others.length ? Math.round(500 / others.length) : 0;
+    if (!others.length || !share) return;
+    for (var i = 0; i < others.length; i++) {
+      if (others[i].id === "me") {
+        state.user.points += share;
+        pushLedger({ type: "forfeit", amount: share, note: room.title + " 노쇼 몰수금 분배", roomId: room.id });
+      }
+    }
+  }
+
+  /* ---------------------------------------------------------------
+   * Sim engine
+   * --------------------------------------------------------------- */
+  var autoplayHandle = null;
+
+  var sim = {
+    createRoom: function (spec) {
+      state._roomSeq++;
+      var seed = {
+        id: "r" + state._roomSeq,
+        title: spec.title || "새 모임",
+        slotLabel: spec.slotLabel || "미정",
+        tags: spec.tags || [],
+        capacity: spec.capacity || 3,
+        online: spec.online || "offline",
+        tick: state.tick,
+        deadlineTick: state.tick + (spec.deadlineInTicks || 6),
+        createdTick: state.tick,
+        sponsored: !!spec.sponsored
+      };
+      var room = buildRoom(seed);
+      room.participants.push({ id: "me", name: "나", deposited: false, checkedIn: false, noshow: false });
+      state.rooms.unshift(room);
+      pushNotification({ icon: "bolt", iconColor: "#2F5EDB", title: room.title + " 개설됨 — 모집 시작", roomId: room.id, time: "방금" });
+      emit();
+      return room.id;
+    },
+
+    advanceTick: function (steps) {
+      steps = steps || 1;
+      for (var s = 0; s < steps; s++) {
+        state.tick++;
+        for (var i = 0; i < state.rooms.length; i++) {
+          var room = state.rooms[i];
+          if (room.status === "recruiting") {
+            var remaining = [];
+            for (var j = 0; j < room.scheduledJoins.length; j++) {
+              var sj = room.scheduledJoins[j];
+              if (sj.joinTick <= state.tick && room.participants.length < room.capacity) {
+                var col = null;
+                for (var k = 0; k < COLLEAGUES.length; k++) if (COLLEAGUES[k].id === sj.colleagueId) col = COLLEAGUES[k];
+                if (col) room.participants.push({ id: col.id, name: col.name, deposited: true, checkedIn: false, noshow: false });
+              } else {
+                remaining.push(sj);
+              }
+            }
+            room.scheduledJoins = remaining;
+            if (room.participants.length >= room.capacity) {
+              room.status = "confirmed";
+              pushNotification({ icon: "check", iconColor: "#22A06B", title: room.title + " 확정 — " + room.capacity + "/" + room.capacity + "명", roomId: room.id, time: "방금" });
+            } else if (state.tick >= room.deadlineTick) {
+              room.status = "exploded";
+              for (var p = 0; p < room.participants.length; p++) {
+                if (room.participants[p].deposited) {
+                  var refundAmt = room.participants[p].depositAmount || 500;
+                  pushLedger({ type: "refund", amount: refundAmt, note: room.title + " 방폭 · 전액 환급", roomId: room.id });
+                  if (room.participants[p].id === "me") state.user.points += refundAmt;
+                  room.participants[p].deposited = false;
+                }
+              }
+              pushNotification({ icon: "warn", iconColor: "#E05A5A", title: room.title + " 방폭 — 전액 환급됨", roomId: room.id, time: "방금" });
+            }
+          }
+          if (room.status === "confirmed" && !room.reminderSent && state.tick >= room.slotTick - 1) {
+            room.reminderSent = true;
+            pushNotification({ icon: "clock", iconColor: "#F0A64E", title: room.title + " · 1시간 전 리마인더", roomId: room.id, time: "방금" });
+          }
+        }
+      }
+      emit();
+    },
+
+    play: function (speed) {
+      sim.pause();
+      state.simSpeed = speed || state.simSpeed || 1;
+      autoplayHandle = setInterval(function () { sim.advanceTick(1); }, Math.max(200, 1200 / state.simSpeed));
+      emit();
+    },
+    pause: function () { if (autoplayHandle) { clearInterval(autoplayHandle); autoplayHandle = null; } emit(); },
+    setSpeed: function (speed) { state.simSpeed = speed; if (autoplayHandle) sim.play(speed); else emit(); },
+    isPlaying: function () { return !!autoplayHandle; },
+
+    joinRoom: function (roomId) {
+      var room = findRoom(roomId);
+      if (!room || room.status !== "recruiting") return { ok: false, reason: "not-open" };
+      if (findParticipant(room, "me")) return { ok: false, reason: "already-joined" };
+      if (room.participants.length >= room.capacity) return { ok: false, reason: "full" };
+      room.participants.push({ id: "me", name: "나", deposited: false, checkedIn: false, noshow: false });
+      if (room.participants.length >= room.capacity) {
+        room.status = "confirmed";
+        pushNotification({ icon: "check", iconColor: "#22A06B", title: room.title + " 확정됨", roomId: room.id, time: "방금" });
+      }
+      emit();
+      return { ok: true };
+    },
+
+    payDeposit: function (roomId, amount) {
+      amount = amount || 500;
+      var room = findRoom(roomId);
+      if (!room) return { ok: false, reason: "no-room" };
+      var me = findParticipant(room, "me");
+      if (!me) return { ok: false, reason: "not-joined" };
+      if (state.user.points < amount) return { ok: false, reason: "insufficient" };
+      state.user.points -= amount;
+      me.deposited = true;
+      me.depositAmount = amount;
+      pushLedger({ type: "deposit", amount: -amount, note: room.title + " 디파짓 예치", roomId: room.id });
+      emit();
+      return { ok: true };
+    },
+
+    cancelDeposit: function (roomId) {
+      var room = findRoom(roomId);
+      if (!room) return { ok: false, reason: "no-room" };
+      var me = findParticipant(room, "me");
+      if (!me || !me.deposited) return { ok: false, reason: "no-deposit" };
+      var penalty = (state.tick >= room.slotTick - 2);
+      var paidAmount = me.depositAmount || 500;
+      var refund = penalty ? Math.round(paidAmount / 2) : paidAmount;
+      state.user.points += refund;
+      me.deposited = false;
+      room.participants = room.participants.filter(function (p) { return p.id !== "me"; });
+      pushLedger({ type: "refund", amount: refund, note: room.title + " 취소" + (penalty ? " · 페널티 적용" : " · 무페널티"), roomId: room.id });
+      emit();
+      return { ok: true, penalty: penalty };
+    },
+
+    checkin: function (roomId, participantId) {
+      var room = findRoom(roomId);
+      if (!room) return { ok: false };
+      var p = findParticipant(room, participantId);
+      if (!p) return { ok: false };
+      p.checkedIn = true;
+      emit();
+      return { ok: true };
+    },
+
+    confirmCheckin: function (roomId) {
+      var room = findRoom(roomId);
+      if (!room) return { ok: false };
+      room.status = "checkin-done";
+      for (var i = 0; i < room.participants.length; i++) {
+        var p = room.participants[i];
+        if (p.checkedIn) {
+          pushLedger({ type: "bonus", amount: 50, note: room.title + " 체크인 환급", roomId: room.id });
+          if (p.id === "me") state.user.points += 50;
+        } else {
+          p.noshow = true;
+          state.user.noshowCount += (p.id === "me") ? 1 : 0;
+          forfeitDeposit(room, p);
+        }
+      }
+      pushNotification({ icon: "check", iconColor: "#22A06B", title: room.title + " 체크인 완료 · +50P 환급", roomId: room.id, time: "방금" });
+      emit();
+      return { ok: true };
+    },
+
+    markNoshow: function (roomId, participantId) {
+      var room = findRoom(roomId);
+      if (!room) return { ok: false };
+      var p = findParticipant(room, participantId);
+      if (!p) return { ok: false };
+      p.noshow = true;
+      if (p.id === "me") state.user.noshowCount++;
+      forfeitDeposit(room, p);
+      emit();
+      return { ok: true };
+    },
+
+    settleRoom: function (roomId, opts) {
+      var room = findRoom(roomId);
+      if (!room) return { ok: false };
+      var payers = room.participants.filter(function (p) { return !p.noshow; });
+      var per = payers.length ? Math.round((opts.totalAmount || 0) / payers.length) : 0;
+      room.status = "settled";
+      room.receipt = { totalAmount: opts.totalAmount || 0, method: opts.method || "간편결제", perPerson: per, issuedTick: state.tick };
+      pushLedger({ type: "settle", amount: -per, note: room.title + " 정산 · " + (opts.method || "간편결제"), roomId: room.id });
+      emit();
+      return { ok: true, perPerson: per };
+    },
+
+    applyCoupon: function (roomId) {
+      var room = findRoom(roomId);
+      if (!room) return { ok: false };
+      room.couponApplied = true;
+      emit();
+      return { ok: true };
+    },
+
+    registerSponsor: function (spec) {
+      state._roomSeq++;
+      var seed = {
+        id: "r" + state._roomSeq, title: spec.title || "스폰서드 모임", slotLabel: spec.slotLabel || "미정",
+        tags: spec.tags || [], capacity: spec.capacity || 3, online: "offline",
+        tick: state.tick, deadlineTick: state.tick + 8, createdTick: state.tick, sponsored: true
+      };
+      var room = buildRoom(seed);
+      room.sponsorBudget = spec.budget || 0;
+      room.couponPercent = spec.couponPercent || 15;
+      state.rooms.unshift(room);
+      emit();
+      return room.id;
+    },
+
+    markNotificationRead: function (id) {
+      for (var i = 0; i < state.notifications.length; i++) if (state.notifications[i].id === id) state.notifications[i].read = true;
+      emit();
+    },
+    markAllNotificationsRead: function () {
+      for (var i = 0; i < state.notifications.length; i++) state.notifications[i].read = true;
+      emit();
+    },
+    updateSettings: function (patch) { Object.assign(state.settings, patch); emit(); },
+    updateProfile: function (patch) { Object.assign(state.user, patch); emit(); },
+    topUpPoints: function (amount) { state.user.points += amount; pushLedger({ type: "topup", amount: amount, note: "포인트 충전", roomId: null }); emit(); }
+  };
+
+  /* ---------------------------------------------------------------
+   * Router — history API (push/replace) + popstate, with a slide
+   * transition and a simple forward/back stack.
+   * --------------------------------------------------------------- */
+  var screens = {}; // id -> { title, render, onEnter, onLeave }
+  var mounted = null; // { id, params, el, unsub }
+  var histIdx = 0;
+  var TAB_ROUTES = ["home", "explore", "my"];
+
+  function register(id, def) {
+    screens[id] = {
+      title: def.title || id,
+      render: def.render || function (el) { el.innerHTML = ""; },
+      onEnter: def.onEnter || function () {},
+      onLeave: def.onLeave || function () {}
+    };
+    // If this route is the one currently on screen as a placeholder,
+    // re-render it immediately so late-loaded modules take effect.
+    if (mounted && mounted.id === id) mountScreen(id, mounted.params, "none");
+  }
+
+  function encodeParams(params) {
+    if (!params || !Object.keys(params).length) return "";
+    return "?p=" + encodeURIComponent(JSON.stringify(params));
+  }
+  function parseHash(hash) {
+    hash = (hash || "").replace(/^#\/?/, "");
+    var qIdx = hash.indexOf("?");
+    var id = qIdx === -1 ? hash : hash.slice(0, qIdx);
+    var params = {};
+    if (qIdx !== -1) {
+      var qs = hash.slice(qIdx + 1);
+      var m = qs.split("&");
+      for (var i = 0; i < m.length; i++) {
+        var kv = m[i].split("=");
+        if (kv[0] === "p" && kv[1]) { try { params = JSON.parse(decodeURIComponent(kv[1])); } catch (e) { params = {}; } }
+      }
+    }
+    return { id: id || "splash", params: params };
+  }
+
+  function placeholderDef(id) {
+    return {
+      title: id,
+      render: function (el, params) {
+        el.innerHTML = statusBar() + appBar("모듈 대기", id, id !== "home") +
+          '<div class="om-body"><div class="om-placeholder">' +
+          icon("gear", 30, "#8892AE") +
+          '<div style="font-weight:800; font-size:13px; margin-top:10px; color:#0E1430;">"' + id + '" 모듈 대기</div>' +
+          '<div style="font-size:11.5px; margin-top:4px;">이 라우트는 아직 등록되지 않았습니다.<br>OM.register("' + id + '", {...}) 로 붙여넣으세요.</div>' +
+          (Object.keys(params || {}).length ? '<div class="tag">params: ' + JSON.stringify(params) + '</div>' : "") +
+          '</div></div>';
+      }
+    };
+  }
+
+  function ensureScreen(id) {
+    if (!screens[id]) screens[id] = placeholderDefAsScreen(id);
+    return screens[id];
+  }
+  function placeholderDefAsScreen(id) {
+    var d = placeholderDef(id);
+    return { title: d.title, render: d.render, onEnter: function () {}, onLeave: function () {} };
+  }
+
+  function renderTabbar(activeId) {
+    var bar = document.getElementById("omTabbar");
+    if (TAB_ROUTES.indexOf(activeId) === -1) { bar.style.display = "none"; return; }
+    bar.style.display = "flex";
+    var unread = 0;
+    for (var i = 0; i < state.notifications.length; i++) if (!state.notifications[i].read) unread++;
+    var defs = [
+      ["home", "chat", "홈"],
+      ["explore", "compass", "탐색"],
+      ["my", "person", "마이"]
+    ];
+    var html = "";
+    for (var j = 0; j < defs.length; j++) {
+      var d = defs[j];
+      var active = d[0] === activeId;
+      html += '<button class="om-tab' + (active ? " active" : "") + '" data-om-tab="' + d[0] + '">' +
+        icon(d[1], 17, active ? "#2F5EDB" : "#8892AE") + '<span>' + d[2] + '</span>';
+      if (d[0] === "my" && unread > 0) html += '<span class="badge-dot">' + (unread > 9 ? "9+" : unread) + '</span>';
+      html += '</button>';
+    }
+    bar.innerHTML = html;
+  }
+
+  function mountScreen(id, params, direction) {
+    // direction: "fwd" | "back" | "none"
+    var stack = document.getElementById("omScreenStack");
+    var def = ensureScreen(id);
+    var el = document.createElement("div");
+    el.className = "om-screen";
+    if (direction === "fwd") el.classList.add("slide-in-fwd");
+    if (direction === "back") el.classList.add("slide-in-back");
+    stack.appendChild(el);
+    def.render(el, params || {});
+    var unsub = subscribe(function () { def.render(el, params || {}); });
+    def.onEnter(params || {});
+
+    var prev = mounted;
+    mounted = { id: id, params: params || {}, el: el, unsub: unsub, def: def };
+    renderTabbar(id);
+
+    if (direction === "none" || !prev) {
+      if (prev) { prev.unsub(); prev.def.onLeave(); prev.el.remove(); }
+      requestAnimationFrame(function () { el.classList.remove("slide-in-fwd", "slide-in-back"); });
+      return;
+    }
+    requestAnimationFrame(function () {
+      el.classList.add("slide-settle");
+      el.classList.remove("slide-in-fwd", "slide-in-back");
+      prev.el.classList.add(direction === "fwd" ? "slide-out-fwd" : "slide-out-back");
+    });
+    setTimeout(function () {
+      prev.unsub();
+      prev.def.onLeave();
+      prev.el.remove();
+    }, 300);
+  }
+
+  function go(route, params, opts) {
+    opts = opts || {};
+    histIdx++;
+    var hash = "#/" + route + encodeParams(params);
+    if (opts.replace) history.replaceState({ idx: histIdx }, "", hash);
+    else history.pushState({ idx: histIdx }, "", hash);
+    mountScreen(route, params, "fwd");
+  }
+  function back() {
+    if (history.state && history.state.idx > 0) history.back();
+    else go("home", {}, { replace: true });
+  }
+
+  window.addEventListener("popstate", function (e) {
+    var parsed = parseHash(location.hash);
+    var newIdx = (e.state && typeof e.state.idx === "number") ? e.state.idx : 0;
+    var direction = newIdx < histIdx ? "back" : "fwd";
+    histIdx = newIdx;
+    mountScreen(parsed.id, parsed.params, direction);
+  });
+
+  document.addEventListener("click", function (e) {
+    var backBtn = e.target.closest ? e.target.closest("[data-om-back]") : null;
+    if (backBtn) { back(); return; }
+    var tabBtn = e.target.closest ? e.target.closest("[data-om-tab]") : null;
+    if (tabBtn) { go(tabBtn.getAttribute("data-om-tab"), {}); return; }
+  });
+
+  /* ---------------------------------------------------------------
+   * Public API
+   * --------------------------------------------------------------- */
+  window.OM = {
+    state: state,
+    subscribe: subscribe,
+    emit: emit,
+    sim: sim,
+    register: register,
+    go: go,
+    back: back,
+    ui: { icon: icon, chip: chip, statusBar: statusBar, appBar: appBar, qrGrid: qrGrid, stepperDots: stepperDots, gauge: gauge },
+    _colleagues: COLLEAGUES
+  };
+
+  /* ---------------------------------------------------------------
+   * Placeholder registration for every contract route, so shell.html
+   * runs standalone. Real modules call OM.register(id, {...}) again
+   * later (appended as separate <script> blocks) and silently win.
+   * --------------------------------------------------------------- */
+  var ALL_ROUTES = [
+    // A onboarding
+    "splash", "onboard-consent", "onboard-profile", "settings", "profile-edit",
+    // B home-chat
+    "home", "room-chat",
+    // C lifecycle
+    "room-detail", "deposit", "reminder", "checkin", "settle", "noshow",
+    // D explore
+    "explore", "room-preview", "sponsor-offer", "sponsor-register",
+    // E my
+    "my", "ledger", "notifications"
+  ];
+  ALL_ROUTES.forEach(function (id) {
+    if (id === "splash") return; // splash gets a real screen below
+    screens[id] = placeholderDefAsScreen(id);
+  });
+
+  register("splash", {
+    title: "splash",
+    render: function (el) {
+      el.innerHTML = '<div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:linear-gradient(160deg,#1a2440,#0b1022);">' +
+        '<span style="width:56px; height:56px; border-radius:18px; background:linear-gradient(150deg,#4C7DF5,#2F5EDB); display:flex; align-items:center; justify-content:center; box-shadow:0 16px 30px -10px rgba(47,94,219,.6);">' + icon("bolt", 28, "#fff") + '</span>' +
+        '<div style="color:#fff; font-weight:800; font-size:16px; letter-spacing:-.01em;">OfficeMate</div>' +
+        '<div style="color:#9AA3BE; font-size:11.5px;">동료와 번개 모임, 말 한마디로.</div>' +
+        '<button class="om-btn om-press" style="width:auto; padding:10px 22px; margin-top:8px;" data-om-start="1">시작하기</button>' +
+        '</div>';
+    },
+    onEnter: function () {
+      document.addEventListener("click", startOnce);
+      function startOnce(e) {
+        if (e.target.closest && e.target.closest("[data-om-start]")) {
+          document.removeEventListener("click", startOnce);
+          go("onboard-consent", {}, { replace: true });
+        }
+      }
+    }
+  });
+
+  /* ---------------------------------------------------------------
+   * Demo speed control bar (tick advance + play/pause) — small
+   * always-available affordance so the sim engine is reachable
+   * without a purpose-built screen.
+   * --------------------------------------------------------------- */
+  function renderSimBar() {
+    var bar = document.getElementById("omSimBar");
+    bar.innerHTML = "tick " + state.tick +
+      ' <button data-om-sim="step">+1</button>' +
+      ' <button data-om-sim="play">' + (sim.isPlaying() ? "정지" : "재생") + '</button>' +
+      ' <button data-om-sim="speed">x' + state.simSpeed + '</button>';
+  }
+  document.getElementById("omSimBar").addEventListener("click", function (e) {
+    var btn = e.target.closest ? e.target.closest("[data-om-sim]") : null;
+    if (!btn) return;
+    var action = btn.getAttribute("data-om-sim");
+    if (action === "step") sim.advanceTick(1);
+    else if (action === "play") { sim.isPlaying() ? sim.pause() : sim.play(state.simSpeed); }
+    else if (action === "speed") sim.setSpeed(state.simSpeed >= 4 ? 1 : state.simSpeed * 2);
+  });
+  var simBarTimer = null;
+  document.getElementById("omStage").addEventListener("mousemove", showSimBar);
+  document.getElementById("omStage").addEventListener("touchstart", showSimBar);
+  function showSimBar() {
+    var bar = document.getElementById("omSimBar");
+    if (!bar.classList.contains("show")) {
+      bar.classList.add("show");
+      renderSimBar();
+    }
+    clearTimeout(simBarTimer);
+    simBarTimer = setTimeout(function () { bar.classList.remove("show"); }, 2500);
+  }
+  subscribe(renderSimBar);
+
+  /* ---------------------------------------------------------------
+   * Boot
+   * --------------------------------------------------------------- */
+  function boot() {
+    var parsed = parseHash(location.hash);
+    if (!location.hash) {
+      history.replaceState({ idx: 0 }, "", "#/splash");
+      mountScreen("splash", {}, "none");
+    } else {
+      history.replaceState({ idx: 0 }, "", location.hash);
+      mountScreen(parsed.id, parsed.params, "none");
+    }
+  }
+  boot();
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+
+  var TAG_CATALOG = ["매운맛", "베이커리", "커피챗", "보드게임", "러닝", "채식"];
+
+  function toast(el, msg) {
+    var old = el.querySelector(".om-toast");
+    if (old) old.remove();
+    var t = document.createElement("div");
+    t.className = "om-toast";
+    t.textContent = msg;
+    el.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.remove(); }, 1600);
+  }
+
+  function tagChipsHtml(selected, prefix) {
+    var html = '<div class="om-scr-onb-chiprow">';
+    for (var i = 0; i < TAG_CATALOG.length; i++) {
+      var t = TAG_CATALOG[i];
+      var on = selected.indexOf(t) !== -1;
+      html += '<span class="om-scr-onb-tagchip' + (on ? " on" : "") + '" data-' + prefix + '-tag="' + t + '">' + t + '</span>';
+    }
+    return html + "</div>";
+  }
+
+  /* ================================================================
+   * onboard-consent
+   * ================================================================ */
+  (function () {
+    var consent = { tos: false, privacy: false, location: false, marketing: false };
+    var loading = true;
+    var lastEl = null;
+    var loadTimer = null;
+
+    var ITEMS = [
+      { key: "tos", label: "서비스 이용약관 동의", req: true, detail: "OfficeMate 서비스 전반의 이용 조건에 대한 약관입니다." },
+      { key: "privacy", label: "개인정보 수집·이용 동의", req: true, detail: "이름·부서·모임 이력 등 매칭·정산에 필요한 정보를 수집합니다." },
+      { key: "location", label: "위치기반서비스 이용약관 동의", req: true, detail: "오프라인 모임 추천을 위해 근무지 기반 위치 정보를 활용합니다." },
+      { key: "marketing", label: "마케팅 정보 수신 동의", req: false, detail: "이벤트·스폰서 혜택 알림을 받아보실 수 있어요. 언제든 해제 가능합니다." }
+    ];
+
+    function allRequiredOn() {
+      for (var i = 0; i < ITEMS.length; i++) if (ITEMS[i].req && !consent[ITEMS[i].key]) return false;
+      return true;
+    }
+    function allOn() {
+      for (var i = 0; i < ITEMS.length; i++) if (!consent[ITEMS[i].key]) return false;
+      return true;
+    }
+
+    function render(el, params) {
+      lastEl = el;
+      var body = '<div class="om-card">' +
+        '<div style="font-weight:800; font-size:13.5px;">동의하고 시작할게요</div>' +
+        '<div class="om-scr-onb-detail">아래 약관에 동의하시면 OfficeMate의 매칭·정산 기능을 바로 쓸 수 있어요.</div>' +
+        '</div>';
+
+      if (loading) {
+        body += '<div class="om-card">' +
+          '<div class="skel-line skel" style="width:70%;"></div>' +
+          '<div class="skel-line skel" style="width:95%;"></div>' +
+          '<div class="skel-line skel" style="width:95%;"></div>' +
+          '<div class="skel-line skel" style="width:60%;"></div>' +
+          '</div>';
+      } else {
+        body += '<div class="om-card">' +
+          '<div class="om-scr-onb-item" data-onb-action="toggle-all">' +
+          '<span class="om-scr-onb-box' + (allOn() ? " on" : "") + '">' + (allOn() ? OM.ui.icon("check", 12, "#fff") : "") + '</span>' +
+          '<span class="om-scr-onb-label">전체 동의</span>' +
+          '</div></div>';
+
+        body += '<div class="om-card">';
+        for (var i = 0; i < ITEMS.length; i++) {
+          var it = ITEMS[i];
+          var on = consent[it.key];
+          body += '<div class="om-scr-onb-item" data-onb-toggle="' + it.key + '">' +
+            '<span class="om-scr-onb-box' + (on ? " on" : "") + '">' + (on ? OM.ui.icon("check", 12, "#fff") : "") + '</span>' +
+            '<div style="flex:1;">' +
+            '<span class="om-scr-onb-label" style="display:inline;">' + it.label + '</span>' +
+            '<span class="' + (it.req ? "om-scr-onb-tag-req" : "om-scr-onb-tag-opt") + '">' + (it.req ? "필수" : "선택") + '</span>' +
+            '<div class="om-scr-onb-detail">' + it.detail + '</div>' +
+            '</div></div>';
+        }
+        body += '</div>';
+      }
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("동의 및 시작", "1 / 2", true) +
+        '<div class="om-body">' + body +
+        '<button class="om-btn om-press" style="margin-top:6px;" data-onb-action="continue"' + (allRequiredOn() ? "" : " disabled") + '>다음</button>' +
+        '</div>';
+    }
+
+    function handleClick(e) {
+      var toggle = e.target.closest ? e.target.closest("[data-onb-toggle]") : null;
+      var action = e.target.closest ? e.target.closest("[data-onb-action]") : null;
+      if (toggle) {
+        var key = toggle.getAttribute("data-onb-toggle");
+        consent[key] = !consent[key];
+        render(lastEl, {});
+        return;
+      }
+      if (action) {
+        var a = action.getAttribute("data-onb-action");
+        if (a === "toggle-all") {
+          var next = !allOn();
+          for (var i = 0; i < ITEMS.length; i++) consent[ITEMS[i].key] = next;
+          render(lastEl, {});
+        } else if (a === "continue") {
+          if (!allRequiredOn()) { toast(lastEl, "필수 항목에 모두 동의해주세요"); return; }
+          OM.go("onboard-profile", {});
+        }
+      }
+    }
+
+    OM.register("onboard-consent", {
+      title: "동의 및 시작",
+      render: render,
+      onEnter: function () {
+        lastEl.addEventListener("click", handleClick);
+        loadTimer = setTimeout(function () { loading = false; render(lastEl, {}); }, 380);
+      },
+      onLeave: function () {
+        if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+      }
+    });
+  })();
+
+  /* ================================================================
+   * onboard-profile
+   * ================================================================ */
+  (function () {
+    var profile = { tags: [], mealPref: "일반", workStyle: "상관없음", bio: "" };
+    var loading = true;
+    var lastEl = null;
+    var loadTimer = null;
+
+    function render(el, params) {
+      lastEl = el;
+      var body;
+      if (loading) {
+        body = '<div class="om-card">' +
+          '<div class="skel-line skel" style="width:50%;"></div>' +
+          '<div class="skel-line skel" style="width:100%;"></div>' +
+          '<div class="skel-line skel" style="width:80%;"></div>' +
+          '</div>';
+      } else {
+        body = '<div class="om-card">' +
+          '<div class="om-scr-onb-label-sm">관심 태그 (1개 이상)</div>' +
+          tagChipsHtml(profile.tags, "onbp") +
+          (profile.tags.length === 0 ? '<div class="om-scr-ped-empty">아직 선택한 관심사가 없어요. 태그를 눌러 골라보세요.</div>' : "") +
+
+          '<div class="om-scr-onb-label-sm">식사 취향</div>' +
+          '<div class="om-scr-onb-seg">' +
+          '<span class="om-scr-onb-segbtn' + (profile.mealPref === "일반" ? " on" : "") + '" data-onbp-meal="일반">일반식</span>' +
+          '<span class="om-scr-onb-segbtn' + (profile.mealPref === "채식" ? " on" : "") + '" data-onbp-meal="채식">채식</span>' +
+          '</div>' +
+
+          '<div class="om-scr-onb-label-sm">근무 형태</div>' +
+          '<div class="om-scr-onb-seg">' +
+          '<span class="om-scr-onb-segbtn' + (profile.workStyle === "오프라인 선호" ? " on" : "") + '" data-onbp-work="오프라인 선호">오프라인</span>' +
+          '<span class="om-scr-onb-segbtn' + (profile.workStyle === "온라인 선호" ? " on" : "") + '" data-onbp-work="온라인 선호">온라인</span>' +
+          '<span class="om-scr-onb-segbtn' + (profile.workStyle === "상관없음" ? " on" : "") + '" data-onbp-work="상관없음">상관없음</span>' +
+          '</div>' +
+
+          '<div class="om-scr-onb-label-sm">한줄 소개</div>' +
+          '<textarea class="om-scr-onb-bio" rows="2" maxlength="60" placeholder="동료들에게 나를 짧게 소개해보세요" id="omOnbpBio">' + profile.bio + '</textarea>' +
+          '</div>';
+      }
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("관심사 설정", "2 / 2", true) +
+        '<div class="om-body">' + body +
+        '<button class="om-btn om-press" style="margin-top:6px;" data-onbp-action="finish"' + (loading ? " disabled" : "") + '>완료하고 시작하기</button>' +
+        '</div>';
+
+      if (!loading) {
+        var ta = el.querySelector("#omOnbpBio");
+        if (ta) ta.addEventListener("input", function (e) { profile.bio = e.target.value; });
+      }
+    }
+
+    function handleClick(e) {
+      var tagEl = e.target.closest ? e.target.closest("[data-onbp-tag]") : null;
+      var mealEl = e.target.closest ? e.target.closest("[data-onbp-meal]") : null;
+      var workEl = e.target.closest ? e.target.closest("[data-onbp-work]") : null;
+      var actionEl = e.target.closest ? e.target.closest("[data-onbp-action]") : null;
+
+      if (tagEl) {
+        var t = tagEl.getAttribute("data-onbp-tag");
+        var idx = profile.tags.indexOf(t);
+        if (idx === -1) profile.tags.push(t); else profile.tags.splice(idx, 1);
+        render(lastEl, {});
+        return;
+      }
+      if (mealEl) { profile.mealPref = mealEl.getAttribute("data-onbp-meal"); render(lastEl, {}); return; }
+      if (workEl) { profile.workStyle = workEl.getAttribute("data-onbp-work"); render(lastEl, {}); return; }
+      if (actionEl && actionEl.getAttribute("data-onbp-action") === "finish") {
+        if (profile.tags.length === 0) { toast(lastEl, "관심 태그를 1개 이상 선택해주세요"); return; }
+        OM.sim.updateSettings({ vegOnly: profile.mealPref === "채식" });
+        toast(lastEl, "온보딩 완료! 홈으로 이동합니다");
+        setTimeout(function () { OM.go("home", {}, { replace: true }); }, 500);
+      }
+    }
+
+    OM.register("onboard-profile", {
+      title: "관심사 설정",
+      render: render,
+      onEnter: function () {
+        lastEl.addEventListener("click", handleClick);
+        loadTimer = setTimeout(function () { loading = false; render(lastEl, {}); }, 380);
+      },
+      onLeave: function () {
+        if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+      }
+    });
+  })();
+
+  /* ================================================================
+   * settings
+   * ================================================================ */
+  (function () {
+    var lastEl = null;
+    var showSpeed = false;
+
+    function switchHtml(on, action) {
+      return '<button class="om-scr-set-switch' + (on ? " on" : "") + '" data-set-action="' + action + '"><i></i></button>';
+    }
+
+    function render(el, params) {
+      lastEl = el;
+      var s = OM.state.settings;
+      var body = '<div class="om-card">' +
+        '<div class="om-scr-onb-label-sm" style="margin-top:0;">알림 시간대</div>' +
+        '<div class="om-scr-set-row"><div><div class="om-scr-set-row-txt">아침 알림</div><div class="om-scr-set-row-sub">오전 슬롯 제안을 받아요</div></div>' + switchHtml(s.notifyMorning, "notifyMorning") + '</div>' +
+        '<div class="om-scr-set-row"><div><div class="om-scr-set-row-txt">점심 알림</div><div class="om-scr-set-row-sub">점심 슬롯 제안을 받아요</div></div>' + switchHtml(s.notifyLunch, "notifyLunch") + '</div>' +
+        '<div class="om-scr-set-row"><div><div class="om-scr-set-row-txt">저녁 알림</div><div class="om-scr-set-row-sub">저녁 슬롯 제안을 받아요</div></div>' + switchHtml(s.notifyEvening, "notifyEvening") + '</div>' +
+        '</div>' +
+
+        '<div class="om-card">' +
+        '<div class="om-scr-onb-label-sm" style="margin-top:0;">매칭 선호</div>' +
+        '<div class="om-scr-set-row"><div><div class="om-scr-set-row-txt">다양한 부서와 매칭</div><div class="om-scr-set-row-sub">같은 부서보다 여러 부서와 우선 매칭돼요</div></div>' + switchHtml(s.preferDiversity, "preferDiversity") + '</div>' +
+        '<div class="om-scr-set-row"><div><div class="om-scr-set-row-txt">채식 메뉴만 추천</div><div class="om-scr-set-row-sub">모집 시 채식 태그 모임을 우선 보여줘요</div></div>' + switchHtml(s.vegOnly, "vegOnly") + '</div>' +
+        '<div class="om-scr-set-navrow" data-set-action="edit-profile"><div><div class="om-scr-set-row-txt">프로필 정보 수정</div><div class="om-scr-set-row-sub">이름 · 부서 · 관심 태그</div></div>' + OM.ui.icon("back", 13, "#8892AE") + '</div>' +
+        '</div>' +
+
+        '<div class="om-card">' +
+        '<div class="om-scr-set-row"><div><div class="om-scr-set-row-txt">배속 컨트롤 노출</div><div class="om-scr-set-row-sub">데모 시연용 시간 배속 컨트롤을 화면에 표시해요</div></div>' + switchHtml(showSpeed, "toggleSpeed") + '</div>' +
+        (showSpeed ?
+          '<div class="om-scr-set-simbox">' +
+          '<span class="om-chip blue">tick ' + OM.state.tick + '</span>' +
+          '<button class="om-btn auto secondary om-press" data-set-action="sim-step">+1틱</button>' +
+          '<button class="om-btn auto secondary om-press" data-set-action="sim-play">' + (OM.sim.isPlaying() ? "정지" : "재생") + '</button>' +
+          '<button class="om-btn auto secondary om-press" data-set-action="sim-speed">x' + OM.state.simSpeed + '</button>' +
+          '</div>' : "") +
+        '</div>';
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("설정", "알림 · 매칭 · 배속", true) +
+        '<div class="om-body">' + body + '</div>';
+    }
+
+    var TOGGLE_FIELDS = { notifyMorning: 1, notifyLunch: 1, notifyEvening: 1, preferDiversity: 1, vegOnly: 1 };
+
+    function handleClick(e) {
+      var btn = e.target.closest ? e.target.closest("[data-set-action]") : null;
+      if (!btn) return;
+      var action = btn.getAttribute("data-set-action");
+      if (TOGGLE_FIELDS[action]) {
+        var patch = {};
+        patch[action] = !OM.state.settings[action];
+        OM.sim.updateSettings(patch);
+        toast(lastEl, "설정이 저장되었어요");
+        return;
+      }
+      if (action === "toggleSpeed") { showSpeed = !showSpeed; render(lastEl, {}); return; }
+      if (action === "sim-step") { OM.sim.advanceTick(1); return; }
+      if (action === "sim-play") { OM.sim.isPlaying() ? OM.sim.pause() : OM.sim.play(OM.state.simSpeed); return; }
+      if (action === "sim-speed") { OM.sim.setSpeed(OM.state.simSpeed >= 4 ? 1 : OM.state.simSpeed * 2); return; }
+      if (action === "edit-profile") { OM.go("profile-edit", {}); return; }
+    }
+
+    OM.register("settings", {
+      title: "설정",
+      render: render,
+      onEnter: function () { lastEl.addEventListener("click", handleClick); },
+      onLeave: function () {}
+    });
+  })();
+
+  /* ================================================================
+   * profile-edit
+   * ================================================================ */
+  (function () {
+    var buf = null; // { name, dept, deptVisible, tags }
+    var lastEl = null;
+    var loading = true;
+    var loadTimer = null;
+    var nameErr = false;
+
+    function ensureBuf() {
+      if (!buf) {
+        buf = { name: OM.state.user.name, dept: OM.state.user.dept, deptVisible: true, tags: [] };
+      }
+    }
+
+    function render(el, params) {
+      lastEl = el;
+      ensureBuf();
+      var body;
+      if (loading) {
+        body = '<div class="om-card">' +
+          '<div class="skel-line skel" style="width:40%;"></div>' +
+          '<div class="skel-line skel" style="width:90%;"></div>' +
+          '<div class="skel-line skel" style="width:90%;"></div>' +
+          '</div>';
+      } else {
+        body = '<div class="om-card">' +
+          '<div class="om-scr-ped-field">' +
+          '<label>이름</label>' +
+          '<input class="om-scr-ped-input' + (nameErr ? " err" : "") + '" id="omPedName" value="' + buf.name + '" placeholder="이름을 입력하세요">' +
+          (nameErr ? '<div class="om-scr-ped-errtxt">이름은 비워둘 수 없어요</div>' : "") +
+          '</div>' +
+          '<div class="om-scr-ped-field">' +
+          '<label>부서</label>' +
+          '<input class="om-scr-ped-input" id="omPedDept" value="' + buf.dept + '" placeholder="부서를 입력하세요">' +
+          '</div>' +
+          '<div class="om-scr-set-row" style="margin-top:8px;">' +
+          '<div><div class="om-scr-set-row-txt">부서 공개</div><div class="om-scr-set-row-sub">다른 동료에게 내 부서를 보여줘요</div></div>' +
+          '<button class="om-scr-set-switch' + (buf.deptVisible ? " on" : "") + '" data-ped-action="toggle-visible"><i></i></button>' +
+          '</div>' +
+          '</div>' +
+
+          '<div class="om-card">' +
+          '<div class="om-scr-onb-label-sm" style="margin-top:0;">관심 태그</div>' +
+          tagChipsHtml(buf.tags, "ped") +
+          (buf.tags.length === 0 ? '<div class="om-scr-ped-empty">관심 태그를 선택하면 매칭 정확도가 올라가요.</div>' : "") +
+          '</div>';
+      }
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("프로필 편집", "", true) +
+        '<div class="om-body">' + body +
+        (loading ? "" :
+          '<div style="display:flex; gap:8px; margin-top:6px;">' +
+          '<button class="om-btn ghost om-press" data-ped-action="cancel">취소</button>' +
+          '<button class="om-btn om-press" data-ped-action="save">저장</button>' +
+          '</div>') +
+        '</div>';
+
+      if (!loading) {
+        var ni = el.querySelector("#omPedName");
+        var di = el.querySelector("#omPedDept");
+        if (ni) ni.addEventListener("input", function (e) { buf.name = e.target.value; if (nameErr && e.target.value.trim()) { nameErr = false; render(lastEl, {}); } });
+        if (di) di.addEventListener("input", function (e) { buf.dept = e.target.value; });
+      }
+    }
+
+    function handleClick(e) {
+      var tagEl = e.target.closest ? e.target.closest("[data-ped-tag]") : null;
+      var actionEl = e.target.closest ? e.target.closest("[data-ped-action]") : null;
+
+      if (tagEl) {
+        var t = tagEl.getAttribute("data-ped-tag");
+        var idx = buf.tags.indexOf(t);
+        if (idx === -1) buf.tags.push(t); else buf.tags.splice(idx, 1);
+        render(lastEl, {});
+        return;
+      }
+      if (actionEl) {
+        var a = actionEl.getAttribute("data-ped-action");
+        if (a === "toggle-visible") { buf.deptVisible = !buf.deptVisible; render(lastEl, {}); return; }
+        if (a === "cancel") { buf = null; nameErr = false; OM.back(); return; }
+        if (a === "save") {
+          if (!buf.name || !buf.name.trim()) { nameErr = true; render(lastEl, {}); toast(lastEl, "이름을 입력해주세요"); return; }
+          OM.sim.updateProfile({ name: buf.name.trim(), dept: buf.dept.trim() || OM.state.user.dept });
+          toast(lastEl, "저장되었습니다");
+          buf = null; nameErr = false;
+          setTimeout(function () { OM.back(); }, 450);
+        }
+      }
+    }
+
+    OM.register("profile-edit", {
+      title: "프로필 편집",
+      render: render,
+      onEnter: function () {
+        lastEl.addEventListener("click", handleClick);
+        loading = true;
+        loadTimer = setTimeout(function () { loading = false; render(lastEl, {}); }, 300);
+      },
+      onLeave: function () {
+        if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+        buf = null; nameErr = false; loading = true;
+      }
+    });
+  })();
+
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+
+  /* =================================================================
+   * Shared helpers
+   * ================================================================= */
+  function esc(s) {
+    s = String(s == null ? "" : s);
+    s = s.split("&").join("&amp;");
+    s = s.split("<").join("&lt;");
+    s = s.split(">").join("&gt;");
+    s = s.split('"').join("&quot;");
+    return s;
+  }
+  function omFindRoom(roomId) {
+    var rooms = OM.state.rooms;
+    for (var i = 0; i < rooms.length; i++) if (rooms[i].id === roomId) return rooms[i];
+    return null;
+  }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  /* =================================================================
+   * SECTION A — home: 봇 채팅 홈 (탭 루트)
+   * ================================================================= */
+  var SLOT_DAYS = ["월", "화", "수", "목", "금"];
+  var SLOT_PERIODS = [
+    { key: "morning", label: "아침", time: "08:00" },
+    { key: "lunch", label: "점심", time: "12:00" },
+    { key: "evening", label: "저녁", time: "19:00" }
+  ];
+  var HC_EXAMPLES = ["목요일 점심 매운 거 3명", "내일 저녁 커피챗 2명", "금요일 점심 보드게임 4명"];
+
+  var homeChat = {
+    messages: [],
+    activePanel: null,
+    draft: { dayLabel: null, periodLabel: null, slotLabel: null, tags: [], capacity: null, online: null },
+    headcountVal: 3,
+    slotTab: "lunch",
+    roomId: null,
+    knownParticipantIds: [],
+    lastStatus: null,
+    inputVal: "",
+    toast: null,
+    _toastTimer: null
+  };
+  var homeEl = null;
+  var homeParams = null;
+
+  /* ---- 자연어 파싱 (문자열 함수만 사용, 정규식 금지) ---- */
+  function detectDay(text) {
+    var days = [
+      ["월요일", "월"], ["화요일", "화"], ["수요일", "수"], ["목요일", "목"], ["금요일", "금"], ["토요일", "토"], ["일요일", "일"],
+      ["오늘", "오늘"], ["내일", "내일"], ["모레", "모레"]
+    ];
+    for (var i = 0; i < days.length; i++) if (text.indexOf(days[i][0]) !== -1) return days[i][1];
+    return null;
+  }
+  function detectPeriod(text) {
+    var periods = [
+      ["아침", "아침", "08:00"], ["오전", "아침", "08:00"],
+      ["점심", "점심", "12:00"], ["낮", "점심", "12:00"],
+      ["저녁", "저녁", "19:00"], ["밤", "저녁", "19:00"]
+    ];
+    for (var i = 0; i < periods.length; i++) if (text.indexOf(periods[i][0]) !== -1) return { label: periods[i][1], time: periods[i][2] };
+    return null;
+  }
+  function detectTags(text) {
+    var dict = [
+      ["매운맛", ["매운맛", "매운"]],
+      ["커피챗", ["커피챗", "커피"]],
+      ["채식", ["채식", "비건"]],
+      ["베이커리", ["베이커리", "빵"]],
+      ["보드게임", ["보드게임", "보드"]],
+      ["러닝", ["러닝", "달리기", "조깅"]]
+    ];
+    var found = [];
+    for (var i = 0; i < dict.length; i++) {
+      var kws = dict[i][1];
+      for (var j = 0; j < kws.length; j++) {
+        if (text.indexOf(kws[j]) !== -1) { found.push(dict[i][0]); break; }
+      }
+    }
+    return found;
+  }
+  function detectHeadcount(text) {
+    for (var i = 0; i < text.length; i++) {
+      var c = text.charAt(i);
+      if (c >= "0" && c <= "9") {
+        var j = i;
+        while (j < text.length && text.charAt(j) >= "0" && text.charAt(j) <= "9") j++;
+        var numStr = text.slice(i, j);
+        var rest = text.charAt(j);
+        if (rest === "명" || rest === "인") return parseInt(numStr, 10);
+        i = j;
+      }
+    }
+    var words = [["한명", 1], ["두명", 2], ["세명", 3], ["네명", 4], ["다섯명", 5], ["여섯명", 6]];
+    for (var k = 0; k < words.length; k++) if (text.indexOf(words[k][0]) !== -1) return words[k][1];
+    return null;
+  }
+  function parseSentence(text) {
+    var day = detectDay(text);
+    var period = detectPeriod(text);
+    var tags = detectTags(text);
+    var headcount = detectHeadcount(text);
+    var missing = [];
+    if (!day && !period) missing.push("시간");
+    if (!headcount) missing.push("인원");
+    if (missing.length) return { ok: false, missing: missing };
+    var dayLabel = day || "오늘";
+    var periodLabel = period ? period.label : "점심";
+    var timeStr = period ? period.time : "12:00";
+    var online = tags.indexOf("커피챗") !== -1 ? "online" : "offline";
+    return {
+      ok: true,
+      draft: {
+        dayLabel: dayLabel, periodLabel: periodLabel, slotLabel: dayLabel + " " + timeStr,
+        tags: tags, capacity: headcount, online: online
+      }
+    };
+  }
+  function buildReaskText(missing) {
+    var hasTime = missing.indexOf("시간") !== -1;
+    var hasCount = missing.indexOf("인원") !== -1;
+    if (hasTime && hasCount) return "언제, 몇 명인지 잘 못 읽었어요. 예: '목요일 점심 3명'처럼 알려주실래요?";
+    if (hasCount) return "인원을 못 읽었어요. 몇 명인지 알려주실래요?";
+    return "시간을 못 읽었어요. 언제인지 알려주실래요?";
+  }
+
+  /* ---- 렌더 ---- */
+  function renderMessage(m) {
+    if (m.kind === "me") return '<div class="om-bubble bot">' + esc(m.text) + "</div>";
+    if (m.kind === "bot") return '<div class="om-bubble">' + OM.ui.icon("bolt", 12, "#2F5EDB") + " " + esc(m.text) + "</div>";
+    if (m.kind === "roomcard") return renderHomeRoomCard(m.roomId);
+    return "";
+  }
+  function renderExamples() {
+    var greet = homeChat.messages.length
+      ? "다른 모임도 말해보세요. 예를 들면 이렇게요."
+      : "안녕하세요! 언제, 뭘 먹을지, 몇 명인지 편하게 말해주세요. 예를 들면 이렇게요.";
+    var html = '<div class="om-bubble">' + OM.ui.icon("bolt", 12, "#2F5EDB") + " " + greet + "</div>";
+    html += '<div class="om-hc-examples">';
+    for (var i = 0; i < HC_EXAMPLES.length; i++) {
+      html += '<button class="om-chip blue om-hc-chipbtn om-press" data-action="example" data-text="' + esc(HC_EXAMPLES[i]) + '">' + esc(HC_EXAMPLES[i]) + "</button>";
+    }
+    html += "</div>";
+    return html;
+  }
+  function renderConfirmPanel() {
+    var d = homeChat.draft;
+    var tagsHtml = d.tags.length ? d.tags.map(function (t) { return OM.ui.chip("blue", t); }).join(" ") : OM.ui.chip("grey", "태그 없음");
+    return '<div class="om-card">' +
+      '<div style="font-size:11px; color:var(--muted); margin-bottom:4px;">파싱 결과 확인 · 수정 가능</div>' +
+      '<div style="font-weight:800; font-size:14px; margin-bottom:6px;">' + esc(d.slotLabel) + "</div>" +
+      '<div style="margin-bottom:10px;">' + tagsHtml + "</div>" +
+      '<div style="font-size:11.5px; color:var(--muted); margin-bottom:12px;">정원 ' + d.capacity + "명</div>" +
+      '<button class="om-btn om-press" data-action="confirm-create">이대로 개설하기</button>' +
+      '<div style="display:flex; gap:8px; margin-top:8px;">' +
+      '<button class="om-btn secondary om-press" style="flex:1;" data-action="edit-slot">슬롯 다시 고르기</button>' +
+      '<button class="om-btn secondary om-press" style="flex:1;" data-action="edit-headcount">인원 조정</button>' +
+      "</div></div>";
+  }
+  function renderReaskPanel() {
+    return '<div class="om-card">' + OM.ui.chip("amber", "파싱 실패 → 재질문") +
+      '<div style="font-size:11.5px; color:var(--muted); margin-top:8px;">직접 다시 입력하거나, 슬롯을 골라보세요.</div>' +
+      '<button class="om-btn secondary om-press" style="margin-top:10px;" data-action="reask-slotpicker">슬롯 직접 고르기</button>' +
+      "</div>";
+  }
+  function renderSlotpickerPanel() {
+    var tabsHtml = "";
+    for (var i = 0; i < SLOT_PERIODS.length; i++) {
+      var active = homeChat.slotTab === SLOT_PERIODS[i].key;
+      tabsHtml += '<button class="om-hc-slot-tab' + (active ? " active" : "") + ' om-press" data-action="slot-tab" data-tab="' + SLOT_PERIODS[i].key + '">' + SLOT_PERIODS[i].label + "</button>";
+    }
+    var current = null;
+    for (var j = 0; j < SLOT_PERIODS.length; j++) if (SLOT_PERIODS[j].key === homeChat.slotTab) current = SLOT_PERIODS[j];
+    var gridHtml = "";
+    for (var k = 0; k < SLOT_DAYS.length; k++) {
+      var day = SLOT_DAYS[k];
+      var selected = homeChat.draft.dayLabel === day && homeChat.draft.periodLabel === current.label;
+      gridHtml += '<button class="om-chip ' + (selected ? "blue" : "grey") + ' om-hc-slotchip om-press" data-action="pick-slot" data-day="' + day + '" data-time="' + current.time + '" data-period="' + current.label + '">' + day + " " + current.time + "</button>";
+    }
+    var summary = homeChat.draft.slotLabel ? ("선택됨: " + homeChat.draft.slotLabel) : "시간대 탭을 고르고 요일을 선택하세요";
+    return '<div class="om-card">' +
+      '<div style="font-size:11.5px; color:var(--muted); margin-bottom:8px;">' + esc(summary) + "</div>" +
+      '<div class="om-hc-slot-tabs">' + tabsHtml + "</div>" +
+      '<div class="om-hc-slotgrid">' + gridHtml + "</div>" +
+      "</div>";
+  }
+  function renderHeadcountPanel() {
+    return '<div class="om-card" style="text-align:center;">' +
+      '<div style="font-size:11.5px; color:var(--muted); margin-bottom:10px;">인원을 선택하세요</div>' +
+      '<div class="om-hc-stepper-row">' +
+      '<button class="om-btn secondary auto om-press" data-action="hc-minus">-</button>' +
+      '<div style="font-weight:800; font-size:20px; min-width:44px;">' + homeChat.headcountVal + "명</div>" +
+      '<button class="om-btn secondary auto om-press" data-action="hc-plus">+</button>' +
+      "</div>" +
+      '<button class="om-btn om-press" style="margin-top:12px;" data-action="hc-next">다음</button>' +
+      "</div>";
+  }
+  function renderOnoffPanel() {
+    var d = homeChat.draft;
+    var online = d.tags && d.tags.indexOf("커피챗") !== -1;
+    d.online = online ? "online" : "offline";
+    var minutes = online ? 30 : 60;
+    var card = online
+      ? '<div style="text-align:center;">' + OM.ui.chip("blue", "온라인") + '<div style="margin:10px 0;">' + OM.ui.icon("video", 28, "#2F5EDB") + '</div><div style="font-weight:800; font-size:13px;">화상 모임 링크가 자동 생성돼요</div></div>'
+      : '<div style="text-align:center;">' + OM.ui.chip("green", "오프라인") + '<div style="margin:10px 0;">' + OM.ui.icon("building", 28, "#22A06B") + '</div><div style="font-weight:800; font-size:13px;">오프라인 모임으로 진행돼요</div></div>';
+    return '<div class="om-card">' +
+      '<div style="font-size:11px; color:var(--muted);">슬롯 길이 규칙 · 30분 이하 온라인, 60분 이상 오프라인</div>' +
+      '<div style="font-size:13px; font-weight:700; margin:4px 0 10px;">이번 슬롯: ' + minutes + "분</div>" +
+      card +
+      '<button class="om-btn om-press" style="margin-top:12px;" data-action="detect-next">모임 만들기</button>' +
+      "</div>";
+  }
+  function renderInsufficientPanel() {
+    return '<div class="om-card">' + OM.ui.chip("red", "포인트 부족 · 500P 필요") +
+      '<div style="font-size:11.5px; color:var(--muted); margin-top:8px;">현재 보유 ' + OM.state.user.points + "P · 참여 확정 후 디파짓 500P를 예치해요. 지금은 포인트가 부족해요.</div>" +
+      '<button class="om-btn om-press" style="margin-top:10px;" data-action="topup">포인트 충전 (데모, +1000P)</button>' +
+      '<button class="om-btn ghost om-press" style="margin-top:8px;" data-action="force-create">그래도 모임 만들기</button>' +
+      "</div>";
+  }
+  function renderCreatingPanel() {
+    return '<div class="om-card">' +
+      '<div class="skel-line skel" style="width:70%;"></div>' +
+      '<div class="skel-line skel" style="width:50%;"></div>' +
+      '<div class="skel-line skel" style="width:60%;"></div>' +
+      '<div style="font-size:11px; color:var(--muted); margin-top:6px;">모임을 만들고 있어요...</div>' +
+      "</div>";
+  }
+  function renderPanel(panel) {
+    switch (panel.type) {
+      case "confirm": return renderConfirmPanel();
+      case "reask": return renderReaskPanel();
+      case "slotpicker": return renderSlotpickerPanel();
+      case "headcount": return renderHeadcountPanel();
+      case "onoff": return renderOnoffPanel();
+      case "insufficient": return renderInsufficientPanel();
+      case "creating": return renderCreatingPanel();
+      default: return "";
+    }
+  }
+  function renderHomeRoomCard(roomId) {
+    var room = omFindRoom(roomId);
+    if (!room) return '<div class="om-card">모임 정보를 찾을 수 없어요.</div>';
+    var pct = 100 * room.participants.length / room.capacity;
+    var chipHtml = room.status === "confirmed" ? OM.ui.chip("green", "확정")
+      : room.status === "exploded" ? OM.ui.chip("red", "방폭")
+      : OM.ui.chip("blue", "모집 중");
+    var names = room.participants.map(function (p) { return p.id === "me" ? "나" : p.name; }).join(", ");
+    var html = '<div class="om-card">' + chipHtml +
+      '<div style="font-weight:800; font-size:14px; margin-top:8px;">' + esc(room.title) + "</div>" +
+      '<div style="font-size:11px; color:var(--muted); margin:2px 0 10px;">' + esc(room.slotLabel) + " · " + (room.online === "online" ? "온라인" : "오프라인") + "</div>" +
+      OM.ui.gauge(pct) +
+      '<div style="font-size:11px; color:var(--muted); margin-top:6px;">' + room.participants.length + "/" + room.capacity + "명 · " + esc(names) + "</div>";
+    if (room.status === "confirmed") {
+      html += '<button class="om-btn om-press" style="margin-top:10px;" data-action="goto-room" data-room="' + room.id + '">모임 채팅방으로 이동</button>';
+    } else if (room.status === "exploded") {
+      html += '<button class="om-btn secondary om-press" style="margin-top:10px;" data-action="reset-flow">새 모임 만들기</button>';
+    }
+    html += "</div>";
+    return html;
+  }
+
+  function syncRoomEvents() {
+    if (!homeChat.roomId) return;
+    var room = omFindRoom(homeChat.roomId);
+    if (!room) return;
+    for (var j = 0; j < room.participants.length; j++) {
+      var p = room.participants[j];
+      if (p.id === "me") continue;
+      if (homeChat.knownParticipantIds.indexOf(p.id) === -1) {
+        homeChat.knownParticipantIds.push(p.id);
+        homeChat.messages.push({ kind: "bot", text: p.name + "님이 합류했어요." });
+      }
+    }
+    if (room.status !== homeChat.lastStatus) {
+      if (room.status === "confirmed") homeChat.messages.push({ kind: "bot", text: "정원이 다 찼어요! 모임이 확정됐어요." });
+      else if (room.status === "exploded") homeChat.messages.push({ kind: "bot", text: "마감까지 인원을 못 채워서 모임이 방폭됐어요. 예치금은 전액 환급돼요." });
+      homeChat.lastStatus = room.status;
+    }
+  }
+
+  function homeRender(el, params) {
+    homeEl = el; homeParams = params;
+    syncRoomEvents();
+    var existingInput = el.querySelector(".om-hc-input");
+    if (existingInput) homeChat.inputVal = existingInput.value;
+    var hadFocus = existingInput && document.activeElement === existingInput;
+
+    var body = "";
+    for (var i = 0; i < homeChat.messages.length; i++) body += renderMessage(homeChat.messages[i]);
+    if (homeChat.activePanel) body += renderPanel(homeChat.activePanel);
+    else body += renderExamples();
+
+    var toastHtml = homeChat.toast ? '<div class="om-toast">' + esc(homeChat.toast) + "</div>" : "";
+
+    el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("OfficeMate", "봇에게 말해보세요", false) +
+      '<div class="om-body" id="hcScroll">' + body + "</div>" +
+      '<div class="om-hc-composer">' +
+      '<input class="om-hc-input" type="text" placeholder="예) 목요일 점심 매운 거 3명" value="' + esc(homeChat.inputVal) + '">' +
+      '<button class="om-hc-send om-press" data-action="send">' + OM.ui.icon("bolt", 16, "#fff") + "</button>" +
+      "</div>" + toastHtml;
+
+    var scrollEl = el.querySelector("#hcScroll");
+    if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
+    var ni = el.querySelector(".om-hc-input");
+    if (ni && hadFocus) { ni.focus(); var vlen = ni.value.length; ni.setSelectionRange(vlen, vlen); }
+  }
+
+  function hcToast(text) {
+    homeChat.toast = text;
+    homeRender(homeEl, homeParams);
+    clearTimeout(homeChat._toastTimer);
+    homeChat._toastTimer = setTimeout(function () {
+      homeChat.toast = null;
+      if (homeEl && homeEl.isConnected) homeRender(homeEl, homeParams);
+    }, 1800);
+  }
+
+  function doSend(text) {
+    var input = homeEl.querySelector(".om-hc-input");
+    var value = (text != null) ? text : (input ? input.value.trim() : "");
+    if (!value) { hcToast("메시지를 입력해주세요"); return; }
+    homeChat.messages.push({ kind: "me", text: value });
+    homeChat.inputVal = "";
+    var parsed = parseSentence(value);
+    if (parsed.ok) {
+      homeChat.draft = parsed.draft;
+      homeChat.headcountVal = parsed.draft.capacity;
+      homeChat.slotTab = "lunch";
+      for (var i = 0; i < SLOT_PERIODS.length; i++) if (SLOT_PERIODS[i].label === parsed.draft.periodLabel) homeChat.slotTab = SLOT_PERIODS[i].key;
+      var tagText = parsed.draft.tags.length ? parsed.draft.tags.join(", ") : "태그 없음";
+      homeChat.messages.push({ kind: "bot", text: "파싱 완료 — " + parsed.draft.slotLabel + " · " + tagText + " · 정원 " + parsed.draft.capacity + "명" });
+      homeChat.activePanel = { type: "confirm" };
+    } else {
+      homeChat.messages.push({ kind: "bot", text: buildReaskText(parsed.missing) });
+      homeChat.activePanel = { type: "reask" };
+    }
+    homeRender(homeEl, homeParams);
+  }
+
+  function pickSlot(day, time, periodLabel) {
+    homeChat.draft.dayLabel = day;
+    homeChat.draft.periodLabel = periodLabel;
+    homeChat.draft.slotLabel = day + " " + time;
+    if (!homeChat.draft.tags) homeChat.draft.tags = [];
+    if (homeChat.draft.online == null) homeChat.draft.online = homeChat.draft.tags.indexOf("커피챗") !== -1 ? "online" : "offline";
+    if (homeChat.draft.capacity == null) {
+      homeChat.headcountVal = homeChat.headcountVal || 3;
+      homeChat.activePanel = { type: "headcount" };
+    } else {
+      homeChat.activePanel = { type: "confirm" };
+    }
+    homeRender(homeEl, homeParams);
+  }
+  function adjustHeadcount(delta) {
+    homeChat.headcountVal = clamp((homeChat.headcountVal || 3) + delta, 2, 8);
+    homeRender(homeEl, homeParams);
+  }
+  function confirmHeadcount() {
+    homeChat.draft.capacity = homeChat.headcountVal;
+    homeChat.activePanel = homeChat.draft.slotLabel ? { type: "confirm" } : { type: "slotpicker" };
+    homeRender(homeEl, homeParams);
+  }
+
+  function doCreateRoom() {
+    var d = homeChat.draft;
+    var titleParts = [d.dayLabel || "", d.periodLabel || "", (d.tags && d.tags[0]) ? d.tags[0] : "번개", "모임"];
+    var title = titleParts.join(" ").split("  ").join(" ").trim();
+    var roomId = OM.sim.createRoom({
+      title: title,
+      slotLabel: d.slotLabel,
+      tags: d.tags || [],
+      capacity: d.capacity,
+      online: d.online || "offline",
+      deadlineInTicks: 6
+    });
+    homeChat.roomId = roomId;
+    homeChat.knownParticipantIds = ["me"];
+    homeChat.lastStatus = "recruiting";
+    homeChat.messages.push({ kind: "bot", text: "모임을 만들었어요! 동료들에게 알렸어요." });
+    homeChat.messages.push({ kind: "roomcard", roomId: roomId });
+  }
+  function startCreating() {
+    homeChat.activePanel = { type: "creating" };
+    homeRender(homeEl, homeParams);
+    setTimeout(function () {
+      if (!homeEl || !homeEl.isConnected) return;
+      doCreateRoom();
+      homeChat.activePanel = null;
+      homeRender(homeEl, homeParams);
+    }, 500);
+  }
+  function checkPointsAndCreate() {
+    if (OM.state.user.points < 500) {
+      homeChat.activePanel = { type: "insufficient" };
+      homeRender(homeEl, homeParams);
+    } else {
+      startCreating();
+    }
+  }
+  function resetFlow() {
+    homeChat.roomId = null;
+    homeChat.knownParticipantIds = [];
+    homeChat.lastStatus = null;
+    homeChat.activePanel = null;
+    homeChat.draft = { dayLabel: null, periodLabel: null, slotLabel: null, tags: [], capacity: null, online: null };
+    homeChat.messages.push({ kind: "bot", text: "새로운 모임을 만들어볼까요? 다시 말해주세요." });
+    homeRender(homeEl, homeParams);
+  }
+
+  function onHomeClick(e) {
+    var btn = e.target.closest ? e.target.closest("[data-action]") : null;
+    if (!btn) return;
+    var action = btn.getAttribute("data-action");
+    if (action === "send") { doSend(); return; }
+    if (action === "example") { doSend(btn.getAttribute("data-text")); return; }
+    if (action === "confirm-create") { homeChat.activePanel = { type: "onoff" }; homeRender(homeEl, homeParams); return; }
+    if (action === "edit-slot") { homeChat.activePanel = { type: "slotpicker" }; homeRender(homeEl, homeParams); return; }
+    if (action === "edit-headcount") { homeChat.headcountVal = homeChat.draft.capacity || 3; homeChat.activePanel = { type: "headcount" }; homeRender(homeEl, homeParams); return; }
+    if (action === "reask-slotpicker") { homeChat.activePanel = { type: "slotpicker" }; homeRender(homeEl, homeParams); return; }
+    if (action === "slot-tab") { homeChat.slotTab = btn.getAttribute("data-tab"); homeRender(homeEl, homeParams); return; }
+    if (action === "pick-slot") { pickSlot(btn.getAttribute("data-day"), btn.getAttribute("data-time"), btn.getAttribute("data-period")); return; }
+    if (action === "hc-minus") { adjustHeadcount(-1); return; }
+    if (action === "hc-plus") { adjustHeadcount(1); return; }
+    if (action === "hc-next") { confirmHeadcount(); return; }
+    if (action === "detect-next") { checkPointsAndCreate(); return; }
+    if (action === "topup") { OM.sim.topUpPoints(1000); checkPointsAndCreate(); hcToast("1000P 충전됐어요 (데모)"); return; }
+    if (action === "force-create") { startCreating(); return; }
+    if (action === "goto-room") { OM.go("room-chat", { roomId: btn.getAttribute("data-room") }); return; }
+    if (action === "reset-flow") { resetFlow(); return; }
+    hcToast("준비 중인 기능이에요");
+  }
+  function onHomeKeydown(e) {
+    if (e.key === "Enter" && e.target.classList && e.target.classList.contains("om-hc-input")) {
+      e.preventDefault();
+      doSend();
+    }
+  }
+
+  OM.register("home", {
+    title: "홈",
+    render: homeRender,
+    onEnter: function () {
+      if (homeEl) {
+        homeEl.addEventListener("click", onHomeClick);
+        homeEl.addEventListener("keydown", onHomeKeydown);
+      }
+    },
+    onLeave: function () {
+      clearTimeout(homeChat._toastTimer);
+    }
+  });
+
+  /* =================================================================
+   * SECTION B — room-chat: 개별 모임 방 채팅 (params: {roomId})
+   * ================================================================= */
+  var rcEl = null;
+  var rcParams = null;
+  var rcLocal = {};        // roomId -> [{kind:"me", text}]
+  var rcLoadingRooms = {}; // roomId -> bool
+  var rcToastMsg = null;
+  var rcToastTimer = null;
+
+  function buildRoomLog(room) {
+    var log = [];
+    log.push({ kind: "sys", text: "모임이 개설됐어요 · " + room.slotLabel });
+    for (var i = 0; i < room.participants.length; i++) {
+      var p = room.participants[i];
+      log.push({ kind: "sys", text: (p.id === "me" ? "나" : p.name) + "님이 참여 중이에요." });
+    }
+    if (room.status === "confirmed" || room.status === "checkin-done" || room.status === "settled") {
+      log.push({ kind: "sys", text: "모집이 완료되어 모임이 확정됐어요." });
+    }
+    if (room.reminderSent) log.push({ kind: "sys", text: "1시간 전 리마인더가 발송됐어요." });
+    if (room.status === "checkin-done") log.push({ kind: "sys", text: "체크인이 마감됐어요." });
+    if (room.status === "settled" && room.receipt) log.push({ kind: "sys", text: "정산 완료 · 1인당 " + room.receipt.perPerson + "P" });
+    if (room.status === "exploded") log.push({ kind: "sys", text: "모집 마감까지 인원을 못 채워 방폭됐어요." });
+    return log;
+  }
+  function renderLogLine(line) {
+    if (line.kind === "me") return '<div class="om-bubble bot">' + esc(line.text) + "</div>";
+    return '<div class="om-bubble">' + OM.ui.icon("bolt", 12, "#2F5EDB") + " " + esc(line.text) + "</div>";
+  }
+  function renderRoomActionCard(room) {
+    var pct = 100 * room.participants.length / room.capacity;
+    if (room.status === "recruiting") {
+      return '<div class="om-card">' + OM.ui.chip("blue", "모집 중") + OM.ui.gauge(pct) +
+        '<div style="font-size:11px; color:var(--muted); margin-top:6px;">' + room.participants.length + "/" + room.capacity + "명</div>" +
+        '<button class="om-btn secondary om-press" style="margin-top:10px;" data-action="preview">모임 상세 보기</button></div>';
+    }
+    if (room.status === "confirmed") {
+      return '<div class="om-card">' + OM.ui.chip("green", "확정") +
+        '<div style="font-size:11.5px; color:var(--muted); margin-top:6px;">정원이 모두 채워졌어요.</div>' +
+        '<button class="om-btn om-press" style="margin-top:10px;" data-action="preview">모임 상세보기</button></div>';
+    }
+    if (room.status === "checkin-done") {
+      return '<div class="om-card">' + OM.ui.chip("blue", "체크인 완료") +
+        '<div style="font-size:11.5px; color:var(--muted); margin-top:6px;">이제 정산을 진행해주세요.</div>' +
+        '<button class="om-btn om-press" style="margin-top:10px;" data-action="settle">정산하러 가기</button></div>';
+    }
+    if (room.status === "settled") {
+      return '<div class="om-card">' + OM.ui.chip("green", "정산 완료") +
+        '<div style="font-size:11.5px; color:var(--muted); margin-top:6px;">1인당 ' + (room.receipt ? room.receipt.perPerson : 0) + "P · 원장에서 확인할 수 있어요.</div>" +
+        '<button class="om-btn secondary om-press" style="margin-top:10px;" data-action="ledger">원장 보기</button></div>';
+    }
+    if (room.status === "exploded") {
+      return '<div class="om-card">' + OM.ui.chip("red", "방폭") +
+        '<div style="font-size:11.5px; color:var(--muted); margin-top:6px;">전액 환급됐어요.</div>' +
+        '<button class="om-btn secondary om-press" style="margin-top:10px;" data-action="home">홈으로</button></div>';
+    }
+    return "";
+  }
+
+  function rcToast(text) {
+    rcToastMsg = text;
+    roomChatRender(rcEl, rcParams);
+    clearTimeout(rcToastTimer);
+    rcToastTimer = setTimeout(function () {
+      rcToastMsg = null;
+      if (rcEl && rcEl.isConnected) roomChatRender(rcEl, rcParams);
+    }, 1800);
+  }
+
+  function roomChatRender(el, params) {
+    rcEl = el; rcParams = params;
+    var roomId = params.roomId;
+    var room = omFindRoom(roomId);
+
+    if (!room) {
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("모임 채팅", "", true) +
+        '<div class="om-body"><div class="om-card" style="text-align:center; margin-top:40px;">' +
+        OM.ui.icon("warn", 26, "#8892AE") + '<div style="font-weight:700; margin-top:8px;">모임을 찾을 수 없어요</div>' +
+        '<div style="font-size:11.5px; color:var(--muted); margin-top:4px;">삭제되었거나 잘못된 링크예요.</div>' +
+        '<button class="om-btn secondary om-press" style="margin-top:12px;" data-om-back="1">뒤로가기</button></div></div>';
+      return;
+    }
+
+    if (rcLoadingRooms[roomId] === undefined) {
+      rcLoadingRooms[roomId] = true;
+      setTimeout(function () {
+        rcLoadingRooms[roomId] = false;
+        if (rcEl && rcEl.isConnected) roomChatRender(rcEl, rcParams);
+      }, 260);
+    }
+    if (rcLoadingRooms[roomId]) {
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar(room.title, "불러오는 중", true) +
+        '<div class="om-body">' +
+        '<div class="skel-line skel" style="width:70%;"></div><div class="skel-line skel" style="width:55%;"></div><div class="skel-line skel" style="width:60%;"></div>' +
+        "</div>";
+      return;
+    }
+
+    var existingInput = el.querySelector(".om-rc-input");
+    var inputVal = existingInput ? existingInput.value : "";
+    var hadFocus = existingInput && document.activeElement === existingInput;
+
+    var log = buildRoomLog(room);
+    var extra = rcLocal[roomId] || [];
+    var body = "";
+    for (var i = 0; i < log.length; i++) body += renderLogLine(log[i]);
+    for (var j = 0; j < extra.length; j++) body += renderLogLine(extra[j]);
+    body += renderRoomActionCard(room);
+
+    var toastHtml = rcToastMsg ? '<div class="om-toast">' + esc(rcToastMsg) + "</div>" : "";
+
+    el.innerHTML = OM.ui.statusBar() + OM.ui.appBar(room.title, room.slotLabel, true) +
+      '<div class="om-body" id="rcScroll">' + body + "</div>" +
+      '<div class="om-rc-composer">' +
+      '<input class="om-rc-input" type="text" placeholder="메시지 보내기" value="' + esc(inputVal) + '">' +
+      '<button class="om-rc-send om-press" data-action="send">' + OM.ui.icon("bolt", 16, "#fff") + "</button>" +
+      "</div>" + toastHtml;
+
+    var scrollEl = el.querySelector("#rcScroll");
+    if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight;
+    var ni = el.querySelector(".om-rc-input");
+    if (ni && hadFocus) { ni.focus(); var vlen = ni.value.length; ni.setSelectionRange(vlen, vlen); }
+  }
+
+  function doRcSend() {
+    var input = rcEl.querySelector(".om-rc-input");
+    var value = input ? input.value.trim() : "";
+    if (!value) { rcToast("메시지를 입력해주세요"); return; }
+    if (!rcLocal[rcParams.roomId]) rcLocal[rcParams.roomId] = [];
+    rcLocal[rcParams.roomId].push({ kind: "me", text: value });
+    roomChatRender(rcEl, rcParams);
+  }
+
+  function onRcClick(e) {
+    var btn = e.target.closest ? e.target.closest("[data-action]") : null;
+    if (!btn) return;
+    var action = btn.getAttribute("data-action");
+    if (action === "send") { doRcSend(); return; }
+    if (action === "preview") { OM.go("room-detail", { roomId: rcParams.roomId }); return; }
+    if (action === "settle") { OM.go("settle", { roomId: rcParams.roomId }); return; }
+    if (action === "ledger") { OM.go("ledger", {}); return; }
+    if (action === "home") { OM.go("home", {}); return; }
+    rcToast("준비 중인 기능이에요");
+  }
+  function onRcKeydown(e) {
+    if (e.key === "Enter" && e.target.classList && e.target.classList.contains("om-rc-input")) {
+      e.preventDefault();
+      doRcSend();
+    }
+  }
+
+  OM.register("room-chat", {
+    title: "모임 채팅",
+    render: roomChatRender,
+    onEnter: function (params) {
+      if (rcEl) {
+        rcEl.addEventListener("click", onRcClick);
+        rcEl.addEventListener("keydown", onRcKeydown);
+      }
+      rcLoadingRooms[params.roomId] = undefined; // force loading flash on fresh entry
+      delete rcLoadingRooms[params.roomId];
+    },
+    onLeave: function () {
+      clearTimeout(rcToastTimer);
+    }
+  });
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------- shared local helpers (module-scoped, no OM.state writes) ---------------- */
+  function findRoom(id) {
+    var rooms = OM.state.rooms;
+    for (var i = 0; i < rooms.length; i++) if (rooms[i].id === id) return rooms[i];
+    return null;
+  }
+  function findParticipant(room, pid) {
+    if (!room) return null;
+    for (var i = 0; i < room.participants.length; i++) if (room.participants[i].id === pid) return room.participants[i];
+    return null;
+  }
+  function colleagueInfo(id) {
+    if (id === "me") return { id: "me", name: OM.state.user.name, dept: OM.state.user.dept };
+    var list = OM._colleagues;
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return { id: id, name: "동료", dept: "" };
+  }
+  function initials(name) { return name ? name.slice(0, 1) : "?"; }
+  function sumChars(str) {
+    var s = 0;
+    for (var i = 0; i < str.length; i++) s += str.charCodeAt(i);
+    return s;
+  }
+  function esc(s) {
+    if (s == null) return "";
+    return String(s).split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+  }
+  function toast(el, msg) {
+    var old = el.querySelector(".om-toast");
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var d = document.createElement("div");
+    d.className = "om-toast";
+    d.textContent = msg;
+    el.appendChild(d);
+    setTimeout(function () { if (d.parentNode) d.parentNode.removeChild(d); }, 1700);
+  }
+  function bindOnce(el, handler) {
+    if (!el._omBound) { el.addEventListener("click", handler); el._omBound = true; }
+  }
+  function notFoundScreen(el, title) {
+    el.innerHTML = OM.ui.statusBar() + OM.ui.appBar(title, "", true) +
+      '<div class="om-body"><div class="om-c-empty">' + OM.ui.icon("warn", 26, "#8892AE") +
+      '<div style="margin-top:8px;">모임을 찾을 수 없어요.<br>이미 종료되었거나 잘못된 링크예요.</div></div></div>';
+  }
+
+  var ICEBREAKERS = [
+    "요즘 가장 몰입하고 있는 일이 뭐예요?",
+    "최근에 본 것 중 가장 재밌었던 콘텐츠는?",
+    "점심시간에 꼭 지키는 나만의 규칙이 있나요?",
+    "요즘 배우고 싶은 게 있다면?",
+    "이번 주 나를 웃게 한 순간은?",
+    "커피 vs 차, 그리고 그 이유는?"
+  ];
+  var PLACES_OFFLINE = ["회사 근처 '정성한상' — 매운 음식 전문", "3층 라운지 옆 '브런치 하우스'", "테라스가 있는 '카페 온기'", "지하 1층 사내 카페테리아 VIP존"];
+  var PLACES_ONLINE = ["화상 회의실 B — 편하게 카메라 켜고 진행", "사내 보이스룸 3번", "팀 채팅 음성 채널"];
+  function pickIcebreaker(room) { return ICEBREAKERS[sumChars(room.id) % ICEBREAKERS.length]; }
+  function pickPlace(room) {
+    var bank = room.online === "online" ? PLACES_ONLINE : PLACES_OFFLINE;
+    return bank[sumChars(room.id + room.tags.join("")) % bank.length];
+  }
+
+  var STATUS_CHIP = {
+    recruiting: OM.ui.chip("blue", "모집 중"),
+    confirmed: OM.ui.chip("green", "확정"),
+    exploded: OM.ui.chip("red", "방폭"),
+    "checkin-done": OM.ui.chip("amber", "체크인 완료"),
+    settled: OM.ui.chip("grey", "정산 완료")
+  };
+
+  /* =====================================================================
+     room-detail
+     ===================================================================== */
+  var defRoomDetail = {
+    title: "모임 상세",
+    render: function (el, params) {
+      var room = findRoom(params.roomId);
+      if (!el.dataset.omLoaded) {
+        el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("모임 상세", room ? room.slotLabel : "", true) +
+          '<div class="om-body">' +
+          '<div class="om-card"><div class="skel-line skel" style="width:55%"></div><div class="skel-line skel" style="width:85%"></div><div class="skel-line skel" style="width:35%"></div></div>' +
+          '<div class="om-card"><div class="skel-line skel" style="width:70%"></div><div class="skel-line skel" style="width:50%"></div></div>' +
+          '</div>';
+        el.dataset.omLoaded = "pending";
+        setTimeout(function () { el.dataset.omLoaded = "1"; defRoomDetail.render(el, params); }, 380);
+        return;
+      }
+      if (!room) { notFoundScreen(el, "모임 상세"); return; }
+      var me = findParticipant(room, "me");
+      var tagsHtml = room.tags.map(function (t) { return OM.ui.chip("blue", t); }).join(" ");
+      var partHtml = room.participants.map(function (p) {
+        var info = colleagueInfo(p.id);
+        var st = p.noshow ? OM.ui.chip("red", "노쇼") : (p.checkedIn ? OM.ui.chip("green", "체크인") : (p.deposited ? OM.ui.chip("grey", "예치완료") : OM.ui.chip("amber", "예치 대기")));
+        return '<div class="om-c-row"><span class="om-c-avatar">' + esc(initials(info.name)) + '</span>' +
+          '<div style="flex:1;"><div class="om-c-name">' + esc(info.name) + (p.id === "me" ? " (나)" : "") + '</div><div class="om-c-sub">' + esc(info.dept || "") + '</div></div>' + st + '</div>';
+      }).join("");
+
+      var cta = "";
+      if (room.status === "exploded") {
+        cta = '<div class="om-card" style="text-align:center; color:var(--danger); font-size:12px; font-weight:700;">인원 미달로 방폭되었어요. 예치금은 전액 환급되었어요.</div>' +
+          '<button class="om-btn secondary om-press" data-action="explore">다른 모임 보러가기</button>';
+      } else if (room.status === "settled") {
+        cta = '<button class="om-btn om-press" data-action="settle">정산 결과 보기</button>';
+      } else if (room.status === "checkin-done") {
+        cta = '<button class="om-btn om-press" data-action="settle">정산하러 가기</button>';
+      } else if (room.status === "confirmed") {
+        if (!me) {
+          cta = '<div class="om-c-empty">이미 인원이 마감된 모임이에요.</div>';
+        } else if (room.reminderSent) {
+          cta = '<button class="om-btn om-press" data-action="reminder">리마인더 보기</button>';
+        } else if (!me.deposited) {
+          cta = '<button class="om-btn om-press" data-action="deposit">디파짓 예치하기</button>';
+        } else {
+          cta = '<button class="om-btn secondary om-press" data-action="chat">채팅방으로 이동</button>';
+        }
+      } else {
+        if (!me) {
+          cta = '<button class="om-btn om-press" data-action="join">참여하기 (500P 예치 필요)</button>';
+        } else if (!me.deposited) {
+          cta = '<button class="om-btn om-press" data-action="deposit">디파짓 예치하기</button>';
+        } else {
+          cta = '<button class="om-btn ghost om-press" disabled>예치 완료 · 모집 대기 중</button>';
+        }
+      }
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("모임 상세", room.slotLabel, true) +
+        '<div class="om-body">' +
+        '<div class="om-card">' +
+        '<div style="display:flex; align-items:center; justify-content:space-between;"><div style="font-weight:800; font-size:14.5px;">' + esc(room.title) + '</div>' + STATUS_CHIP[room.status] + '</div>' +
+        '<div style="margin-top:6px;">' + tagsHtml + ' ' + OM.ui.chip("grey", room.online === "online" ? "온라인" : "오프라인") + '</div>' +
+        '<div style="margin-top:10px;">' + OM.ui.gauge(100 * room.participants.length / room.capacity) + '</div>' +
+        '<div class="om-c-sub" style="margin-top:4px;">' + room.participants.length + ' / ' + room.capacity + '명 모집</div>' +
+        '</div>' +
+        '<div class="om-card"><div style="font-weight:800; font-size:12.5px; margin-bottom:4px;">참여 멤버</div>' + partHtml + '</div>' +
+        '<div class="om-card">' + OM.ui.icon("chat", 15, "#2F5EDB") + ' <span style="font-weight:700; font-size:12px; margin-left:4px;">아이스브레이커 질문</span>' +
+        '<div class="om-c-sub" style="margin-top:6px; color:var(--ink2);">"' + esc(pickIcebreaker(room)) + '"</div></div>' +
+        '<div class="om-card">' + OM.ui.icon("building", 15, "#2F5EDB") + ' <span style="font-weight:700; font-size:12px; margin-left:4px;">추천 장소</span>' +
+        '<div class="om-c-sub" style="margin-top:6px; color:var(--ink2);">' + esc(pickPlace(room)) + '</div></div>' +
+        cta +
+        '</div>';
+
+      bindOnce(el, function (e) {
+        var btn = e.target.closest ? e.target.closest("[data-action]") : null;
+        if (!btn) return;
+        var action = btn.getAttribute("data-action");
+        var r = findRoom(params.roomId);
+        if (!r) return;
+        if (action === "join") {
+          var res = OM.sim.joinRoom(r.id);
+          if (!res.ok) toast(el, res.reason === "full" ? "이미 인원이 마감됐어요." : "참여할 수 없어요.");
+          else toast(el, "참여 완료! 500P 예치가 필요해요.");
+        } else if (action === "deposit") { OM.go("deposit", { roomId: r.id }); }
+        else if (action === "reminder") { OM.go("reminder", { roomId: r.id }); }
+        else if (action === "chat") { OM.go("room-chat", { roomId: r.id }); }
+        else if (action === "settle") { OM.go("settle", { roomId: r.id }); }
+        else if (action === "explore") { OM.go("explore", {}); }
+      });
+    },
+    onEnter: function () {},
+    onLeave: function () {}
+  };
+  OM.register("room-detail", defRoomDetail);
+
+  /* =====================================================================
+     deposit — 500P 예치, 3회 면제 로직(세션 내 로컬 카운터), 부족 시 분기
+     ===================================================================== */
+  var depositExemptRemaining = 3;
+  var depositExemptedRooms = {};
+
+  var defDeposit = {
+    title: "디파짓 예치",
+    render: function (el, params) {
+      var room = findRoom(params.roomId);
+      if (!room) { notFoundScreen(el, "디파짓 예치"); return; }
+
+      bindOnce(el, function (e) {
+        var btn = e.target.closest ? e.target.closest("[data-action]") : null;
+        if (!btn) return;
+        var action = btn.getAttribute("data-action");
+        var r = findRoom(params.roomId);
+        if (!r) return;
+        if (action === "join") {
+          var jres = OM.sim.joinRoom(r.id);
+          if (!jres.ok) toast(el, "참여할 수 없어요.");
+          return;
+        }
+        if (action === "pay") {
+          var payAmount = (r.sponsored && r.couponApplied) ? (500 - Math.round(500 * (r.couponPercent || 15) / 100)) : 500;
+          var res = OM.sim.payDeposit(r.id, payAmount);
+          if (!res.ok && res.reason === "insufficient") {
+            el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("디파짓 예치", r.slotLabel, true) +
+              '<div class="om-body"><div class="om-card" style="text-align:center;">' + OM.ui.icon("warn", 26, "#E05A5A") +
+              '<div style="font-weight:800; font-size:13px; margin-top:6px; color:var(--danger);">포인트가 부족해요</div>' +
+              '<div class="om-c-sub" style="margin-top:2px;">현재 ' + OM.state.user.points + 'P · ' + payAmount + 'P 필요</div></div>' +
+              '<button class="om-btn om-press" data-action="topup">1000P 충전하기</button>' +
+              '<button class="om-btn ghost om-press" data-om-back="1">뒤로가기</button></div>';
+          } else if (res.ok) {
+            toast(el, payAmount + "P 예치 완료!");
+          }
+        } else if (action === "exempt") {
+          if (depositExemptRemaining > 0 && !depositExemptedRooms[r.id]) {
+            var eres = OM.sim.payDeposit(r.id, 1);
+            if (eres.ok) {
+              depositExemptRemaining--;
+              depositExemptedRooms[r.id] = true;
+              toast(el, "면제권을 사용했어요. (1P만 예치)");
+            } else {
+              toast(el, "면제권을 사용할 수 없어요.");
+            }
+          }
+        } else if (action === "cancel") {
+          var cres = OM.sim.cancelDeposit(r.id);
+          if (cres.ok) toast(el, cres.penalty ? "250P 페널티가 적용되어 환급됐어요." : "전액 환급됐어요.");
+          else toast(el, "취소할 수 없어요.");
+        } else if (action === "topup") {
+          OM.sim.topUpPoints(1000);
+          toast(el, "1000P 충전 완료!");
+        }
+      });
+
+      var me = findParticipant(room, "me");
+      if (!me) {
+        el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("디파짓 예치", room.slotLabel, true) +
+          '<div class="om-body"><div class="om-c-empty">먼저 모임에 참여해야 예치할 수 있어요.</div>' +
+          '<button class="om-btn om-press" data-action="join">참여하기</button></div>';
+        return;
+      }
+
+      var exempted = !!depositExemptedRooms[room.id];
+      var coupon = !!(room.sponsored && room.couponApplied);
+      var discountAmount = coupon ? Math.round(500 * (room.couponPercent || 15) / 100) : 0;
+      var depositAmount = 500 - discountAmount;
+      var body;
+      if (me.deposited) {
+        var withinPenalty = OM.state.tick >= room.slotTick - 2;
+        body = '<div class="om-card" style="text-align:center;">' + OM.ui.icon("check", 26, "#22A06B") +
+          '<div style="font-weight:800; font-size:13px; margin-top:6px;">예치 완료</div>' +
+          '<div class="om-c-sub" style="margin-top:2px;">' + (exempted ? "면제권으로 예치했어요." : depositAmount + "P가 예치되었어요." + (coupon ? " (스폰서 쿠폰 " + discountAmount + "P 할인 적용)" : "")) + '</div></div>' +
+          '<button class="om-btn danger om-press" data-action="cancel">예치 취소하기</button>' +
+          '<div class="om-c-sub" style="text-align:center; margin-top:6px;">' + (withinPenalty ? "모임 시작 2시간 이내 취소 시 250P 페널티가 적용돼요." : "지금 취소하면 전액 환급돼요.") + '</div>';
+      } else {
+        body = '<div class="om-card"><div style="font-weight:800; font-size:13px;">모임 참여 디파짓</div>' +
+          '<div class="om-c-sub" style="margin-top:4px;">노쇼 방지를 위해 ' + depositAmount + 'P를 예치해요. 참석하면 체크인 시 그대로 돌아와요.' + (coupon ? " (스폰서 쿠폰 " + discountAmount + "P 할인 적용됨)" : "") + '</div>' +
+          '<div style="margin-top:10px; display:flex; justify-content:space-between; font-size:12px;"><span>내 포인트</span><b>' + OM.state.user.points + 'P</b></div>' +
+          '<div style="margin-top:4px; display:flex; justify-content:space-between; font-size:12px; color:var(--ink2);"><span>남은 면제권</span><b>' + depositExemptRemaining + '회</b></div>' +
+          '</div>' +
+          (depositExemptRemaining > 0 ? '<button class="om-btn secondary om-press" data-action="exempt">면제권으로 예치하기 (1P만)</button>' : "") +
+          '<button class="om-btn om-press" data-action="pay">' + depositAmount + 'P 예치하기</button>';
+      }
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("디파짓 예치", room.slotLabel, true) + '<div class="om-body">' + body + '</div>';
+    },
+    onEnter: function () {},
+    onLeave: function () {}
+  };
+  OM.register("deposit", defDeposit);
+
+  /* =====================================================================
+     reminder — 1시간 전 카드, 참석/취소, 대기자 승급 플레이버
+     ===================================================================== */
+  var defReminder = {
+    title: "리마인더",
+    render: function (el, params) {
+      var room = findRoom(params.roomId);
+      if (!room) { notFoundScreen(el, "리마인더"); return; }
+      var me = findParticipant(room, "me");
+
+      if (!me) {
+        el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("리마인더", room.slotLabel, true) +
+          '<div class="om-body"><div class="om-c-empty">' + OM.ui.icon("clock", 24, "#8892AE") +
+          '<div style="margin-top:8px;">참여를 취소한 모임이에요.<br>다음 대기자에게 자리가 안내됐어요.</div></div></div>';
+        return;
+      }
+      if (room.status !== "confirmed" || !room.reminderSent) {
+        el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("리마인더", room.slotLabel, true) +
+          '<div class="om-body"><div class="om-c-empty">아직 리마인더가 도착하지 않았어요.<br>모임이 확정되고 1시간 전이 되면 알려드려요.</div></div>';
+        return;
+      }
+      var partHtml = room.participants.map(function (p) {
+        var info = colleagueInfo(p.id);
+        return '<span class="om-c-avatar" style="margin-right:4px;" title="' + esc(info.name) + '">' + esc(initials(info.name)) + '</span>';
+      }).join("");
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("리마인더", room.slotLabel, true) +
+        '<div class="om-body">' +
+        '<div class="om-card" style="border:1.5px solid #F0A64E;">' + OM.ui.icon("clock", 22, "#F0A64E") +
+        '<div style="font-weight:800; font-size:13.5px; margin-top:6px;">1시간 뒤 모임이 시작돼요</div>' +
+        '<div class="om-c-sub" style="margin-top:2px;">' + esc(room.title) + ' · ' + esc(room.slotLabel) + '</div>' +
+        '<div style="margin-top:8px;">' + partHtml + '</div></div>' +
+        '<button class="om-btn om-press" data-action="attend">참석해요</button>' +
+        '<button class="om-btn ghost om-press" data-action="cancel">취소할게요</button>' +
+        '</div>';
+
+      bindOnce(el, function (e) {
+        var btn = e.target.closest ? e.target.closest("[data-action]") : null;
+        if (!btn) return;
+        var action = btn.getAttribute("data-action");
+        var r = findRoom(params.roomId);
+        if (!r) return;
+        if (action === "attend") {
+          toast(el, "참석으로 표시했어요. 곧 만나요!");
+        } else if (action === "cancel") {
+          var res = OM.sim.cancelDeposit(r.id);
+          if (res.ok) toast(el, (res.penalty ? "250P 페널티 적용 · " : "") + "취소됐어요. 대기자에게 자리를 안내했어요.");
+          else toast(el, "예치 내역이 없어 자동 취소할 수 없어요.");
+        }
+      });
+    },
+    onEnter: function () {},
+    onLeave: function () {}
+  };
+  OM.register("reminder", defReminder);
+
+  /* =====================================================================
+     checkin — 수동 탭 + QR SIM 탭
+     ===================================================================== */
+  var defCheckin = {
+    title: "체크인",
+    render: function (el, params) {
+      var room = findRoom(params.roomId);
+      if (!room) { notFoundScreen(el, "체크인"); return; }
+
+      bindOnce(el, function (e) {
+        var tabBtn = e.target.closest ? e.target.closest("[data-tab]") : null;
+        if (tabBtn) { el.dataset.omTab = tabBtn.getAttribute("data-tab"); defCheckin.render(el, params); return; }
+        var btn = e.target.closest ? e.target.closest("[data-action]") : null;
+        if (!btn) return;
+        var r = findRoom(params.roomId);
+        if (!r) return;
+        var action = btn.getAttribute("data-action");
+        if (action === "checkin") { OM.sim.checkin(r.id, btn.getAttribute("data-pid")); toast(el, "체크인했어요."); }
+        else if (action === "noshow") {
+          var pid = btn.getAttribute("data-pid");
+          OM.sim.markNoshow(r.id, pid);
+          OM.go("noshow", { roomId: r.id, participantId: pid });
+        } else if (action === "scan") { OM.sim.checkin(r.id, "me"); toast(el, "QR 스캔 완료! 체크인됐어요."); }
+        else if (action === "confirm") { OM.sim.confirmCheckin(r.id); toast(el, "체크인이 마감됐어요."); }
+        else if (action === "settle") { OM.go("settle", { roomId: r.id }); }
+        else if (action === "viewnoshow") { OM.go("noshow", { roomId: r.id, participantId: btn.getAttribute("data-pid") }); }
+      });
+
+      if (room.status !== "confirmed" && room.status !== "checkin-done") {
+        el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("체크인", room.slotLabel, true) +
+          '<div class="om-body"><div class="om-c-empty">' + OM.ui.icon("lock", 24, "#8892AE") +
+          '<div style="margin-top:8px;">아직 체크인을 시작할 수 없어요.<br>모임이 확정되면 체크인이 열려요.</div></div></div>';
+        return;
+      }
+
+      if (room.status === "checkin-done") {
+        var rows = room.participants.map(function (p) {
+          var info = colleagueInfo(p.id);
+          var chip = p.noshow ? OM.ui.chip("red", "노쇼") : OM.ui.chip("green", "참석 · +50P");
+          var noshowBtn = p.noshow ? '<button class="om-btn ghost auto om-press" style="margin-left:6px;" data-action="viewnoshow" data-pid="' + p.id + '">상세</button>' : "";
+          return '<div class="om-c-row"><span class="om-c-avatar">' + esc(initials(info.name)) + '</span>' +
+            '<div style="flex:1;" class="om-c-name">' + esc(info.name) + (p.id === "me" ? " (나)" : "") + '</div>' + chip + noshowBtn + '</div>';
+        }).join("");
+        el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("체크인", room.slotLabel, true) +
+          '<div class="om-body"><div class="om-card"><div style="font-weight:800; font-size:12.5px; margin-bottom:4px;">체크인 결과</div>' + rows + '</div>' +
+          '<button class="om-btn om-press" data-action="settle">정산하러 가기</button></div>';
+        return;
+      }
+
+      var tab = el.dataset.omTab || "manual";
+      var tabbar = '<div class="om-c-tabbar">' +
+        '<button class="om-c-tabbtn' + (tab === "manual" ? " active" : "") + '" data-tab="manual">수동 체크인</button>' +
+        '<button class="om-c-tabbtn' + (tab === "qr" ? " active" : "") + '" data-tab="qr">QR 스캔</button></div>';
+
+      var content;
+      if (tab === "manual") {
+        content = room.participants.map(function (p) {
+          var info = colleagueInfo(p.id);
+          var action = p.checkedIn
+            ? OM.ui.chip("green", "체크인 완료")
+            : p.noshow
+              ? OM.ui.chip("red", "노쇼 처리됨")
+              : '<button class="om-btn auto om-press" data-action="checkin" data-pid="' + p.id + '">체크인</button>' +
+                '<button class="om-btn ghost auto om-press" style="margin-left:6px;" data-action="noshow" data-pid="' + p.id + '">노쇼 처리</button>';
+          return '<div class="om-c-row"><span class="om-c-avatar">' + esc(initials(info.name)) + '</span>' +
+            '<div style="flex:1;" class="om-c-name">' + esc(info.name) + (p.id === "me" ? " (나)" : "") + '</div>' + action + '</div>';
+        }).join("");
+        content = '<div class="om-card">' + content + '</div>';
+      } else {
+        var me = findParticipant(room, "me");
+        content = '<div class="om-card" style="text-align:center;">' +
+          '<div style="font-weight:700; font-size:12px; margin-bottom:8px;">내 QR 코드</div>' +
+          OM.ui.qrGrid() +
+          '<div class="om-c-sub" style="margin-top:8px;">모임장에게 이 화면을 보여주세요.</div>' +
+          (me && !me.checkedIn ? '<button class="om-btn om-press" style="margin-top:10px;" data-action="scan">QR 스캔 시뮬레이션</button>' : '<div class="om-c-sub" style="margin-top:10px; color:var(--good-dark); font-weight:700;">이미 체크인했어요.</div>') +
+          '</div>';
+      }
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("체크인", room.slotLabel, true) +
+        '<div class="om-body">' + tabbar + content +
+        '<button class="om-btn secondary om-press" data-action="confirm">체크인 마감하고 확인</button>' +
+        '</div>';
+    },
+    onEnter: function () {},
+    onLeave: function () {}
+  };
+  OM.register("checkin", defCheckin);
+
+  /* =====================================================================
+     noshow — 몰수 → 분배 → 신뢰도 하락
+     ===================================================================== */
+  var TRUST_RANK = { "상": 3, "중": 2, "하": 1 };
+  function trustFromRank(rank) { return rank >= 3 ? "상" : (rank >= 2 ? "중" : "하"); }
+
+  var defNoshow = {
+    title: "노쇼",
+    render: function (el, params) {
+      var room = findRoom(params.roomId);
+      if (!room) { notFoundScreen(el, "노쇼 처리"); return; }
+      var p = findParticipant(room, params.participantId);
+      if (!p) {
+        el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("노쇼 처리", room.slotLabel, true) +
+          '<div class="om-body"><div class="om-c-empty">대상 참여자를 찾을 수 없어요.</div></div>';
+        return;
+      }
+      var info = colleagueInfo(p.id);
+      var others = room.participants.filter(function (x) { return x.id !== p.id && !x.noshow; });
+      var share = others.length ? Math.round(500 / others.length) : 0;
+      var isMe = p.id === "me";
+
+      var trustBlock = "";
+      if (isMe) {
+        var curRank = TRUST_RANK[OM.state.user.trust] || 3;
+        var nextRank = OM.state.user.noshowCount >= 3 ? 1 : (OM.state.user.noshowCount >= 1 ? Math.min(curRank, 2) : curRank);
+        trustBlock = '<div class="om-card"><div style="font-weight:800; font-size:12.5px;">신뢰도 영향</div>' +
+          '<div class="om-c-sub" style="margin-top:4px;">현재 신뢰도 <b style="color:var(--ink);">' + OM.state.user.trust + '</b> · 노쇼 ' + OM.state.user.noshowCount + '회' +
+          (nextRank < curRank ? ' → 확인 시 <b style="color:var(--danger);">' + trustFromRank(nextRank) + '</b>로 하락' : "") + '</div></div>' +
+          '<button class="om-btn om-press" data-action="ack">확인했어요</button>';
+      } else {
+        trustBlock = '<div class="om-card"><div style="font-weight:800; font-size:12.5px;">동료 신뢰도</div>' +
+          '<div class="om-c-sub" style="margin-top:4px;">' + esc(info.name) + '님의 신뢰도가 다음 모임부터 낮게 반영돼요.</div></div>' +
+          '<button class="om-btn secondary om-press" data-action="ack">확인</button>';
+      }
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("노쇼 처리", room.slotLabel, true) +
+        '<div class="om-body">' +
+        '<div class="om-card" style="text-align:center; border:1.5px solid #E05A5A;">' + OM.ui.icon("warn", 24, "#E05A5A") +
+        '<div style="font-weight:800; font-size:13px; margin-top:6px;">' + esc(info.name) + (isMe ? " (나)" : "") + '님이 노쇼했어요</div>' +
+        '<div style="margin-top:6px;">' + OM.ui.chip("red", "노쇼 처리됨") + '</div></div>' +
+        '<div class="om-card"><div style="font-weight:800; font-size:12.5px;">예치금 몰수 · 분배</div>' +
+        '<div class="om-c-receiptrow"><span>몰수 금액</span><b>500P</b></div>' +
+        '<div class="om-c-receiptrow"><span>분배 대상</span><b>' + others.length + '명</b></div>' +
+        '<div class="om-c-receiptrow"><span>1인당 분배</span><b>' + share + 'P</b></div></div>' +
+        trustBlock +
+        '<button class="om-btn ghost om-press" data-action="settle">정산 계속하기</button>' +
+        '</div>';
+
+      bindOnce(el, function (e) {
+        var btn = e.target.closest ? e.target.closest("[data-action]") : null;
+        if (!btn) return;
+        var r = findRoom(params.roomId);
+        if (!r) return;
+        var action = btn.getAttribute("data-action");
+        if (action === "ack") {
+          OM.sim.markNoshow(r.id, params.participantId);
+          if (isMe) {
+            var cur = TRUST_RANK[OM.state.user.trust] || 3;
+            var next = OM.state.user.noshowCount >= 3 ? 1 : (OM.state.user.noshowCount >= 1 ? Math.min(cur, 2) : cur);
+            if (next < cur) OM.sim.updateProfile({ trust: trustFromRank(next) });
+          }
+          toast(el, "확인했어요.");
+        } else if (action === "settle") { OM.go("settle", { roomId: r.id }); }
+      });
+    },
+    onEnter: function () {},
+    onLeave: function () {}
+  };
+  OM.register("noshow", defNoshow);
+
+  /* =====================================================================
+     settle — 총액 선결제 → 결제수단 → 나 제외 요청 → 순차 입금 연출 → 영수증
+     ===================================================================== */
+  function startSettleSequence(el, params) {
+    var idx = parseInt(el.dataset.omSettleIdx || "0", 10);
+    var payers = el._omSettlePayers || [];
+    if (idx >= payers.length) { el.dataset.omSettleDone = "1"; defSettle.render(el, params); return; }
+    setTimeout(function () {
+      if (!el.isConnected) return;
+      el.dataset.omSettleIdx = String(idx + 1);
+      defSettle.render(el, params);
+      startSettleSequence(el, params);
+    }, 480);
+  }
+
+  var defSettle = {
+    title: "정산",
+    render: function (el, params) {
+      var room = findRoom(params.roomId);
+      if (!room) { notFoundScreen(el, "정산"); return; }
+
+      bindOnce(el, function (e) {
+        var methodBtn = e.target.closest ? e.target.closest("[data-method]") : null;
+        if (methodBtn) { el.dataset.omMethod = methodBtn.getAttribute("data-method"); defSettle.render(el, params); return; }
+        var btn = e.target.closest ? e.target.closest("[data-action]") : null;
+        if (!btn) return;
+        var action = btn.getAttribute("data-action");
+        var r = findRoom(params.roomId);
+        if (!r) return;
+        if (action === "done") { OM.go("my", {}); return; }
+        if (action !== "start") return;
+        var input = el.querySelector("#omSettleAmt");
+        var amt = input ? parseInt(input.value, 10) : 0;
+        if (!amt || amt <= 0) { toast(el, "결제 금액을 입력해주세요."); return; }
+        el._omAmount = amt;
+        var m = el.dataset.omMethod;
+        if (!m) { toast(el, "결제 수단을 선택해주세요."); return; }
+        var res = OM.sim.settleRoom(r.id, { totalAmount: amt, method: m });
+        if (res.ok) {
+          el._omSettlePayers = findRoom(r.id).participants.filter(function (p) { return !p.noshow && p.id !== "me"; });
+          el.dataset.omSettleIdx = "0";
+          delete el.dataset.omSettleDone;
+          startSettleSequence(el, params);
+        }
+      });
+
+      if (room.status === "settled") {
+        var otherPayers = el._omSettlePayers || room.participants.filter(function (p) { return !p.noshow && p.id !== "me"; });
+        var animating = !!(el._omSettlePayers && !el.dataset.omSettleDone);
+        var idx = animating ? parseInt(el.dataset.omSettleIdx || "0", 10) : otherPayers.length;
+        var meInfo = colleagueInfo("me");
+        var seqRows = '<div class="om-c-seqitem done"><span class="om-c-dot done"></span>' + esc(meInfo.name) + ' (나 · 선결제 완료)</div>' +
+          otherPayers.map(function (p, i) {
+            var info = colleagueInfo(p.id);
+            var done = i < idx;
+            return '<div class="om-c-seqitem' + (done ? " done" : "") + '"><span class="om-c-dot' + (done ? " done" : "") + '"></span>' +
+              esc(info.name) + (done ? " · 입금 확인" : " · 요청 대기 중") + '</div>';
+          }).join("");
+
+        var receiptHtml = "";
+        if (!animating) {
+          receiptHtml = '<div class="om-card"><div style="font-weight:800; font-size:13px; margin-bottom:6px;">' + OM.ui.icon("receipt", 15, "#2F5EDB") + ' 영수증</div>' +
+            '<div class="om-c-receiptrow"><span>총 결제 금액</span><b>' + room.receipt.totalAmount.toLocaleString() + 'P</b></div>' +
+            '<div class="om-c-receiptrow"><span>결제 수단</span><b>' + esc(room.receipt.method) + '</b></div>' +
+            '<div class="om-c-receiptrow"><span>1인당 정산액</span><b>' + room.receipt.perPerson.toLocaleString() + 'P</b></div>' +
+            '<div class="om-c-receiptrow"><span>정산 인원</span><b>' + (otherPayers.length + 1) + '명</b></div></div>' +
+            '<button class="om-btn om-press" data-action="done">완료</button>';
+        }
+
+        el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("정산", room.slotLabel, true) +
+          '<div class="om-body">' +
+          '<div class="om-card"><div style="font-weight:800; font-size:12.5px; margin-bottom:4px;">' + (animating ? "순차 입금 확인 중..." : "정산 완료") + '</div>' + seqRows + '</div>' +
+          receiptHtml +
+          '</div>';
+        return;
+      }
+
+      if (room.status !== "checkin-done") {
+        el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("정산", room.slotLabel, true) +
+          '<div class="om-body"><div class="om-c-empty">체크인 완료 후 정산할 수 있어요.</div></div>';
+        return;
+      }
+
+      var method = el.dataset.omMethod || "";
+      var methods = ["카드", "간편결제", "계좌이체"];
+      var methodHtml = methods.map(function (m) {
+        return '<button class="om-c-chipbtn' + (method === m ? " active" : "") + '" data-method="' + m + '">' + m + '</button>';
+      }).join(" ");
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("정산", room.slotLabel, true) +
+        '<div class="om-body">' +
+        '<div class="om-card"><div style="font-weight:800; font-size:12.5px;">총 결제 금액 (내가 선결제)</div>' +
+        '<input id="omSettleAmt" type="number" min="0" step="1000" value="' + (el._omAmount || 30000) + '" ' +
+        'style="width:100%; margin-top:8px; padding:10px 12px; border-radius:10px; border:1.5px solid var(--line); font-size:14px; font-weight:700;">' +
+        '</div>' +
+        '<div class="om-card"><div style="font-weight:800; font-size:12.5px; margin-bottom:8px;">결제 수단</div>' +
+        '<div style="display:flex; gap:6px; flex-wrap:wrap;">' + methodHtml + '</div></div>' +
+        '<div class="om-c-sub" style="margin-bottom:8px;">확정 시 나를 제외한 참석자에게 각자 몫을 순차로 요청해요.</div>' +
+        '<button class="om-btn om-press" data-action="start">정산 시작</button>' +
+        '</div>';
+    },
+    onEnter: function () {},
+    onLeave: function () {}
+  };
+  OM.register("settle", defSettle);
+})();
+</script>
+<script>
+/* =============================== explore =============================== */
+(function () {
+  var TAG_LABELS = ["매운맛", "커피챗", "베이커리", "러닝", "채식", "보드게임"];
+  var filterMode = "all"; // "all" | "online" | "offline" — ephemeral UI state, not OM store
+  var loaded = false;
+  var loadTimer = null;
+  var toastMsg = null;
+  var toastTimer = null;
+  var lastEl = null, lastParams = null;
+
+  function flashToast(msg) {
+    toastMsg = msg;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastMsg = null;
+      if (lastEl) render(lastEl, lastParams);
+    }, 1600);
+    if (lastEl) render(lastEl, lastParams);
+  }
+
+  function sponsoredBadge() {
+    return '<span class="om-chip amber">' + OM.ui.icon("percent", 10, "#8A5A16") + ' 스폰서드</span>';
+  }
+
+  function roomCard(room) {
+    var pct = 100 * room.participants.length / room.capacity;
+    var onlineChip = room.online === "online"
+      ? '<span class="om-chip blue">' + OM.ui.icon("video", 10, "#1B3EA8") + ' 온라인</span>'
+      : '<span class="om-chip grey">오프라인</span>';
+    var tagsHtml = "";
+    for (var i = 0; i < room.tags.length; i++) tagsHtml += OM.ui.chip("grey", "#" + room.tags[i]);
+    var sponsorBtn = room.sponsored
+      ? '<button class="om-btn secondary auto om-press" data-action="offer" data-room="' + room.id + '">쿠폰 보기</button>'
+      : "";
+    return '<div class="om-card' + (room.sponsored ? " om-scr-explore-sponsorcard" : "") + '" data-action="preview" data-room="' + room.id + '" style="cursor:pointer;">' +
+      '<div class="om-scr-explore-metarow">' + (room.sponsored ? sponsoredBadge() : "") + onlineChip + '</div>' +
+      '<div class="om-scr-explore-roomtitle">' + room.title + '</div>' +
+      '<div style="font-size:11.5px; color:var(--muted); font-weight:700; margin-top:2px;">' + room.slotLabel + '</div>' +
+      '<div class="om-scr-explore-tagrow">' + tagsHtml + '</div>' +
+      OM.ui.gauge(pct) +
+      '<div class="om-scr-explore-bottomrow">' +
+      '<span class="om-scr-explore-count">' + room.participants.length + ' / ' + room.capacity + '명 모집</span>' +
+      sponsorBtn +
+      '</div></div>';
+  }
+
+  function render(el, params) {
+    lastEl = el; lastParams = params;
+    var body;
+    if (!loaded) {
+      body = '<div class="om-body">' +
+        '<div class="om-card"><div class="skel-line skel" style="width:60%;"></div><div class="skel-line skel" style="width:90%;"></div><div class="skel-line skel" style="width:40%;"></div></div>' +
+        '<div class="om-card"><div class="skel-line skel" style="width:55%;"></div><div class="skel-line skel" style="width:85%;"></div><div class="skel-line skel" style="width:35%;"></div></div>' +
+        '</div>';
+    } else {
+      var rooms = OM.state.rooms.filter(function (r) { return r.status === "recruiting"; });
+      if (filterMode !== "all") rooms = rooms.filter(function (r) { return r.online === filterMode; });
+
+      var filterBar = '<div class="om-scr-explore-filterbar">' +
+        '<button class="om-scr-explore-filterbtn om-press' + (filterMode === "all" ? " active" : "") + '" data-filter="all">전체</button>' +
+        '<button class="om-scr-explore-filterbtn om-press' + (filterMode === "online" ? " active" : "") + '" data-filter="online">온라인</button>' +
+        '<button class="om-scr-explore-filterbtn om-press' + (filterMode === "offline" ? " active" : "") + '" data-filter="offline">오프라인</button>' +
+        '</div>';
+
+      if (rooms.length === 0) {
+        body = '<div class="om-body">' + filterBar +
+          '<div class="om-scr-explore-empty">' +
+          OM.ui.icon("compass", 34, "#8892AE") +
+          '<div class="headline">모집 중인 모임이 없어요</div>' +
+          '<div class="sub">조건에 맞는 모임이 아직 없어요.<br>새 모임을 만들어서 동료들을 모아보세요.</div>' +
+          '<button class="om-btn auto om-press" style="margin-top:16px;" data-action="new-room">새 모임 만들기</button>' +
+          '</div></div>';
+      } else {
+        var list = "";
+        for (var i = 0; i < rooms.length; i++) list += roomCard(rooms[i]);
+        body = '<div class="om-body">' + filterBar + list +
+          '<div class="om-scr-explore-registerbanner om-press" data-action="sponsor-register">' +
+          OM.ui.icon("building", 22, "#fff") +
+          '<div><div class="t1">우리 매장을 스폰서로 등록할까요?</div><div class="t2">쿠폰 예산을 걸고 모임에 노출돼요</div></div>' +
+          '</div></div>';
+      }
+    }
+
+    el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("탐색", "모집 중인 모임", false) + body +
+      '<button class="om-btn om-scr-explore-fab om-press" data-action="new-room">' + OM.ui.icon("bolt", 14, "#fff") + ' 새 모임</button>' +
+      (toastMsg ? '<div class="om-toast">' + toastMsg + '</div>' : "");
+  }
+
+  OM.register("explore", {
+    title: "탐색",
+    render: render,
+    onEnter: function (params) {
+      loaded = false;
+      if (loadTimer) clearTimeout(loadTimer);
+      loadTimer = setTimeout(function () {
+        loaded = true;
+        if (lastEl) render(lastEl, lastParams);
+      }, 420);
+    },
+    onLeave: function () {
+      if (loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
+      if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+    }
+  });
+
+  // Delegated click handling — bound once on document, filtered by closest
+  // ancestor screen check so it only reacts while "explore" is the mounted
+  // route's own elements (data-action values are unique to this module).
+  document.addEventListener("click", function (e) {
+    var filterBtn = e.target.closest ? e.target.closest("[data-filter]") : null;
+    if (filterBtn && lastEl && lastEl.contains(filterBtn)) {
+      filterMode = filterBtn.getAttribute("data-filter");
+      render(lastEl, lastParams);
+      return;
+    }
+    var newRoomBtn = e.target.closest ? e.target.closest('[data-action="new-room"]') : null;
+    if (newRoomBtn && lastEl && lastEl.contains(newRoomBtn)) { OM.go("home", {}); return; }
+
+    var sponsorBannerBtn = e.target.closest ? e.target.closest('[data-action="sponsor-register"]') : null;
+    if (sponsorBannerBtn && lastEl && lastEl.contains(sponsorBannerBtn)) { OM.go("sponsor-register", {}); return; }
+
+    var offerBtn = e.target.closest ? e.target.closest('[data-action="offer"]') : null;
+    if (offerBtn && lastEl && lastEl.contains(offerBtn)) { OM.go("sponsor-offer", { roomId: offerBtn.getAttribute("data-room") }); return; }
+
+    var previewCard = e.target.closest ? e.target.closest('[data-action="preview"]') : null;
+    if (previewCard && lastEl && lastEl.contains(previewCard)) { OM.go("room-preview", { roomId: previewCard.getAttribute("data-room") }); return; }
+  });
+})();
+
+/* =============================== room-preview =============================== */
+(function () {
+  var toastMsg = null;
+  var toastTimer = null;
+  var lastEl = null, lastParams = null;
+
+  function flashToast(msg) {
+    toastMsg = msg;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastMsg = null;
+      if (lastEl) render(lastEl, lastParams);
+    }, 1600);
+    if (lastEl) render(lastEl, lastParams);
+  }
+
+  function joinFailMessage(reason) {
+    if (reason === "already-joined") return "이미 참여 중인 모임이에요.";
+    if (reason === "full") return "정원이 가득 찼어요.";
+    if (reason === "not-open") return "모집이 종료된 모임이에요.";
+    return "참여할 수 없어요.";
+  }
+
+  function render(el, params) {
+    lastEl = el; lastParams = params;
+    var room = null;
+    for (var i = 0; i < OM.state.rooms.length; i++) if (OM.state.rooms[i].id === params.roomId) room = OM.state.rooms[i];
+
+    if (!room) {
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("모임 미리보기", "", true) +
+        '<div class="om-body"><div class="om-scr-explore-empty">' +
+        OM.ui.icon("warn", 30, "#E05A5A") +
+        '<div class="headline">모임을 찾을 수 없어요</div>' +
+        '<div class="sub">삭제되었거나 잘못된 링크예요.</div>' +
+        '<button class="om-btn secondary auto om-press" style="margin-top:16px;" data-om-back="1">뒤로 가기</button>' +
+        '</div></div>';
+      return;
+    }
+
+    var me = null;
+    for (var j = 0; j < room.participants.length; j++) if (room.participants[j].id === "me") me = room.participants[j];
+
+    var avatars = "";
+    var showCount = Math.min(room.participants.length, 5);
+    for (var k = 0; k < showCount; k++) avatars += '<div class="om-scr-preview-avatar">' + room.participants[k].name.charAt(0) + '</div>';
+    for (var e2 = showCount; e2 < room.capacity; e2++) avatars += '<div class="om-scr-preview-avatar empty">?</div>';
+
+    var onlineLabel = room.online === "online" ? "온라인" : "오프라인";
+    var tagsHtml = "";
+    for (var t = 0; t < room.tags.length; t++) tagsHtml += OM.ui.chip("grey", "#" + room.tags[t]);
+
+    var statusChip = "";
+    if (room.status === "confirmed") statusChip = OM.ui.chip("blue", "확정됨");
+    else if (room.status === "exploded") statusChip = OM.ui.chip("red", "방폭됨");
+    else if (room.status === "checkin-done" || room.status === "settled") statusChip = OM.ui.chip("grey", "종료됨");
+    else statusChip = OM.ui.chip("green", "모집 중");
+
+    var ctaHtml;
+    if (me) {
+      ctaHtml = '<button class="om-btn secondary om-press" data-action="go-chat">채팅방으로 이동</button>';
+    } else if (room.status !== "recruiting") {
+      ctaHtml = '<button class="om-btn om-press" disabled>참여할 수 없는 모임이에요</button>';
+    } else {
+      ctaHtml = '<button class="om-btn om-press" data-action="join">참여하기 (500P 예치)</button>';
+    }
+
+    var couponStrip = room.sponsored
+      ? '<div class="om-scr-preview-couponstrip" data-action="offer">' +
+        OM.ui.icon("percent", 16, "#8A5A16") +
+        '<div class="txt">이 모임은 스폰서 쿠폰 대상이에요 · ' + (room.couponPercent || 15) + '% 할인</div>' +
+        OM.ui.icon("back", 12, "#8A5A16") + '</div>'
+      : "";
+
+    el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("모임 미리보기", room.slotLabel, true) +
+      '<div class="om-body">' +
+      '<div class="om-card om-scr-preview-hero">' +
+      statusChip +
+      '<div class="title">' + room.title + '</div>' +
+      '<div class="slot">' + room.slotLabel + ' · ' + onlineLabel + '</div>' +
+      '<div class="om-scr-preview-avatars">' + avatars + '</div>' +
+      OM.ui.gauge(100 * room.participants.length / room.capacity) +
+      '<div style="font-size:11px; color:var(--muted); font-weight:700; margin-top:6px;">' + room.participants.length + ' / ' + room.capacity + '명 모집</div>' +
+      '</div>' +
+      '<div class="om-card">' +
+      '<div class="om-scr-explore-tagrow">' + tagsHtml + '</div>' +
+      '<div class="om-scr-preview-infogrid">' +
+      '<div class="cell"><div class="k">일정</div><div class="v">' + room.slotLabel + '</div></div>' +
+      '<div class="cell"><div class="k">방식</div><div class="v">' + onlineLabel + '</div></div>' +
+      '</div>' +
+      couponStrip +
+      '</div>' +
+      ctaHtml +
+      '</div>' +
+      (toastMsg ? '<div class="om-toast">' + toastMsg + '</div>' : "");
+  }
+
+  OM.register("room-preview", {
+    title: "모임 미리보기",
+    render: render,
+    onEnter: function () {},
+    onLeave: function () { if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; } }
+  });
+
+  document.addEventListener("click", function (e) {
+    var joinBtn = e.target.closest ? e.target.closest('[data-action="join"]') : null;
+    if (joinBtn && lastEl && lastEl.contains(joinBtn) && lastParams) {
+      var res = OM.sim.joinRoom(lastParams.roomId);
+      if (res.ok) OM.go("deposit", { roomId: lastParams.roomId });
+      else flashToast(joinFailMessage(res.reason));
+      return;
+    }
+    var chatBtn = e.target.closest ? e.target.closest('[data-action="go-chat"]') : null;
+    if (chatBtn && lastEl && lastEl.contains(chatBtn) && lastParams) { OM.go("room-chat", { roomId: lastParams.roomId }); return; }
+
+    var offerStrip = e.target.closest ? e.target.closest('[data-action="offer"]') : null;
+    if (offerStrip && lastEl && lastEl.contains(offerStrip) && lastParams) { OM.go("sponsor-offer", { roomId: lastParams.roomId }); return; }
+  });
+})();
+
+/* =============================== sponsor-offer =============================== */
+(function () {
+  var toastMsg = null;
+  var toastTimer = null;
+  var lastEl = null, lastParams = null;
+
+  function flashToast(msg) {
+    toastMsg = msg;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastMsg = null;
+      if (lastEl) render(lastEl, lastParams);
+    }, 1600);
+    if (lastEl) render(lastEl, lastParams);
+  }
+
+  function render(el, params) {
+    lastEl = el; lastParams = params;
+    var room = null;
+    for (var i = 0; i < OM.state.rooms.length; i++) if (OM.state.rooms[i].id === params.roomId) room = OM.state.rooms[i];
+
+    if (!room || !room.sponsored) {
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("스폰서 쿠폰", "", true) +
+        '<div class="om-body"><div class="om-scr-explore-empty">' +
+        OM.ui.icon("warn", 30, "#E05A5A") +
+        '<div class="headline">쿠폰 정보를 찾을 수 없어요</div>' +
+        '<div class="sub">스폰서드 모임이 아니거나 삭제되었어요.</div>' +
+        '<button class="om-btn secondary auto om-press" style="margin-top:16px;" data-om-back="1">뒤로 가기</button>' +
+        '</div></div>';
+      return;
+    }
+
+    var pct = room.couponPercent || 15;
+    var budget = room.sponsorBudget || 0;
+    var discountAmount = Math.round(500 * pct / 100);
+    var applied = !!room.couponApplied;
+    var used = OM.state.rooms.filter(function (r) { return r.sponsored && r.couponApplied; }).length * discountAmount;
+    var budgetPct = budget > 0 ? Math.min(100, 100 * used / budget) : 0;
+
+    el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("스폰서 쿠폰", room.title, true) +
+      '<div class="om-body">' +
+      '<div class="om-card om-scr-offer-hero">' +
+      OM.ui.chip("amber", "스폰서드") +
+      '<div class="om-scr-offer-pct">' + pct + '<span>% 할인</span></div>' +
+      '<div style="font-size:12px; color:var(--muted); font-weight:700; margin-top:4px;">' + room.title + ' · ' + room.slotLabel + '</div>' +
+      '</div>' +
+      '<div class="om-card">' +
+      '<div class="om-scr-offer-row"><span class="k">기본 예치금</span><span class="v">500P</span></div>' +
+      '<div class="om-scr-offer-row"><span class="k">쿠폰 할인</span><span class="v">-' + discountAmount + 'P</span></div>' +
+      '<div class="om-scr-offer-row"><span class="k">예치 후 실부담</span><span class="v">' + (500 - discountAmount) + 'P</span></div>' +
+      '</div>' +
+      '<div class="om-card">' +
+      '<div style="font-size:11.5px; font-weight:800; color:var(--ink2); margin-bottom:4px;">스폰서 예산 소진율 (데모)</div>' +
+      '<div class="om-scr-offer-budgetbar"><i style="width:' + budgetPct + '%"></i></div>' +
+      '<div style="font-size:10.5px; color:var(--muted); font-weight:700; margin-top:6px;">예산 ' + budget + 'P 중 ' + used + 'P 사용</div>' +
+      '</div>' +
+      (applied
+        ? '<button class="om-btn secondary om-press" disabled>' + OM.ui.icon("check", 14, "#2F5EDB") + ' 쿠폰 적용됨</button>'
+        : '<button class="om-btn om-press" data-action="apply">쿠폰 적용하기</button>') +
+      '<button class="om-btn ghost om-press" style="margin-top:8px;" data-action="go-preview">모임 보러 가기</button>' +
+      '</div>' +
+      (toastMsg ? '<div class="om-toast">' + toastMsg + '</div>' : "");
+  }
+
+  OM.register("sponsor-offer", {
+    title: "스폰서 쿠폰",
+    render: render,
+    onEnter: function () {},
+    onLeave: function () { if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; } }
+  });
+
+  document.addEventListener("click", function (e) {
+    var applyBtn = e.target.closest ? e.target.closest('[data-action="apply"]') : null;
+    if (applyBtn && lastEl && lastEl.contains(applyBtn) && lastParams) {
+      var res = OM.sim.applyCoupon(lastParams.roomId);
+      flashToast(res.ok ? "쿠폰이 적용되었어요." : "쿠폰을 적용할 수 없어요.");
+      return;
+    }
+    var previewBtn = e.target.closest ? e.target.closest('[data-action="go-preview"]') : null;
+    if (previewBtn && lastEl && lastEl.contains(previewBtn) && lastParams) { OM.go("room-preview", { roomId: lastParams.roomId }); return; }
+  });
+})();
+
+/* =============================== sponsor-register =============================== */
+(function () {
+  var ALL_TAGS = ["매운맛", "커피챗", "베이커리", "러닝", "채식", "보드게임"];
+  var PCT_OPTIONS = [10, 15, 20, 30];
+
+  var step = 0; // 0 target, 1 budget, 2 review, 3 done
+  var form = { title: "", tags: [], capacity: 3, online: "offline", budget: 3000, couponPercent: 15 };
+  var doneRoomId = null;
+  var toastMsg = null;
+  var toastTimer = null;
+  var lastEl = null, lastParams = null;
+
+  function resetForm() {
+    step = 0;
+    form = { title: "", tags: [], capacity: 3, online: "offline", budget: 3000, couponPercent: 15 };
+    doneRoomId = null;
+  }
+
+  function flashToast(msg) {
+    toastMsg = msg;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastMsg = null;
+      if (lastEl) render(lastEl, lastParams);
+    }, 1600);
+    if (lastEl) render(lastEl, lastParams);
+  }
+
+  function stepValid(s) {
+    if (s === 0) return form.title.length > 0 && form.tags.length > 0 && form.capacity >= 2;
+    if (s === 1) return form.budget >= 500;
+    return true;
+  }
+
+  function renderStep0() {
+    var tagBtns = "";
+    for (var i = 0; i < ALL_TAGS.length; i++) {
+      var tg = ALL_TAGS[i];
+      var active = form.tags.indexOf(tg) !== -1;
+      tagBtns += '<button class="om-scr-reg-tagbtn om-press' + (active ? " active" : "") + '" data-tag="' + tg + '">#' + tg + '</button>';
+    }
+    return '<div class="om-scr-reg-field"><div class="om-scr-reg-label">모임 이름</div>' +
+      '<input class="om-scr-reg-input" id="omRegTitle" type="text" placeholder="예: 신메뉴 시식 점심" value="' + form.title + '" />' +
+      '</div>' +
+      '<div class="om-scr-reg-field"><div class="om-scr-reg-label">타깃 관심 태그</div>' +
+      '<div class="om-scr-reg-taggrid">' + tagBtns + '</div></div>' +
+      '<div class="om-scr-reg-field"><div class="om-scr-reg-label">모집 인원</div>' +
+      '<div class="om-scr-reg-counter">' +
+      '<button class="om-press" data-action="cap-minus">–</button>' +
+      '<span class="num">' + form.capacity + '명</span>' +
+      '<button class="om-press" data-action="cap-plus">+</button>' +
+      '</div></div>' +
+      '<div class="om-scr-reg-field"><div class="om-scr-reg-label">진행 방식</div>' +
+      '<div class="om-scr-reg-taggrid">' +
+      '<button class="om-scr-reg-tagbtn om-press' + (form.online === "offline" ? " active" : "") + '" data-online="offline">오프라인</button>' +
+      '<button class="om-scr-reg-tagbtn om-press' + (form.online === "online" ? " active" : "") + '" data-online="online">온라인</button>' +
+      '</div></div>';
+  }
+
+  function renderStep1() {
+    var pctBtns = "";
+    for (var i = 0; i < PCT_OPTIONS.length; i++) {
+      var p = PCT_OPTIONS[i];
+      pctBtns += '<button class="om-scr-reg-pctbtn om-press' + (form.couponPercent === p ? " active" : "") + '" data-pct="' + p + '">' + p + '%</button>';
+    }
+    return '<div class="om-scr-reg-field"><div class="om-scr-reg-label">쿠폰 예산 (포인트)</div>' +
+      '<div class="om-scr-reg-counter">' +
+      '<button class="om-press" data-action="budget-minus">–</button>' +
+      '<span class="num">' + form.budget + 'P</span>' +
+      '<button class="om-press" data-action="budget-plus">+</button>' +
+      '</div></div>' +
+      '<div class="om-scr-reg-field"><div class="om-scr-reg-label">참여자 할인율</div>' +
+      '<div class="om-scr-reg-pctgrid">' + pctBtns + '</div></div>' +
+      '<div class="om-card" style="background:#F5F7FC; box-shadow:none;">' +
+      '<div style="font-size:11px; color:var(--muted); font-weight:700; line-height:1.6;">예산 ' + form.budget + 'P로 1인당 ' +
+      Math.round(500 * form.couponPercent / 100) + 'P 할인 쿠폰을 약 ' +
+      Math.max(1, Math.floor(form.budget / Math.max(1, Math.round(500 * form.couponPercent / 100)))) + '건 지원할 수 있어요.</div>' +
+      '</div>';
+  }
+
+  function renderStep2() {
+    var tagsLabel = form.tags.map(function (t) { return "#" + t; }).join(" ");
+    return '<div class="om-card">' +
+      '<div class="om-scr-reg-summaryrow"><span class="k">모임 이름</span><span class="v">' + (form.title || "-") + '</span></div>' +
+      '<div class="om-scr-reg-summaryrow"><span class="k">타깃 태그</span><span class="v">' + (tagsLabel || "-") + '</span></div>' +
+      '<div class="om-scr-reg-summaryrow"><span class="k">모집 인원</span><span class="v">' + form.capacity + '명</span></div>' +
+      '<div class="om-scr-reg-summaryrow"><span class="k">진행 방식</span><span class="v">' + (form.online === "online" ? "온라인" : "오프라인") + '</span></div>' +
+      '<div class="om-scr-reg-summaryrow"><span class="k">쿠폰 예산</span><span class="v">' + form.budget + 'P</span></div>' +
+      '<div class="om-scr-reg-summaryrow"><span class="k">할인율</span><span class="v">' + form.couponPercent + '%</span></div>' +
+      '</div>' +
+      '<div style="font-size:11px; color:var(--muted); font-weight:700; line-height:1.6; padding:0 4px;">제출하면 탐색 피드에 스폰서드 배지가 붙은 모임으로 즉시 노출돼요. (데모 — 실제 과금 없음)</div>';
+  }
+
+  function renderStep3() {
+    return '<div class="om-scr-reg-donewrap">' +
+      '<div class="circle">' + OM.ui.icon("check", 28, "#22A06B") + '</div>' +
+      '<div class="headline">스폰서 등록 완료!</div>' +
+      '<div class="sub">"' + (form.title || "새 모임") + '"이 탐색 피드에 스폰서드로 노출되기 시작했어요.</div>' +
+      '</div>';
+  }
+
+  function render(el, params) {
+    lastEl = el; lastParams = params;
+    var appTitle = step === 3 ? "등록 완료" : "사업자 스폰서 등록";
+    var body;
+    if (step === 3) body = renderStep3();
+    else {
+      var content = step === 0 ? renderStep0() : (step === 1 ? renderStep1() : renderStep2());
+      body = OM.ui.stepperDots(3, step) + content;
+    }
+
+    var footer;
+    if (step === 3) {
+      footer = '<div class="om-scr-reg-footer">' +
+        '<button class="om-btn secondary om-press" data-action="go-explore">탐색 피드에서 보기</button>' +
+        '</div>';
+    } else {
+      var nextLabel = step === 2 ? "제출하기" : "다음";
+      var disabled = !stepValid(step) ? " disabled" : "";
+      footer = '<div class="om-scr-reg-footer">' +
+        (step > 0 ? '<button class="om-btn ghost om-press" data-action="prev">이전</button>' : "") +
+        '<button class="om-btn om-press" data-action="next"' + disabled + '>' + nextLabel + '</button>' +
+        '</div>';
+    }
+
+    el.innerHTML = OM.ui.statusBar() + OM.ui.appBar(appTitle, "", true) +
+      '<div class="om-body">' + body + footer + '</div>' +
+      (toastMsg ? '<div class="om-toast">' + toastMsg + '</div>' : "");
+
+    var titleInput = el.querySelector ? el.querySelector("#omRegTitle") : null;
+    if (titleInput) {
+      titleInput.addEventListener("input", function (ev) { form.title = ev.target.value; });
+    }
+  }
+
+  OM.register("sponsor-register", {
+    title: "사업자 스폰서 등록",
+    render: render,
+    onEnter: function () { resetForm(); },
+    onLeave: function () { if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; } }
+  });
+
+  document.addEventListener("click", function (e) {
+    if (!lastEl || !lastEl.contains(e.target)) return;
+
+    var tagBtn = e.target.closest ? e.target.closest("[data-tag]") : null;
+    if (tagBtn) {
+      var tg = tagBtn.getAttribute("data-tag");
+      var idx = form.tags.indexOf(tg);
+      if (idx === -1) form.tags.push(tg); else form.tags.splice(idx, 1);
+      render(lastEl, lastParams);
+      return;
+    }
+    var onlineBtn = e.target.closest ? e.target.closest("[data-online]") : null;
+    if (onlineBtn) { form.online = onlineBtn.getAttribute("data-online"); render(lastEl, lastParams); return; }
+
+    var pctBtn = e.target.closest ? e.target.closest("[data-pct]") : null;
+    if (pctBtn) { form.couponPercent = Number(pctBtn.getAttribute("data-pct")); render(lastEl, lastParams); return; }
+
+    var capMinus = e.target.closest ? e.target.closest('[data-action="cap-minus"]') : null;
+    if (capMinus) { form.capacity = Math.max(2, form.capacity - 1); render(lastEl, lastParams); return; }
+    var capPlus = e.target.closest ? e.target.closest('[data-action="cap-plus"]') : null;
+    if (capPlus) { form.capacity = Math.min(12, form.capacity + 1); render(lastEl, lastParams); return; }
+
+    var budgetMinus = e.target.closest ? e.target.closest('[data-action="budget-minus"]') : null;
+    if (budgetMinus) { form.budget = Math.max(500, form.budget - 500); render(lastEl, lastParams); return; }
+    var budgetPlus = e.target.closest ? e.target.closest('[data-action="budget-plus"]') : null;
+    if (budgetPlus) { form.budget = Math.min(50000, form.budget + 500); render(lastEl, lastParams); return; }
+
+    var prevBtn = e.target.closest ? e.target.closest('[data-action="prev"]') : null;
+    if (prevBtn) { step = Math.max(0, step - 1); render(lastEl, lastParams); return; }
+
+    var nextBtn = e.target.closest ? e.target.closest('[data-action="next"]') : null;
+    if (nextBtn) {
+      if (!stepValid(step)) { flashToast("필수 항목을 채워주세요."); return; }
+      if (step === 2) {
+        doneRoomId = OM.sim.registerSponsor({
+          title: form.title, slotLabel: "협의 예정", tags: form.tags,
+          capacity: form.capacity, budget: form.budget, couponPercent: form.couponPercent
+        });
+        step = 3;
+      } else {
+        step = step + 1;
+      }
+      render(lastEl, lastParams);
+      return;
+    }
+
+    var goExploreBtn = e.target.closest ? e.target.closest('[data-action="go-explore"]') : null;
+    if (goExploreBtn) { OM.go("explore", {}); return; }
+  });
+})();
+</script>
+<script>
+(function () {
+  "use strict";
+
+  /* ---------------------------------------------------------------
+   * shared helpers
+   * --------------------------------------------------------------- */
+  function showToast(el, msg) {
+    var old = el.querySelector(".om-toast");
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var t = document.createElement("div");
+    t.className = "om-toast";
+    t.textContent = msg;
+    el.appendChild(t);
+    setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 1600);
+  }
+
+  var TRUST_MAP = {
+    "상": { pct: 92, color: "var(--good)", chip: "green", label: "상" },
+    "중": { pct: 58, color: "var(--brand)", chip: "blue", label: "중" },
+    "하": { pct: 26, color: "var(--danger)", chip: "red", label: "하" }
+  };
+  function trustInfo(trust) { return TRUST_MAP[trust] || TRUST_MAP["중"]; }
+  function trustRing(trust) {
+    var info = trustInfo(trust);
+    var deg = Math.round(3.6 * info.pct);
+    return '<div class="om-e-ring" style="background:conic-gradient(' + info.color + ' 0deg ' + deg + 'deg, #EEF1F8 ' + deg + 'deg 360deg);"><span>' + info.label + '</span></div>';
+  }
+
+  var STATUS_LABEL = {
+    recruiting: ["모집 중", "amber"],
+    confirmed: ["확정", "blue"],
+    exploded: ["방폭", "grey"],
+    "checkin-done": ["체크인 완료", "green"],
+    settled: ["정산 완료", "green"]
+  };
+  function statusChip(status) {
+    var s = STATUS_LABEL[status] || ["-", "grey"];
+    return OM.ui.chip(s[1], s[0]);
+  }
+
+  var LEDGER_TYPE = {
+    deposit: { label: "예치", icon: "lock", color: "#2F5EDB" },
+    refund: { label: "환급", icon: "check", color: "#22A06B" },
+    forfeit: { label: "몰수", icon: "warn", color: "#E05A5A" },
+    settle: { label: "정산", icon: "receipt", color: "#2F5EDB" },
+    bonus: { label: "적립", icon: "shield", color: "#22A06B" },
+    topup: { label: "충전", icon: "percent", color: "#7C5CC4" }
+  };
+  function ledgerMeta(type) { return LEDGER_TYPE[type] || { label: type, icon: "bolt", color: "#8892AE" }; }
+  function ticksAgoLabel(tick) {
+    var diff = OM.state.tick - tick;
+    if (diff <= 0) return "방금";
+    return diff + "틱 전";
+  }
+  function findRoom(roomId) {
+    if (!roomId) return null;
+    var rooms = OM.state.rooms;
+    for (var i = 0; i < rooms.length; i++) if (rooms[i].id === roomId) return rooms[i];
+    return null;
+  }
+
+  /* =================================================================
+   * my — 포인트 지갑 · 신뢰도 · 이번 시즌 통계 · 참여 이력
+   * ================================================================= */
+  OM.register("my", {
+    title: "마이페이지",
+    render: function (el, params) {
+      var u = OM.state.user;
+      var myRooms = OM.state.rooms.filter(function (r) {
+        for (var i = 0; i < r.participants.length; i++) if (r.participants[i].id === "me") return true;
+        return false;
+      });
+      var earned = 0;
+      for (var i = 0; i < OM.state.ledger.length; i++) {
+        var e = OM.state.ledger[i];
+        if (e.amount > 0) earned += e.amount;
+      }
+      var unread = 0;
+      for (var j = 0; j < OM.state.notifications.length; j++) if (!OM.state.notifications[j].read) unread++;
+
+      var historyHtml = "";
+      if (!myRooms.length) {
+        historyHtml = '<div class="om-e-empty">' + OM.ui.icon("compass", 26, "#8892AE") +
+          '<div style="margin-top:8px;">아직 참여한 모임이 없어요.<br>탐색에서 첫 모임을 찾아볼까요?</div></div>';
+      } else {
+        var rows = myRooms.slice().sort(function (a, b) { return b.createdTick - a.createdTick; });
+        for (var k = 0; k < rows.length; k++) {
+          var r = rows[k];
+          historyHtml += '<div class="om-e-row om-press" data-action="my-open-room" data-room="' + r.id + '">' +
+            '<div class="ic">' + OM.ui.icon(r.online === "online" ? "video" : "building", 17, "#2F5EDB") + '</div>' +
+            '<div class="mid"><div class="t1">' + r.title + '</div><div class="t2">' + r.slotLabel + ' · ' + r.tags.join(", ") + '</div></div>' +
+            statusChip(r.status) +
+            '</div>';
+        }
+      }
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("마이페이지", u.name + " · " + u.dept, false) +
+        '<div class="om-body">' +
+        '<div class="om-card">' +
+        '<div style="font-size:11px; color:var(--muted); font-weight:700;">포인트 지갑</div>' +
+        '<div style="display:flex; align-items:baseline; gap:6px; margin-top:4px;">' +
+        '<div style="font-size:24px; font-weight:800; color:var(--ink);">' + u.points.toLocaleString() + '</div>' +
+        '<div style="font-size:12px; color:var(--muted);">P</div></div>' +
+        '<div style="display:flex; gap:8px; margin-top:10px;">' +
+        '<button class="om-btn auto om-press" data-action="my-topup">+1,000P 충전</button>' +
+        '<button class="om-btn ghost auto om-press" data-action="my-goto-ledger">원장 보기</button>' +
+        '</div>' +
+        '<div style="font-size:10.5px; color:var(--muted); margin-top:8px;">데모용 가상 포인트예요. 실제 결제는 이루어지지 않아요.</div>' +
+        '</div>' +
+
+        '<div class="om-card">' +
+        '<div style="font-size:11px; color:var(--muted); font-weight:700; margin-bottom:10px;">신뢰도</div>' +
+        '<div class="om-e-ring-wrap">' + trustRing(u.trust) +
+        '<div>' + OM.ui.chip(trustInfo(u.trust).chip, "신뢰도 " + u.trust) +
+        '<div style="font-size:11px; color:var(--muted); margin-top:6px;">누적 노쇼 ' + u.noshowCount + '회</div></div>' +
+        '</div>' +
+        '</div>' +
+
+        '<div class="om-card">' +
+        '<div style="font-size:11px; color:var(--muted); font-weight:700;">이번 시즌 통계</div>' +
+        '<div class="om-e-stat-grid">' +
+        '<div class="om-e-stat"><div class="n">' + myRooms.length + '</div><div class="l">참여 모임</div></div>' +
+        '<div class="om-e-stat"><div class="n">' + u.noshowCount + '</div><div class="l">노쇼</div></div>' +
+        '<div class="om-e-stat"><div class="n">' + earned.toLocaleString() + '</div><div class="l">누적 적립 P</div></div>' +
+        '</div></div>' +
+
+        '<div class="om-e-quick">' +
+        '<button class="om-press" data-action="my-goto-ledger">' + OM.ui.icon("receipt", 18, "#2F5EDB") + '<span>포인트 원장</span></button>' +
+        '<button class="om-press" data-action="my-goto-notif">' + OM.ui.icon("bell", 18, "#2F5EDB") + '<span>알림함</span>' +
+        (unread ? '<span class="badge">' + (unread > 9 ? "9+" : unread) + '</span>' : '') + '</button>' +
+        '</div>' +
+
+        '<div class="om-e-section-h"><div class="t">참여 이력</div></div>' +
+        historyHtml +
+        '</div>';
+    },
+    onEnter: function () {},
+    onLeave: function () {}
+  });
+
+  document.addEventListener("click", function (ev) {
+    // Global delegated handler kept simple per-screen via closest() checks below,
+    // scoped so it only reacts inside the currently mounted "my"/"ledger"/"notifications" screens.
+    var t = ev.target.closest ? ev.target.closest("[data-action]") : null;
+    if (!t) return;
+    var screenEl = t.closest(".om-screen");
+    if (!screenEl) return;
+    var action = t.getAttribute("data-action");
+
+    if (action === "my-topup") {
+      OM.sim.topUpPoints(1000);
+      showToast(screenEl, "1,000P 충전했어요");
+    } else if (action === "my-goto-ledger") {
+      OM.go("ledger", {});
+    } else if (action === "my-goto-notif") {
+      OM.go("notifications", {});
+    } else if (action === "my-open-room") {
+      var roomId = t.getAttribute("data-room");
+      if (findRoom(roomId)) OM.go("room-detail", { roomId: roomId });
+      else showToast(screenEl, "연결된 모임을 찾을 수 없어요");
+    } else if (action === "ledger-filter") {
+      LEDGER_FILTER = t.getAttribute("data-filter");
+      OM.go("ledger", {}, { replace: true });
+    } else if (action === "ledger-open") {
+      var lrId = t.getAttribute("data-room");
+      if (findRoom(lrId)) OM.go("room-detail", { roomId: lrId });
+      else showToast(screenEl, "연결된 모임을 찾을 수 없어요");
+    } else if (action === "notif-mark-all") {
+      OM.sim.markAllNotificationsRead();
+      showToast(screenEl, "모두 읽음으로 표시했어요");
+    } else if (action === "notif-open") {
+      var nid = t.getAttribute("data-notif");
+      var list = OM.state.notifications;
+      var notif = null;
+      for (var i = 0; i < list.length; i++) if (list[i].id === nid) notif = list[i];
+      if (!notif) return;
+      OM.sim.markNotificationRead(nid);
+      if (notif.roomId) {
+        var room = findRoom(notif.roomId);
+        if (room) OM.go("room-detail", { roomId: notif.roomId });
+        else showToast(screenEl, "연결된 모임을 찾을 수 없어요 (이미 종료됐을 수 있어요)");
+      } else {
+        showToast(screenEl, "읽음으로 표시했어요");
+      }
+    }
+  });
+
+  /* =================================================================
+   * ledger — 원장 전체 내역 · 필터 칩
+   * ================================================================= */
+  var LEDGER_FILTER = "all";
+  var LEDGER_FILTERS = [
+    ["all", "전체"], ["deposit", "예치"], ["refund", "환급"],
+    ["forfeit", "몰수"], ["settle", "정산"], ["bonus", "적립"], ["topup", "충전"]
+  ];
+
+  OM.register("ledger", {
+    title: "원장 상세",
+    render: function (el, params) {
+      var all = OM.state.ledger.slice().sort(function (a, b) { return b.tick - a.tick; });
+      var filtered = LEDGER_FILTER === "all" ? all : all.filter(function (e) { return e.type === LEDGER_FILTER; });
+
+      var totalIn = 0, totalOut = 0;
+      for (var i = 0; i < all.length; i++) {
+        if (all[i].amount > 0) totalIn += all[i].amount; else totalOut += -all[i].amount;
+      }
+
+      var filterHtml = '<div class="om-e-filters">';
+      for (var f = 0; f < LEDGER_FILTERS.length; f++) {
+        var id = LEDGER_FILTERS[f][0], label = LEDGER_FILTERS[f][1];
+        var active = id === LEDGER_FILTER;
+        filterHtml += '<button class="om-chip om-press ' + (active ? "blue" : "grey") + '" data-action="ledger-filter" data-filter="' + id + '">' + label + '</button>';
+      }
+      filterHtml += '</div>';
+
+      var listHtml = "";
+      if (!all.length) {
+        listHtml = '<div class="om-e-empty">' + OM.ui.icon("receipt", 26, "#8892AE") +
+          '<div style="margin-top:8px;">아직 원장 내역이 없어요.<br>모임에 참여하면 여기 쌓여요.</div></div>';
+      } else if (!filtered.length) {
+        listHtml = '<div class="om-e-empty">해당 유형의 내역이 없어요.</div>';
+      } else {
+        for (var k = 0; k < filtered.length; k++) {
+          var e2 = filtered[k];
+          var meta = ledgerMeta(e2.type);
+          var room = findRoom(e2.roomId);
+          var pos = e2.amount >= 0;
+          listHtml += '<div class="om-e-row om-press" data-action="ledger-open" data-room="' + (e2.roomId || "") + '">' +
+            '<div class="ic">' + OM.ui.icon(meta.icon, 16, meta.color) + '</div>' +
+            '<div class="mid"><div class="t1">' + e2.note + '</div>' +
+            '<div class="t2">' + meta.label + (room ? " · " + room.title : "") + ' · ' + ticksAgoLabel(e2.tick) + '</div></div>' +
+            '<div class="amt ' + (pos ? "pos" : "neg") + '">' + (pos ? "+" : "") + e2.amount.toLocaleString() + 'P</div>' +
+            '</div>';
+        }
+      }
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("원장 상세", "전체 내역", true) +
+        '<div class="om-body">' +
+        '<div class="om-card">' +
+        '<div class="om-e-summary">' +
+        '<div><div class="n" style="color:var(--good-dark);">+' + totalIn.toLocaleString() + '</div><div class="l">누적 적립</div></div>' +
+        '<div><div class="n" style="color:#A32E2E;">-' + totalOut.toLocaleString() + '</div><div class="l">누적 사용</div></div>' +
+        '<div><div class="n" style="color:var(--ink);">' + OM.state.user.points.toLocaleString() + '</div><div class="l">현재 잔액</div></div>' +
+        '</div></div>' +
+        filterHtml +
+        listHtml +
+        '</div>';
+    },
+    onEnter: function () { LEDGER_FILTER = LEDGER_FILTER || "all"; },
+    onLeave: function () {}
+  });
+
+  /* =================================================================
+   * notifications — 알림함
+   * ================================================================= */
+  OM.register("notifications", {
+    title: "알림함",
+    render: function (el, params) {
+      var list = OM.state.notifications;
+      var unread = 0;
+      for (var i = 0; i < list.length; i++) if (!list[i].read) unread++;
+
+      var listHtml = "";
+      if (!list.length) {
+        listHtml = '<div class="om-e-empty">' + OM.ui.icon("bell", 26, "#8892AE") +
+          '<div style="margin-top:8px;">아직 받은 알림이 없어요.</div></div>';
+      } else {
+        for (var k = 0; k < list.length; k++) {
+          var n = list[k];
+          listHtml += '<div class="om-e-row om-press ' + (n.read ? "" : "unread") + '" data-action="notif-open" data-notif="' + n.id + '">' +
+            '<div class="ic">' + OM.ui.icon(n.icon, 17, n.iconColor) + '</div>' +
+            '<div class="mid"><div class="t1">' + n.title + '</div><div class="t2">' + n.time + '</div></div>' +
+            (n.read ? "" : '<span class="dot"></span>') +
+            '</div>';
+        }
+      }
+
+      el.innerHTML = OM.ui.statusBar() + OM.ui.appBar("알림함", unread ? "안 읽은 알림 " + unread + "개" : "모두 읽음", true) +
+        '<div class="om-body">' +
+        '<div class="om-e-section-h"><div class="t">봇 알림 이력</div>' +
+        (unread ? '<a class="om-press" data-action="notif-mark-all">모두 읽음 처리</a>' : '') +
+        '</div>' +
+        listHtml +
+        '</div>';
+    },
+    onEnter: function () {},
+    onLeave: function () {}
+  });
+})();
+</script>
+</body>
+</html>

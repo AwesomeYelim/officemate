@@ -39,6 +39,7 @@
 | 경로 | 내용 |
 |---|---|
 | [/](https://officemate.namo.site/) | **랜딩페이지 + 라이브 데모** (메인 · `#demo` 앵커로 데모 섹션 진입, 하단 `#deliverables`에 제출물 링크) |
+| [/app](https://officemate.namo.site/app) | 원큐 앱 프로토타입 — 팀 내부용 |
 | [/biz-plan](https://officemate.namo.site/biz-plan) | 사업계획서 — 3층 수익구조·리텐션 가설·SOM 모델 |
 | [/flow-mockup](https://officemate.namo.site/flow-mockup) | 핵심 매칭 플로우 목업 (12개 폰 화면 + 스펙 카드) |
 | [/journey-mockup](https://officemate.namo.site/journey-mockup) | 사용자 여정 목업 (7단계 시작 가이드 — 프로필·참여 디파짓·확정·리마인더·체크인 페이백·자산·탐색) |
@@ -62,8 +63,8 @@
 <details>
 <summary><b>동작 방식 상세</b> (<code>.github/workflows/deploy.yml</code> → <code>scripts/deploy.mjs</code>)</summary>
 
-1. push 이벤트면 변경된 `*.html`만, `workflow_dispatch`(수동 실행)면 7개 파일 전부를 대상으로 함.
-2. 대상 파일마다 `list_pages`로 namo의 기존 페이지 목록을 받아 파일명(slug: `index`/`landing`/`biz-plan`/`hr-console`/`flow-mockup`/`journey-mockup`/`spec`) 우선, 없으면 `<title>` 일치로 대응 페이지를 찾음.
+1. push 이벤트면 변경된 `*.html`만, `workflow_dispatch`(수동 실행)면 8개 파일 전부를 대상으로 함.
+2. 대상 파일마다 `list_pages`로 namo의 기존 페이지 목록을 받아 파일명(slug: `index`/`app`/`landing`/`biz-plan`/`hr-console`/`flow-mockup`/`journey-mockup`/`spec`) 우선, 없으면 `<title>` 일치로 대응 페이지를 찾음.
 3. 대응 페이지가 없으면 `create_page`로 새로 만든 뒤 그 id를 사용.
 4. 찾은(또는 만든) 페이지 id로 `update_page_html` 호출 — 본문은 이 리포의 HTML에서 `<head>`의 `<style>` 블록(리셋 + 메인 CSS)과 `<body>` 내부(마크업 + `<script>` 포함)를 그대로 이어붙인 것. 발행된 namo 사이트는 루트 경로로 서빙되므로 내부 링크는 그대로 두며, 혹시 서브패스 배포로 바뀌면 `SB_PUBLIC_BASE` 환경변수로 프리픽스 재작성을 켤 수 있음(기본 꺼짐).
 5. namo 쪽 필드 스키마(특히 `list_pages`/`create_page`의 응답 id 필드명)는 실제 토큰 없이 작성되어 확정되지 않았음 — 실패 시 HTTP 응답 원문을 로그에 그대로 출력하도록 되어 있어, 실제 실행 로그로 교정 가능.
