@@ -60,7 +60,6 @@ const PAGES = [
   { file: "hr-console.html", slug: "hr-console", slugAliases: [] },
   { file: "flow-mockup.html", slug: "flow-mockup", slugAliases: [] },
   { file: "journey-mockup.html", slug: "journey-mockup", slugAliases: [] },
-  { file: "spec.html", slug: "spec", slugAliases: [] },
 ];
 
 // --- changed-file detection ---------------------------------------------

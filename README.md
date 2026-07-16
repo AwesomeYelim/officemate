@@ -45,7 +45,6 @@
 | [/journey-mockup](https://officemate.namo.site/journey-mockup) | 사용자 여정 목업 (7단계 시작 가이드 — 프로필·참여 디파짓·확정·리마인더·체크인 페이백·자산·탐색) |
 | [/hr-console](https://officemate.namo.site/hr-console) | HR 콘솔 시뮬레이터 (10페이지 인터랙티브 대시보드) |
 | [/landing](https://officemate.namo.site/landing) | `/`로 리다이렉트 (구 링크 호환용) |
-| [/spec](https://officemate.namo.site/spec) | **팀 내부용 구현 기준서** — 화면·상태·주차 우선순위 배지 맵 (대외 공유 금지) |
 
 ### <img src="https://api.iconify.design/material-symbols/play-circle.svg?color=%2333549C&width=20" width="20" align="top"> 라이브 데모에서 볼 수 있는 것
 
